@@ -14,6 +14,17 @@ public class StoneSkin : Powerup {
 
   private IProfile _profile;
   private PlayerModifiers _modifiers;
+  
+  private IProfile StoneProfile {
+    get {
+      IProfile playerProfile = Player.GetProfile();
+    
+      playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}", 
+      playerProfile.Gender == Gender.Male ? string.Empty : "_fem"), "Skin5");
+      
+      return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
+    }
+  }
 
   public override string Name {
     get {
@@ -39,7 +50,7 @@ public class StoneSkin : Powerup {
     _modifiers.CurrentHealth = -1;
     _modifiers.CurrentEnergy = -1;
 
-    Player.SetProfile(ColorProfile(Player.GetProfile(), "ClothingGray", "ClothingLightGray"));
+    Player.SetProfile(StoneProfile);
 
     Player.SetModifiers(_stoneMod);
   }
