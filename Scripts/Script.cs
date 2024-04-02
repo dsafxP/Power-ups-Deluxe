@@ -724,6 +724,8 @@ public static class Powerups {
           return !Player.IsDisabled &&
             !Player.IsLedgeGrabbing &&
             !Player.IsClimbing &&
+            !Player.IsDiving &&
+            !Player.IsGrabbing &&
             Player.IsInputEnabled;
         }
       }
@@ -746,8 +748,8 @@ public static class Powerups {
 
       protected override void Activate() {
         _feet = new IObject[] {
-          Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3f / 2f * MathHelper.PI),
-            Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3f / 2f * MathHelper.PI)
+          Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 / 2 * MathHelper.PI),
+            Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 / 2 * MathHelper.PI)
         };
 
         _feet[0].SetBodyType(BodyType.Dynamic);
@@ -761,16 +763,16 @@ public static class Powerups {
           Vector2 impulse = new Vector2(0, Player.GetLinearVelocity().Y + 0.2f);
 
           if (Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT))
-            impulse.X += 1f;
+            impulse.X += 1;
 
           if (Player.KeyPressed(VirtualKey.AIM_RUN_LEFT))
-            impulse.X -= 1f;
+            impulse.X -= 1;
 
           if (Player.KeyPressed(VirtualKey.SPRINT))
-            impulse.X *= 2f;
+            impulse.X *= 2;
 
           if (Player.KeyPressed(VirtualKey.WALKING))
-            impulse.X /= 2f;
+            impulse.X /= 2;
 
           Player.SetLinearVelocity(impulse);
         }

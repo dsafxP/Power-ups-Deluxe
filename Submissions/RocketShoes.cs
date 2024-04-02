@@ -9,6 +9,8 @@ public class RocketShoes : Powerup {
       return !Player.IsDisabled &&
         !Player.IsLedgeGrabbing &&
         !Player.IsClimbing &&
+        !Player.IsDiving &&
+        !Player.IsGrabbing &&
         Player.IsInputEnabled;
     }
   }
@@ -31,8 +33,8 @@ public class RocketShoes : Powerup {
 
   protected override void Activate() {
     _feet = new IObject[] {
-      Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 f / 2 f * MathHelper.PI),
-        Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 f / 2 f * MathHelper.PI)
+      Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 / 2 * MathHelper.PI),
+        Game.CreateObject("InvisibleBlockNoCollision", Vector2.Zero, 3 / 2 * MathHelper.PI)
     };
 
     _feet[0].SetBodyType(BodyType.Dynamic);
@@ -43,19 +45,19 @@ public class RocketShoes : Powerup {
     bool rocketing = PlayerValid && Player.KeyPressed(VirtualKey.JUMP);
 
     if (rocketing) {
-      Vector2 impulse = new Vector2(0, Player.GetLinearVelocity().Y + 0.2 f);
+      Vector2 impulse = new Vector2(0, Player.GetLinearVelocity().Y + 0.2f);
 
       if (Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT))
-        impulse.X += 1 f;
+        impulse.X += 1;
 
       if (Player.KeyPressed(VirtualKey.AIM_RUN_LEFT))
-        impulse.X -= 1 f;
+        impulse.X -= 1;
 
       if (Player.KeyPressed(VirtualKey.SPRINT))
-        impulse.X *= 2 f;
+        impulse.X *= 2;
 
       if (Player.KeyPressed(VirtualKey.WALKING))
-        impulse.X /= 2 f;
+        impulse.X /= 2;
 
       Player.SetLinearVelocity(impulse);
     }
@@ -81,7 +83,7 @@ public class RocketShoes : Powerup {
       }
 
       if (Time % (EFFECT_COOLDOWN * 2) == 0)
-        Game.PlaySound("BarrelExplode", Vector2.Zero, 0.5 f);
+        Game.PlaySound("BarrelExplode", Vector2.Zero, 0.5f);
     }
   }
 
