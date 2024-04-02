@@ -109,7 +109,7 @@ public static class Powerups {
     }
   }
 
-  public static float SpawnChance = 100;
+  public static float SpawnChance = 15;
 
   public static IObject CreatePowerupBox(Vector2 pos) {
     // Create box
