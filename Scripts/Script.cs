@@ -396,9 +396,9 @@ public static class Powerups {
       };
 
       private BotBehaviorSet _set = null;
-      
+
       private PlayerModifiers _modifiers; // Stores original player modifiers
-      
+
       public override string Name {
         get {
           return "FLAME";
@@ -427,17 +427,17 @@ public static class Powerups {
         Game.PlayEffect("PLRB", Player.GetWorldPosition());
 
         _modifiers = Player.GetModifiers(); // Store original player modifiers
-        
+
         _modifiers.CurrentHealth = -1;
         _modifiers.CurrentEnergy = -1;
-        
+
         if (Player.IsBot) {
           BotBehaviorSet botSet = Player.GetBotBehaviorSet();
-          
+
           _set = botSet;
-          
+
           botSet.DefensiveRollFireLevel = 0;
-          
+
           Player.SetBotBehaviorSet(botSet);
         }
       }
@@ -454,7 +454,7 @@ public static class Powerups {
 
           // Restore original player modifiers
           Player.SetModifiers(_modifiers);
-          
+
           // Restore behavior set
           if (Player.IsBot && _set != null)
             Player.SetBotBehaviorSet(_set);
@@ -482,14 +482,14 @@ public static class Powerups {
         VirtualKey.AIM_RUN_LEFT,
         VirtualKey.AIM_RUN_RIGHT
       };
-      
+
       public Adrenaline(IPlayer player): base(player) {
         Time = 16000; // Set duration of powerup (16 seconds)
       }
 
       public override void Update(float dlt, float dltSecs) {
         // Verify keys are pressed and the player is attacking or kicking
-        if ((_inputKeys.Any(k => Player.KeyPressed(k)) || Player.IsBot) && 
+        if ((_inputKeys.Any(k => Player.KeyPressed(k)) || Player.IsBot) &&
         (Player.IsMeleeAttacking || Player.IsKicking)) {
           // Calculate offset
           Vector2 offset = new Vector2((SPEED_MULT * Player.GetModifiers().RunSpeedModifier) *
@@ -498,7 +498,7 @@ public static class Powerups {
           // Apply offset
           Player.SetWorldPosition(Player.GetWorldPosition() + offset);
         }
-        
+
         // Play effect
         if (Time % EFFECT_COOLDOWN == 0)
           Game.PlayEffect("ImpactDefault", Player.GetWorldPosition());
@@ -511,29 +511,29 @@ public static class Powerups {
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
       }
     }
-    
+
     public class Vortex : Powerup {
       private const uint VORTEX_COOLDOWN = 250;
       private const float VORTEX_AREA_SIZE = 100;
       private const float VORTEX_FORCE = 5;
-      
+
       private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
       private static readonly Type[] _objTypes = {
         typeof(IObjectSupplyCrate),
         typeof(IObjectStreetsweeperCrate),
         typeof(IObjectWeaponItem)
       };
-      
+
       private Area VortexArea {
         get {
           Area playerArea = Player.GetAABB();
-          
+
           playerArea.SetDimensions(VORTEX_AREA_SIZE, VORTEX_AREA_SIZE);
-          
+
           return playerArea;
         }
       }
-      
+
       private IPlayer[] PlayersInVortex {
         get {
           return Game.GetObjectsByArea < IPlayer > (VortexArea)
@@ -542,7 +542,7 @@ public static class Powerups {
           .ToArray();
         }
       }
-      
+
       private IObject[] ObjectsInVortex {
         get {
           return Game.GetObjectsByArea (VortexArea)
@@ -550,66 +550,66 @@ public static class Powerups {
           .ToArray();
         }
       }
-      
+
       public override string Name {
         get {
           return "VORTEX";
         }
       }
-      
+
       public override string Author {
         get {
           return "dsafxP";
         }
       }
-      
+
       public Vortex(IPlayer player) : base (player) {
         Time = 17000; // 12 s
       }
-      
+
       public override void Update(float dlt, float dltSecs) {
         if (Time % 50 == 0) // every 50ms
           Draw(Player.GetWorldPosition());
-        
+
         if (Time % VORTEX_COOLDOWN == 0) { // every 250ms
           Game.DrawArea(VortexArea, Color.Red);
-          
+
           foreach(IPlayer pulled in PlayersInVortex) {
             pulled.SetInputEnabled(false);
             pulled.AddCommand(_playerCommand);
-            
+
             Events.UpdateCallback.Start((float _dlt) => {
               pulled.SetInputEnabled(true);
             }, 1, 1);
-            
+
             Vector2 pulledPos = pulled.GetWorldPosition();
-            
+
             pulled.SetWorldPosition(pulledPos + (Vector2Helper.Up * 2)); // Sticky feet
-            
-            pulled.SetLinearVelocity(Vector2Helper.DirectionTo(pulledPos, 
+
+            pulled.SetLinearVelocity(Vector2Helper.DirectionTo(pulledPos,
             Player.GetWorldPosition()) * VORTEX_FORCE);
-            
+
             pulled.Disarm(pulled.CurrentWeaponDrawn);
-            
+
             Game.PlaySound("PlayerDive", Vector2.Zero);
           }
-          
+
           foreach(IObject pulled in ObjectsInVortex) {
-            pulled.SetLinearVelocity(Vector2Helper.DirectionTo(pulled.GetWorldPosition(), 
+            pulled.SetLinearVelocity(Vector2Helper.DirectionTo(pulled.GetWorldPosition(),
             Player.GetWorldPosition()) * VORTEX_FORCE);
-            
+
             Game.PlaySound("PlayerDive", Vector2.Zero);
           }
         }
       }
-      
+
       protected override void Activate() {}
-      
+
       public override void TimeOut() {
         // Play sound effect indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
       }
-      
+
       // This cool effect was made by Danger Ross!
       private void Draw(Vector2 pos) {
         PointShape.Swirl(
@@ -625,32 +625,32 @@ public static class Powerups {
         );
       }
     }
-    
+
     public class Sphere : Powerup {
       private const uint EFFECT_COOLDOWN = 50;
       private const float SPHERE_SIZE = 100;
-      
+
       private Area SphereArea {
         get {
           Area playerArea = Player.GetAABB();
-          
+
           playerArea.SetDimensions(SPHERE_SIZE, SPHERE_SIZE);
-          
+
           return playerArea;
         }
       }
-      
+
       private IProjectile[] ProjectilesInSphere {
         get {
           return Game.GetProjectiles()
           .Where(pr => SphereArea.Contains(pr.Position) && pr.InitialOwnerPlayerID != Player.UniqueID &&
-          (GetTeamOrDefault(Game.GetPlayer(pr.InitialOwnerPlayerID)) != Player.GetTeam() || 
+          (GetTeamOrDefault(Game.GetPlayer(pr.InitialOwnerPlayerID)) != Player.GetTeam() ||
           Player.GetTeam() == PlayerTeam.Independent)
           && !pr.PowerupBounceActive)
           .ToArray();
         }
       }
-      
+
       private IObject[] MissilesInSphere {
         get {
           return Game.GetObjectsByArea(SphereArea)
@@ -658,48 +658,48 @@ public static class Powerups {
           .ToArray();
         }
       }
-      
+
       public override string Name {
         get {
           return "SPHERE";
         }
       }
-      
+
       public override string Author {
         get {
           return "dsafxP";
         }
       }
-      
+
       public Sphere(IPlayer player) : base(player) {
         Time = 24000; // 24 s
       }
-      
+
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
           Draw(Player.GetWorldPosition());
-          
+
           Game.DrawArea(SphereArea, Color.Red);
         }
-        
+
         foreach(IProjectile projs in ProjectilesInSphere) {
           projs.Direction *= -1;
           projs.CritChanceDealtModifier = 100;
           projs.PowerupBounceActive = true;
-          
+
           Game.PlayEffect("Electric", projs.Position);
           Game.PlaySound("ShellBounce", Vector2.Zero, 1);
           Game.PlaySound("ElectricSparks", Vector2.Zero, 1);
         }
       }
-      
+
       public override void TimeOut() {
         // Play sound effect indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
       }
-      
+
       protected override void Activate() {}
-      
+
       private void Draw(Vector2 pos) {
         PointShape.Circle(v => {
           Game.PlayEffect("GLM", Vector2Helper.Rotated(v - pos,
@@ -707,13 +707,13 @@ public static class Powerups {
                    + pos);
         }, pos, SPHERE_SIZE / 2, 45);
       }
-      
-      private PlayerTeam GetTeamOrDefault(IPlayer player, 
+
+      private PlayerTeam GetTeamOrDefault(IPlayer player,
       PlayerTeam defaultTeam = PlayerTeam.Independent) {
         return player != null ? player.GetTeam() : defaultTeam;
       }
     }
-    
+
     public class RocketShoes : Powerup {
       private const uint EFFECT_COOLDOWN = 25;
 
@@ -812,7 +812,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     public class Clone : Powerup {
       private IPlayer _clonePlayer;
       private float _accumulatedDamage = 0;
@@ -924,7 +924,7 @@ public static class Powerups {
           _clonePlayer.Kill();
       }
     }
-    
+
     public class Turret : Powerup {
       private static readonly Vector2 _offset = new Vector2(0, 24);
 
@@ -1072,6 +1072,337 @@ public static class Powerups {
             }
           }
         }
+      }
+    }
+
+    public class Dove : Powerup {
+      private const float ATTACK_COOLDOWN = 503;
+      private const float SPEED = 4.35f;
+      private const float DMG_MULT = 20;
+
+      private static Events.PlayerDamageCallback DamageCallback;
+      private static int DovesCount = 0;
+
+      private int m_lastEggID;
+      private int m_dialogueID;
+
+      private IObject m_dove;
+      private IObject m_block;
+
+      private IObjectRevoluteJoint m_joint;
+
+      private Vector2 m_lastSavedVelocity;
+      private Vector2 m_lastPosition;
+
+      private int m_facingDirection;
+
+      private bool m_nameTagVisible;
+
+      private CameraFocusMode m_focusMode;
+
+      private float m_elapsed = ATTACK_COOLDOWN;
+      private float m_eggTimeElapsed = 160;
+
+      private Events.ObjectDamageCallback m_doveDamageCallback;
+
+      public override string Name {
+        get {
+          return "SUPER DOVE";
+        }
+      }
+
+      public override string Author {
+        get {
+          return "Luminous";
+        }
+      }
+
+      public Dove(IPlayer player): base(player) {
+        Time = 10000;
+      }
+
+      private void EggAsMissile() {
+        IObject egg = Game.GetObject(m_lastEggID);
+
+        if (egg != null)
+          egg.TrackAsMissile(true);
+
+        m_lastEggID = 0;
+      }
+
+      public override void Update(float dlt, float dltSecs) {
+        if (m_dove == null || m_dove.IsRemoved) {
+          Enabled = false;
+          return;
+        }
+
+        m_lastPosition = m_dove.GetWorldPosition();
+
+        if (m_lastEggID != 0) {
+          m_eggTimeElapsed -= dlt;
+
+          if (m_eggTimeElapsed <= 0) {
+            EggAsMissile();
+          }
+        }
+
+        m_elapsed -= dlt;
+
+        if (m_elapsed <= 0) {
+          m_eggTimeElapsed = 160;
+          m_elapsed += ATTACK_COOLDOWN;
+          Vector2 vector = m_lastPosition - new Vector2(0, 2);
+
+          Game.PlayEffect("BulletHitCloth", vector);
+          Game.PlaySound("Baseball", Vector2.Zero);
+
+          IObject egg = Game.CreateObject("CrumpledPaper00", vector, 0, m_lastSavedVelocity, -m_facingDirection);
+
+          egg.CustomID = "Egg";
+          m_lastEggID = egg.UniqueID;
+        }
+
+        m_lastSavedVelocity = Vector2.Zero;
+        bool left = Player.KeyPressed(VirtualKey.AIM_RUN_LEFT);
+
+        if (left ^ Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT)) {
+          if (left) {
+            m_lastSavedVelocity.X -= 1;
+            m_facingDirection = -1;
+          } else {
+            m_lastSavedVelocity.X += 1;
+            m_facingDirection = 1;
+          }
+        }
+
+        if (Player.KeyPressed(VirtualKey.JUMP) || Player.KeyPressed(VirtualKey.AIM_CLIMB_UP)) {
+          m_lastSavedVelocity.Y += 1;
+        }
+
+        if (Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN)) {
+          m_lastSavedVelocity.Y -= 1;
+        }
+
+        // Bot support
+        if (Player.IsBot) {
+          m_lastSavedVelocity = new Vector2(_rng.Next(-1, 2), _rng.Next(-1, 2));
+        }
+
+        if (m_lastSavedVelocity == Vector2.Zero) {
+          m_joint.SetTargetObjectA(m_dove);
+        } else {
+          m_joint.SetTargetObjectA(null);
+          m_lastSavedVelocity = Vector2.Normalize(m_lastSavedVelocity) * SPEED;
+        }
+
+        m_dove.SetFaceDirection(m_facingDirection);
+        m_dove.SetLinearVelocity(m_lastSavedVelocity);
+      }
+
+      private static void OnEggHit(IPlayer hit, PlayerDamageArgs args) {
+        if (args.DamageType == PlayerDamageEventType.Missile) {
+          IObject egg = Game.GetObject(args.SourceID);
+
+          if (egg.CustomID == "Egg") {
+            hit.DealDamage(args.Damage * DMG_MULT);
+
+            Game.PlayEffect("CFTXT", egg.GetWorldPosition(), "*BAM*");
+
+            egg.Destroy();
+          }
+        }
+      }
+
+      private void OnDoveDamage(IObject obj, ObjectDamageArgs args) {
+        if (obj == m_dove) {
+          m_dove.SetHealth(m_dove.GetMaxHealth());
+          Player.DealDamage(args.Damage);
+        }
+      }
+
+      protected override void Activate() {
+        Game.PlaySound("Wings", Vector2.Zero);
+
+        m_focusMode = Player.GetCameraSecondaryFocusMode();
+
+        Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
+
+        m_dove = Game.CreateObject("Dove00", Player.GetWorldPosition() + new Vector2(0, 10));
+        m_block = Game.CreateObject("InvisibleBlock", new Vector2(100, 5000));
+        m_joint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", m_dove.GetWorldPosition());
+
+        Player.SetWorldPosition(new Vector2(100, 5000));
+
+        m_nameTagVisible = Player.GetNametagVisible();
+
+        Player.SetNametagVisible(false);
+        Player.SetInputMode(PlayerInputMode.ReadOnly);
+
+        string name = Player.Name;
+
+        if (name.Length > 10) {
+          name = name.Substring(0, 10);
+          name += "...";
+        }
+
+        m_dialogueID = Game.CreateDialogue(name, new Color(44, 44, 44), m_dove, "", 9900, false).ID;
+      }
+
+      public override void OnEnabled(bool enabled) {
+        if (enabled) {
+          m_doveDamageCallback = Events.ObjectDamageCallback.Start(OnDoveDamage);
+          DovesCount++;
+
+          if (DamageCallback == null) {
+            //Game.ShowChatMessage("DMG CALLBACK ENABLED", Color.Red);
+            DamageCallback = Events.PlayerDamageCallback.Start(OnEggHit);
+          }
+
+          return;
+        }
+
+        foreach(IDialogue dialogue in Game.GetDialogues()) {
+          if (dialogue.ID == m_dialogueID) {
+            dialogue.Close();
+
+            break;
+          }
+        }
+
+        Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+        Game.PlaySound("Wings", Vector2.Zero);
+        DovesCount--;
+
+        if (DovesCount == 0) {
+          //Game.ShowChatMessage("DMG CALLBACK DISABLED", Color.Red);
+          DamageCallback.Stop();
+          DamageCallback = null;
+        }
+
+        if (m_lastEggID != 0) {
+          EggAsMissile();
+        }
+
+        m_doveDamageCallback.Stop();
+
+        m_doveDamageCallback = null;
+
+        m_block.Remove();
+        m_dove.Remove();
+        m_joint.Remove();
+
+        Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
+
+        m_lastSavedVelocity.Normalize();
+
+        Player.SetInputMode(PlayerInputMode.Enabled);
+        Player.SetNametagVisible(m_nameTagVisible);
+        Player.SetCameraSecondaryFocusMode(m_focusMode);
+        Player.SetLinearVelocity(new Vector2(0, 2));
+      }
+    }
+
+    public class StoneSkin: Powerup {
+      private
+      const float HEAVY_EXP = 1.034f;
+
+      private static readonly PlayerModifiers _stoneMod = new PlayerModifiers() {
+        ImpactDamageTakenModifier = 0,
+          ExplosionDamageTakenModifier = 0.25f,
+          ProjectileDamageTakenModifier = 0.25f,
+          ProjectileCritChanceTakenModifier = 0,
+          MeleeStunImmunity = 1,
+          MeleeDamageTakenModifier = 0.25f,
+          SprintSpeedModifier = 0.75f
+      };
+
+      private IProfile _profile;
+      private PlayerModifiers _modifiers;
+
+      public override string Name {
+        get {
+          return "STONE SKIN";
+        }
+      }
+
+      public override string Author {
+        get {
+          return "Danila015";
+        }
+      }
+
+      public StoneSkin(IPlayer player): base(player) {
+        Time = 13000; // 13 s
+      }
+
+      protected override void Activate() {
+        _profile = Player.GetProfile(); // Store profile
+
+        _modifiers = Player.GetModifiers(); // Store original player modifiers
+
+        _modifiers.CurrentHealth = -1;
+        _modifiers.CurrentEnergy = -1;
+
+        Player.SetProfile(ColorProfile(Player.GetProfile(), "ClothingGray", "ClothingLightGray"));
+
+        Player.SetModifiers(_stoneMod);
+      }
+
+      public override void Update(float dlt, float dltSecs) {
+        if (Player.IsBurning)
+          Player.ClearFire();
+
+        if (!Player.IsOnGround) {
+          Vector2 playerLinearVelocity = Player.GetLinearVelocity();
+
+          if (playerLinearVelocity.Y < 0) {
+            playerLinearVelocity.Y *= HEAVY_EXP;
+
+            playerLinearVelocity.X /= dlt; // Normalize X
+
+            Player.SetLinearVelocity(playerLinearVelocity);
+          }
+        }
+      }
+
+      public override void TimeOut() {
+        Game.PlayEffect("DestroyCloth", Player.GetWorldPosition());
+        Game.PlaySound("DestroyStone", Vector2.Zero);
+      }
+
+      public override void OnEnabled(bool enabled) {
+        if (!enabled) { // Restore player
+          Player.SetModifiers(_modifiers);
+          Player.SetProfile(_profile);
+        }
+      }
+
+      public static IProfile ColorProfile(IProfile pr, string col, string colI) {
+        if (pr.Accesory != null)
+          pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
+
+        if (pr.ChestOver != null)
+          pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
+
+        if (pr.ChestUnder != null)
+          pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
+
+        if (pr.Feet != null)
+          pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
+
+        if (pr.Hands != null)
+          pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
+
+        if (pr.Head != null)
+          pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
+
+        if (pr.Legs != null)
+          pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
+
+        if (pr.Waist != null)
+          pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
+
+        return pr;
       }
     }
   }

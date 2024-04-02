@@ -7,7 +7,7 @@ public static class Template {
   /// <summary>
   /// Represents a base power-up that can be activated and updated over time.
   /// </summary>
-  public class MY_POWERUP_CHANGE_THIS: Powerup { //1: CHANGE YOUR CLASS' NAMESPACE
+  public class MY_POWERUP_CHANGE_THIS : Powerup { //1: CHANGE YOUR CLASS' NAMESPACE
 
     public override string Name {
       get {
