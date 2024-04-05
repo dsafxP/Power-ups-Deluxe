@@ -2,6 +2,7 @@ private static readonly Random _rng = new Random();
 
 // SUPER DOVE - Luminous
 public class Dove : Powerup {
+  private const uint CLEAN_DELAY = 10000; // ms
   private const float ATTACK_COOLDOWN = 503;
   private const float SPEED = 4.35f;
   private const float DMG_MULT = 20;
@@ -50,8 +51,14 @@ public class Dove : Powerup {
   private void EggAsMissile() {
     IObject egg = Game.GetObject(m_lastEggID);
 
-    if (egg != null)
+    if (egg != null) {
       egg.TrackAsMissile(true);
+      
+      Events.UpdateCallback.Start((float _dlt) => {
+        if (egg != null)
+          egg.Destroy();
+      }, CLEAN_DELAY, 1);
+    }
 
     m_lastEggID = 0;
   }
@@ -154,6 +161,9 @@ public class Dove : Powerup {
     Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
 
     m_dove = Game.CreateObject("Dove00", Player.GetWorldPosition() + new Vector2(0, 10));
+    
+    m_dove.SetTargetAIData(new ObjectAITargetData(500, Player.GetTeam())); // Targetable by bots
+    
     m_block = Game.CreateObject("InvisibleBlock", new Vector2(100, 5000));
     m_joint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", m_dove.GetWorldPosition());
 
@@ -186,17 +196,17 @@ public class Dove : Powerup {
 
       return;
     }
-
-    foreach(IDialogue dialogue in Game.GetDialogues()) {
-      if (dialogue.ID == m_dialogueID) {
-        dialogue.Close();
-
-        break;
-      }
+    
+    IDialogue diag = Game.GetDialogues()
+    .FirstOrDefault(d => d.ID == m_dialogueID);
+    
+    if (diag != null) {
+      diag.Close();
     }
 
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
     Game.PlaySound("Wings", Vector2.Zero);
+    
     DovesCount--;
 
     if (DovesCount == 0) {
@@ -212,18 +222,21 @@ public class Dove : Powerup {
     m_doveDamageCallback.Stop();
 
     m_doveDamageCallback = null;
+    
+    // Delay
+    Events.UpdateCallback.Start((float _dlt) => {
+      m_block.Remove();
+      m_dove.Remove();
+      m_joint.Remove();
 
-    m_block.Remove();
-    m_dove.Remove();
-    m_joint.Remove();
+      Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
 
-    Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
+      m_lastSavedVelocity.Normalize();
 
-    m_lastSavedVelocity.Normalize();
-
-    Player.SetInputMode(PlayerInputMode.Enabled);
-    Player.SetNametagVisible(m_nameTagVisible);
-    Player.SetCameraSecondaryFocusMode(m_focusMode);
-    Player.SetLinearVelocity(new Vector2(0, 2));
+      Player.SetInputMode(PlayerInputMode.Enabled);
+      Player.SetNametagVisible(m_nameTagVisible);
+      Player.SetCameraSecondaryFocusMode(m_focusMode);
+      Player.SetLinearVelocity(new Vector2(0, 2));
+    }, 1, 1);
   }
 }

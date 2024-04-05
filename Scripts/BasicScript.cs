@@ -77,7 +77,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 }
 
 public static class Powerups {
-  private static readonly ObjectAITargetData boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
+  private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
   private static readonly Random _rng = new Random();
   private static readonly List < IObject > _boxes = new List < IObject > ();
 
@@ -112,7 +112,7 @@ public static class Powerups {
     IObject box = Game.CreateObject("CardboardBox00", pos);
 
     // Make box targetable by bots
-    box.SetTargetAIData(boxTargetData);
+    box.SetTargetAIData(_boxTargetData);
 
     // Create helmet
     Vector2 helmOffset = new Vector2(2, -0.5f);
@@ -174,7 +174,7 @@ public static class Powerups {
     destroyTargets.AddObjectToDestroy(weldJoint);
 
     // Bot support
-    syringe.SetTargetAIData(boxTargetData);
+    syringe.SetTargetAIData(_boxTargetData);
 
     // Make pickupable for bots
     Events.UpdateCallback updateCallback = null;

@@ -81,7 +81,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 }
 
 public static class Powerups {
-  private static readonly ObjectAITargetData boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
+  private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
   private static readonly Random _rng = new Random();
   private static readonly List < IObject > _boxes = new List < IObject > ();
 
@@ -116,7 +116,7 @@ public static class Powerups {
     IObject box = Game.CreateObject("CardboardBox00", pos);
 
     // Make box targetable by bots
-    box.SetTargetAIData(boxTargetData);
+    box.SetTargetAIData(_boxTargetData);
 
     // Create helmet
     Vector2 helmOffset = new Vector2(2, -0.5f);
@@ -178,7 +178,7 @@ public static class Powerups {
     destroyTargets.AddObjectToDestroy(weldJoint);
 
     // Bot support
-    syringe.SetTargetAIData(boxTargetData);
+    syringe.SetTargetAIData(_boxTargetData);
 
     // Make pickupable for bots
     Events.UpdateCallback updateCallback = null;
@@ -1077,7 +1077,8 @@ public static class Powerups {
       }
     }
 
-    public class Dove : Powerup {
+    public class Dove: Powerup {
+      private const uint CLEAN_DELAY = 10000; // ms
       private const float ATTACK_COOLDOWN = 503;
       private const float SPEED = 4.35f;
       private const float DMG_MULT = 20;
@@ -1119,15 +1120,21 @@ public static class Powerups {
         }
       }
 
-      public Dove(IPlayer player) : base(player) {
+      public Dove(IPlayer player): base(player) {
         Time = 10000;
       }
 
       private void EggAsMissile() {
         IObject egg = Game.GetObject(m_lastEggID);
 
-        if (egg != null)
+        if (egg != null) {
           egg.TrackAsMissile(true);
+
+          Events.UpdateCallback.Start((float _dlt) => {
+            if (egg != null)
+              egg.Destroy();
+          }, CLEAN_DELAY, 1);
+        }
 
         m_lastEggID = 0;
       }
@@ -1230,6 +1237,9 @@ public static class Powerups {
         Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
 
         m_dove = Game.CreateObject("Dove00", Player.GetWorldPosition() + new Vector2(0, 10));
+
+        m_dove.SetTargetAIData(new ObjectAITargetData(500, Player.GetTeam())); // Targetable by bots
+
         m_block = Game.CreateObject("InvisibleBlock", new Vector2(100, 5000));
         m_joint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", m_dove.GetWorldPosition());
 
@@ -1263,16 +1273,16 @@ public static class Powerups {
           return;
         }
 
-        foreach(IDialogue dialogue in Game.GetDialogues()) {
-          if (dialogue.ID == m_dialogueID) {
-            dialogue.Close();
+        IDialogue diag = Game.GetDialogues()
+          .FirstOrDefault(d => d.ID == m_dialogueID);
 
-            break;
-          }
+        if (diag != null) {
+          diag.Close();
         }
 
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
         Game.PlaySound("Wings", Vector2.Zero);
+
         DovesCount--;
 
         if (DovesCount == 0) {
@@ -1289,18 +1299,21 @@ public static class Powerups {
 
         m_doveDamageCallback = null;
 
-        m_block.Remove();
-        m_dove.Remove();
-        m_joint.Remove();
+        // Delay
+        Events.UpdateCallback.Start((float _dlt) => {
+          m_block.Remove();
+          m_dove.Remove();
+          m_joint.Remove();
 
-        Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
+          Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
 
-        m_lastSavedVelocity.Normalize();
+          m_lastSavedVelocity.Normalize();
 
-        Player.SetInputMode(PlayerInputMode.Enabled);
-        Player.SetNametagVisible(m_nameTagVisible);
-        Player.SetCameraSecondaryFocusMode(m_focusMode);
-        Player.SetLinearVelocity(new Vector2(0, 2));
+          Player.SetInputMode(PlayerInputMode.Enabled);
+          Player.SetNametagVisible(m_nameTagVisible);
+          Player.SetCameraSecondaryFocusMode(m_focusMode);
+          Player.SetLinearVelocity(new Vector2(0, 2));
+        }, 1, 1);
       }
     }
 
