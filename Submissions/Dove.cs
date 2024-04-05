@@ -207,7 +207,7 @@ public class Dove : Powerup {
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
     Game.PlaySound("Wings", Vector2.Zero);
     
-    DovesCount--;
+    --DovesCount;
 
     if (DovesCount == 0) {
       //Game.ShowChatMessage("DMG CALLBACK DISABLED", Color.Red);
@@ -223,20 +223,17 @@ public class Dove : Powerup {
 
     m_doveDamageCallback = null;
     
-    // Delay
-    Events.UpdateCallback.Start((float _dlt) => {
-      m_block.Remove();
-      m_dove.Remove();
-      m_joint.Remove();
+    m_block.Remove();
+    m_dove.Remove();
+    m_joint.Remove();
 
-      Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
+    Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
 
-      m_lastSavedVelocity.Normalize();
+    m_lastSavedVelocity.Normalize();
 
-      Player.SetInputMode(PlayerInputMode.Enabled);
-      Player.SetNametagVisible(m_nameTagVisible);
-      Player.SetCameraSecondaryFocusMode(m_focusMode);
-      Player.SetLinearVelocity(new Vector2(0, 2));
-    }, 1, 1);
+    Player.SetInputMode(PlayerInputMode.Enabled);
+    Player.SetNametagVisible(m_nameTagVisible);
+    Player.SetCameraSecondaryFocusMode(m_focusMode);
+    Player.SetLinearVelocity(new Vector2(0, 2));
   }
 }

@@ -1283,7 +1283,7 @@ public static class Powerups {
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
         Game.PlaySound("Wings", Vector2.Zero);
 
-        DovesCount--;
+        --DovesCount;
 
         if (DovesCount == 0) {
           //Game.ShowChatMessage("DMG CALLBACK DISABLED", Color.Red);
@@ -1299,21 +1299,18 @@ public static class Powerups {
 
         m_doveDamageCallback = null;
 
-        // Delay
-        Events.UpdateCallback.Start((float _dlt) => {
-          m_block.Remove();
-          m_dove.Remove();
-          m_joint.Remove();
+        m_block.Remove();
+        m_dove.Remove();
+        m_joint.Remove();
 
-          Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
+        Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
 
-          m_lastSavedVelocity.Normalize();
+        m_lastSavedVelocity.Normalize();
 
-          Player.SetInputMode(PlayerInputMode.Enabled);
-          Player.SetNametagVisible(m_nameTagVisible);
-          Player.SetCameraSecondaryFocusMode(m_focusMode);
-          Player.SetLinearVelocity(new Vector2(0, 2));
-        }, 1, 1);
+        Player.SetInputMode(PlayerInputMode.Enabled);
+        Player.SetNametagVisible(m_nameTagVisible);
+        Player.SetCameraSecondaryFocusMode(m_focusMode);
+        Player.SetLinearVelocity(new Vector2(0, 2));
       }
     }
 
@@ -1333,14 +1330,14 @@ public static class Powerups {
 
       private IProfile _profile;
       private PlayerModifiers _modifiers;
-      
+
       private IProfile StoneProfile {
         get {
           IProfile playerProfile = Player.GetProfile();
-    
-          playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}", 
+
+          playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}",
           playerProfile.Gender == Gender.Male ? string.Empty : "_fem"), "Skin5");
-      
+
           return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
         }
       }
@@ -1895,7 +1892,7 @@ public static class Powerups {
         return Vector2Helper.Rotated(new Vector2(distance, 0), (float)(_rng.NextDouble() * MathHelper.TwoPI));
       }
     }
-    
+
     public class AirDash: Powerup {
       private const uint TRAIL_COOLDOWN = 5;
 
