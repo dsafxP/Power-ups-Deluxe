@@ -1,36 +1,73 @@
-private static readonly Random _rng = new Random();
-
 // SUPER DOVE - Luminous
-public class Dove : Powerup {
-  private const uint CLEAN_DELAY = 10000; // ms
-  private const float ATTACK_COOLDOWN = 503;
-  private const float SPEED = 4.35f;
-  private const float DMG_MULT = 20;
+public class SuperDove : Powerup {
+  private const float ATTACK_COOLDOWN = 500;
+  private const float SPEED = 5;
+  private const float DMG_MULT = 21;
 
-  private static Events.PlayerDamageCallback DamageCallback;
-  private static int DovesCount = 0;
+  private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
 
-  private int m_lastEggID;
-  private int m_dialogueID;
+  private Events.PlayerDamageCallback _plyDamageCallback;
+  private Events.ObjectDamageCallback _objDamageCallback;
   
-  private IObject m_dove;
-  private IObject m_block;
-  
-  private IObjectRevoluteJoint m_joint;
-  
-  private Vector2 m_lastSavedVelocity;
-  private Vector2 m_lastPosition;
-  
-  private int m_facingDirection;
-  
-  private bool m_nameTagVisible;
-  
-  private CameraFocusMode m_focusMode;
-  
-  private float m_elapsed = ATTACK_COOLDOWN;
-  private float m_eggTimeElapsed = 160;
-  
-  private Events.ObjectDamageCallback m_doveDamageCallback;
+  private IPlayer ClosestEnemy {
+    get {
+      List < IPlayer > enemies = Game.GetPlayers()
+      .Where(p => (p.GetTeam() != Player.GetTeam() || 
+      p.GetTeam() == PlayerTeam.Independent) && !p.IsDead)
+      .ToList();
+      
+      Vector2 playerPos = Dove.GetWorldPosition();
+      
+      enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
+      .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
+      
+      return enemies.FirstOrDefault();
+    }
+  }
+
+  private Vector2 InputDirection {
+    get {
+      Vector2 vel = Vector2.Zero;
+
+      if (Player.IsBot) {
+        IPlayer closestEnemy = ClosestEnemy;
+        
+        if (closestEnemy != null) {
+          vel = Vector2Helper.DirectionTo(Dove.GetWorldPosition(), 
+          ClosestEnemy.GetWorldPosition()) + Vector2Helper.Up;
+        }
+      } else {
+        vel.X += Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : 0;
+        vel.X -= Player.KeyPressed(VirtualKey.AIM_RUN_LEFT) ? 1 : 0;
+
+        vel.Y += Player.KeyPressed(VirtualKey.AIM_CLIMB_UP) ||
+        Player.KeyPressed(VirtualKey.JUMP) ? 1 : 0;
+        vel.Y -= Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN) ? 1 : 0;
+      }
+
+      return vel;
+    }
+  }
+
+  private IDialogue _dialog;
+  private List < IObject > _eggs = new List < IObject > ();
+
+  public IObject Dove {
+    get;
+    private set;
+  }
+
+  public IObject[] Eggs {
+    get {
+      return _eggs.ToArray();
+    }
+  }
+
+  public Vector2 Velocity {
+    get {
+      return InputDirection * SPEED;
+    }
+  }
 
   public override string Name {
     get {
@@ -44,136 +81,47 @@ public class Dove : Powerup {
     }
   }
 
-  public Dove(IPlayer player) : base(player) {
-    Time = 10000;
-  }
-
-  private void EggAsMissile() {
-    IObject egg = Game.GetObject(m_lastEggID);
-
-    if (egg != null) {
-      egg.TrackAsMissile(true);
-      
-      Events.UpdateCallback.Start((float _dlt) => {
-        if (egg != null)
-          egg.Destroy();
-      }, CLEAN_DELAY, 1);
-    }
-
-    m_lastEggID = 0;
+  public SuperDove(IPlayer player) : base(player) {
+    Time = 15000;
   }
 
   public override void Update(float dlt, float dltSecs) {
-    if (m_dove == null || m_dove.IsRemoved) {
+    if (Dove == null || Dove.IsRemoved) {
       Enabled = false;
+
       return;
     }
 
-    m_lastPosition = m_dove.GetWorldPosition();
+    // Attack
+    if (Time % ATTACK_COOLDOWN == 0)
+      CreateEgg();
 
-    if (m_lastEggID != 0) {
-      m_eggTimeElapsed -= dlt;
+    // Apply movement
+    Vector2 inputDirection = InputDirection;
+    Vector2 vel = inputDirection * SPEED;
 
-      if (m_eggTimeElapsed <= 0) {
-        EggAsMissile();
-      }
-    }
-
-    m_elapsed -= dlt;
-
-    if (m_elapsed <= 0) {
-      m_eggTimeElapsed = 160;
-      m_elapsed += ATTACK_COOLDOWN;
-      Vector2 vector = m_lastPosition - new Vector2(0, 2);
-
-      Game.PlayEffect("BulletHitCloth", vector);
-      Game.PlaySound("Baseball", Vector2.Zero);
-
-      IObject egg = Game.CreateObject("CrumpledPaper00", vector, 0, m_lastSavedVelocity, -m_facingDirection);
-
-      egg.CustomID = "Egg";
-      m_lastEggID = egg.UniqueID;
-    }
-
-    m_lastSavedVelocity = Vector2.Zero;
-    bool left = Player.KeyPressed(VirtualKey.AIM_RUN_LEFT);
-
-    if (left ^ Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT)) {
-      if (left) {
-        m_lastSavedVelocity.X -= 1;
-        m_facingDirection = -1;
-      } else {
-        m_lastSavedVelocity.X += 1;
-        m_facingDirection = 1;
-      }
-    }
-
-    if (Player.KeyPressed(VirtualKey.JUMP) || Player.KeyPressed(VirtualKey.AIM_CLIMB_UP)) {
-      m_lastSavedVelocity.Y += 1;
-    }
-
-    if (Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN)) {
-      m_lastSavedVelocity.Y -= 1;
-    }
-    
-    // Bot support
-    if (Player.IsBot) {
-      m_lastSavedVelocity = new Vector2(_rng.Next(-1, 2), _rng.Next(-1, 2));
-    }
-
-    if (m_lastSavedVelocity == Vector2.Zero) {
-      m_joint.SetTargetObjectA(m_dove);
-    } else {
-      m_joint.SetTargetObjectA(null);
-      m_lastSavedVelocity = Vector2.Normalize(m_lastSavedVelocity) * SPEED;
-    }
-
-    m_dove.SetFaceDirection(m_facingDirection);
-    m_dove.SetLinearVelocity(m_lastSavedVelocity);
-  }
-
-  private static void OnEggHit(IPlayer hit, PlayerDamageArgs args) {
-    if (args.DamageType == PlayerDamageEventType.Missile) {
-      IObject egg = Game.GetObject(args.SourceID);
-
-      if (egg.CustomID == "Egg") {
-        hit.DealDamage(args.Damage * DMG_MULT);
-
-        Game.PlayEffect("CFTXT", egg.GetWorldPosition(), "*BAM*");
-
-        egg.Destroy();
-      }
-    }
-  }
-
-  private void OnDoveDamage(IObject obj, ObjectDamageArgs args) {
-    if (obj == m_dove) {
-      m_dove.SetHealth(m_dove.GetMaxHealth());
-      Player.DealDamage(args.Damage);
-    }
+    Dove.SetLinearVelocity(vel);
+    Dove.SetFaceDirection((int)inputDirection.X);
   }
 
   protected override void Activate() {
-    Game.PlaySound("Wings", Vector2.Zero);
+    Game.PlaySound("Wings", Vector2.Zero); // Effect
 
-    m_focusMode = Player.GetCameraSecondaryFocusMode();
+    Dove = Game.CreateObject("Dove00", Player.GetWorldPosition()); // Create dove
 
-    Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
+    PlayerTeam playerTeam = Player.GetTeam();
 
-    m_dove = Game.CreateObject("Dove00", Player.GetWorldPosition() + new Vector2(0, 10));
-    
-    m_dove.SetTargetAIData(new ObjectAITargetData(500, Player.GetTeam())); // Targetable by bots
-    
-    m_block = Game.CreateObject("InvisibleBlock", new Vector2(100, 5000));
-    m_joint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", m_dove.GetWorldPosition());
+    Dove.SetTargetAIData(new ObjectAITargetData(500, playerTeam)); // Targetable by bots
 
-    Player.SetWorldPosition(new Vector2(100, 5000));
-
-    m_nameTagVisible = Player.GetNametagVisible();
+    // Hide player
+    Game.CreateObject("InvisibleBlockSmall", _playerPosition);
+    Player.SetWorldPosition(_playerPosition);
 
     Player.SetNametagVisible(false);
     Player.SetInputMode(PlayerInputMode.ReadOnly);
+    Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
 
+    // Create tag
     string name = Player.Name;
 
     if (name.Length > 10) {
@@ -181,62 +129,85 @@ public class Dove : Powerup {
       name += "...";
     }
 
-    m_dialogueID = Game.CreateDialogue(name, GetTeamColor(Player.GetTeam()), m_dove, "", 9900, false).ID;
+    _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", 9900, false);
+
+    // Callbacks
+    _plyDamageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
+    _objDamageCallback = Events.ObjectDamageCallback.Start(OnObjectDamage);
   }
 
   public override void OnEnabled(bool enabled) {
-    if (enabled) {
-      m_doveDamageCallback = Events.ObjectDamageCallback.Start(OnDoveDamage);
-      DovesCount++;
+    if (!enabled) {
+      Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+      Game.PlaySound("Wings", Vector2.Zero);
 
-      if (DamageCallback == null) {
-        //Game.ShowChatMessage("DMG CALLBACK ENABLED", Color.Red);
-        DamageCallback = Events.PlayerDamageCallback.Start(OnEggHit);
-      }
+      // Close dialogs
+      if (_dialog != null)
+        _dialog.Close();
 
-      return;
+      // Stop callbacks
+      _plyDamageCallback.Stop();
+
+      _plyDamageCallback = null;
+
+      _objDamageCallback.Stop();
+
+      _objDamageCallback = null;
+
+      // Remove dove
+      Dove.Destroy();
+
+      // Recover player
+      Player.SetWorldPosition(Dove.GetWorldPosition());
+      Player.SetLinearVelocity(Vector2.Zero); // Full stop
+      Player.SetInputEnabled(true);
+      Player.SetNametagVisible(true);
+      Player.SetCameraSecondaryFocusMode(CameraFocusMode.Focus);
+
+      // Clean
+      foreach(IObject egg in Eggs)
+        egg.Destroy();
     }
-    
-    IDialogue diag = Game.GetDialogues()
-    .FirstOrDefault(d => d.ID == m_dialogueID);
-    
-    if (diag != null) {
-      diag.Close();
-    }
-
-    Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-    Game.PlaySound("Wings", Vector2.Zero);
-    
-    --DovesCount;
-
-    if (DovesCount == 0) {
-      //Game.ShowChatMessage("DMG CALLBACK DISABLED", Color.Red);
-      DamageCallback.Stop();
-      DamageCallback = null;
-    }
-
-    if (m_lastEggID != 0) {
-      EggAsMissile();
-    }
-
-    m_doveDamageCallback.Stop();
-
-    m_doveDamageCallback = null;
-    
-    m_block.Remove();
-    m_dove.Remove();
-    m_joint.Remove();
-
-    Player.SetWorldPosition(m_lastPosition + new Vector2(0, 4));
-
-    m_lastSavedVelocity.Normalize();
-
-    Player.SetInputMode(PlayerInputMode.Enabled);
-    Player.SetNametagVisible(m_nameTagVisible);
-    Player.SetCameraSecondaryFocusMode(m_focusMode);
-    Player.SetLinearVelocity(new Vector2(0, 2));
   }
-  
+
+  private IObject CreateEgg(bool missile = true) {
+    Vector2 dovePos = Dove.GetWorldPosition();
+
+    Game.PlayEffect("BulletHitCloth", dovePos);
+    Game.PlaySound("Baseball", Vector2.Zero);
+
+    Vector2 vel = Velocity;
+
+    IObject egg = Game.CreateObject("CrumpledPaper00", dovePos, 0, vel, vel.Length());
+
+    egg.TrackAsMissile(missile);
+
+    _eggs.Add(egg);
+
+    return egg;
+  }
+
+  private void OnPlayerDamage(IPlayer player, PlayerDamageArgs args) {
+    if (args.DamageType == PlayerDamageEventType.Missile) {
+      IObject attacker = Game.GetObject(args.SourceID);
+
+      if (Eggs.Contains(attacker)) {
+        player.DealDamage(args.Damage * DMG_MULT);
+
+        Game.PlayEffect("CFTXT", attacker.GetWorldPosition(), "*BAM*");
+
+        attacker.Destroy();
+      }
+    }
+  }
+
+  private void OnObjectDamage(IObject obj, ObjectDamageArgs args) {
+    if (obj == Dove) {
+      Dove.SetHealth(Dove.GetMaxHealth());
+      Player.DealDamage(args.Damage);
+    }
+  }
+
   private static Color GetTeamColor(PlayerTeam team) {
     switch(team) {
       case PlayerTeam.Team1:
