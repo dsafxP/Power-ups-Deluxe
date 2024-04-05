@@ -1077,7 +1077,7 @@ public static class Powerups {
       }
     }
 
-    public class Dove: Powerup {
+    public class Dove : Powerup {
       private const uint CLEAN_DELAY = 10000; // ms
       private const float ATTACK_COOLDOWN = 503;
       private const float SPEED = 4.35f;
@@ -1120,7 +1120,7 @@ public static class Powerups {
         }
       }
 
-      public Dove(IPlayer player): base(player) {
+      public Dove(IPlayer player) : base(player) {
         Time = 10000;
       }
 
@@ -1257,7 +1257,7 @@ public static class Powerups {
           name += "...";
         }
 
-        m_dialogueID = Game.CreateDialogue(name, new Color(44, 44, 44), m_dove, "", 9900, false).ID;
+        m_dialogueID = Game.CreateDialogue(name, GetTeamColor(Player.GetTeam()), m_dove, "", 9900, false).ID;
       }
 
       public override void OnEnabled(bool enabled) {
@@ -1311,6 +1311,21 @@ public static class Powerups {
         Player.SetNametagVisible(m_nameTagVisible);
         Player.SetCameraSecondaryFocusMode(m_focusMode);
         Player.SetLinearVelocity(new Vector2(0, 2));
+      }
+      
+      private static Color GetTeamColor(PlayerTeam team) {
+        switch(team) {
+          case PlayerTeam.Team1:
+            return Color.Blue;
+          case PlayerTeam.Team2:
+            return Color.Red;
+          case PlayerTeam.Team3:
+            return Color.Green;
+          case PlayerTeam.Team4:
+            return Color.Yellow;
+          default:
+            return Color.White;
+        }
       }
     }
 
