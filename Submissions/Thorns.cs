@@ -3,7 +3,7 @@ private static readonly Random _rng = new Random();
 // THORNS - dsafxP - Motto73
 public class Thorns : Powerup {
   private const float EFFECT_COOLDOWN = 100;
-  private const float DMG_MULT = 2;
+  private const float DMG_MULT = 2.25f;
   
   private Events.PlayerMeleeActionCallback _playerMeleeActionCallback;
 

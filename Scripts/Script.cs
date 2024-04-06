@@ -1973,7 +1973,7 @@ public static class Powerups {
     }
     public class Thorns : Powerup {
       private const float EFFECT_COOLDOWN = 100;
-      private const float DMG_MULT = 2;
+      private const float DMG_MULT = 2.25f;
 
       private Events.PlayerMeleeActionCallback _playerMeleeActionCallback;
 
