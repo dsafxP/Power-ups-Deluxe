@@ -1512,6 +1512,12 @@ public static class Powerups {
             FIRE_TYPE);
           }
       }
+      
+      public override void TimeOut() {
+        // Play effects indicating expiration of powerup
+        Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+        Game.PlayEffect("PLRB", Player.GetWorldPosition());
+      }
 
       private Vector2 GetRandomFireVelocity(Random random) {
         float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
