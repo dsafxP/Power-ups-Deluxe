@@ -51,7 +51,7 @@ public class Vortex : Powerup {
   }
 
   public Vortex(IPlayer player): base(player) {
-    Time = 17000; // 12 s
+    Time = 17000; // 17 s
   }
 
   public override void Update(float dlt, float dltSecs) {
