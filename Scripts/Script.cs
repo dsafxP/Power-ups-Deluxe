@@ -1083,6 +1083,7 @@ public static class Powerups {
       private const float DMG_MULT = 21;
 
       private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
+      private static readonly Vector2 _blockPosition = new Vector2(0, 4984);
 
       private Events.PlayerDamageCallback _plyDamageCallback;
       private Events.ObjectDamageCallback _objDamageCallback;
@@ -1192,7 +1193,7 @@ public static class Powerups {
         Dove.SetTargetAIData(new ObjectAITargetData(500, playerTeam)); // Targetable by bots
 
         // Hide player
-        Game.CreateObject("InvisibleBlockSmall", _playerPosition);
+        Game.CreateObject("InvisibleBlockSmall", _blockPosition);
         Player.SetWorldPosition(_playerPosition);
 
         Player.SetNametagVisible(false);
