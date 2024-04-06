@@ -676,7 +676,7 @@ public class CustomProjectile {
     Game.PlayEffect(Effect, pos);
   }
 
-  private static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end, float pointDistance = 0.1 f) {
+  private static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
     int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
 
     for (int i = 0; i < count; i++) {
