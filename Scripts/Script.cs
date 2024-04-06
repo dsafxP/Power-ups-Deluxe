@@ -1489,8 +1489,9 @@ public static class Powerups {
       protected override void Activate() {}
 
       public override void Update(float dlt, float dltSecs) {
-        if (Player.IsBurningInferno) // Fire resistance
+        if (Player.IsBurning) // Fire resistance
           Player.ClearFire();
+
         if (Time % EFFECT_COOLDOWN == 0) // Effect
           Game.PlayEffect("TR_F", Player.GetWorldPosition() + _effectOffset);
 
