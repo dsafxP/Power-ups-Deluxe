@@ -26,8 +26,8 @@ public class Turret : Powerup {
     }
   }
 
-  public Turret(IPlayer player): base(player) {
-    Time = 14000;
+  public Turret(IPlayer player) : base(player) {
+    Time = 17000;
   }
 
   protected override void Activate() {
