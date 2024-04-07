@@ -390,6 +390,7 @@ public static class Powerups {
   }
 
   public static class AvailablePowerups {
+    // FLAME - dsafxP
     public class Flame : Powerup {
       private static readonly PlayerModifiers _fireMod = new PlayerModifiers() {
         FireDamageTakenModifier = 0
@@ -462,6 +463,7 @@ public static class Powerups {
       }
     }
 
+    // ADRENALINE - dsafxP
     public class Adrenaline : Powerup {
       public override string Name {
         get {
@@ -512,6 +514,7 @@ public static class Powerups {
       }
     }
 
+    // VORTEX - dsafxP
     public class Vortex : Powerup {
       private const uint VORTEX_COOLDOWN = 250;
       private const float VORTEX_AREA_SIZE = 100;
@@ -626,6 +629,7 @@ public static class Powerups {
       }
     }
 
+    // SPHERE - dsafxP
     public class Sphere : Powerup {
       private const uint EFFECT_COOLDOWN = 50;
       private const float SPHERE_SIZE = 100;
@@ -714,6 +718,7 @@ public static class Powerups {
       }
     }
 
+    // ROCKET SHOES - Ebomb09
     public class RocketShoes : Powerup {
       private const uint EFFECT_COOLDOWN = 25;
 
@@ -815,6 +820,7 @@ public static class Powerups {
       }
     }
 
+    // CLONE-O-MATIC - Ebomb09
     public class Clone : Powerup {
       private IPlayer _clonePlayer;
       private float _accumulatedDamage = 0;
@@ -927,6 +933,7 @@ public static class Powerups {
       }
     }
 
+    // FIRE TURRET - dsafxP
     public class Turret : Powerup {
       private static readonly Vector2 _offset = new Vector2(0, 24);
 
@@ -1077,10 +1084,11 @@ public static class Powerups {
       }
     }
 
+    // SUPER DOVE - Luminous
     public class SuperDove : Powerup {
-      private const float ATTACK_COOLDOWN = 500;
       private const float SPEED = 5;
-      private const float DMG_MULT = 21;
+      private const float EGG_COOLDOWN = 400;
+      private const float EGG_DMG_MULT = 22;
 
       private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
       private static readonly Vector2 _blockPosition = new Vector2(0, 4984);
@@ -1171,8 +1179,8 @@ public static class Powerups {
           return;
         }
 
-        // Attack
-        if (Time % ATTACK_COOLDOWN == 0)
+        // Egg
+        if (Time % EGG_COOLDOWN == 0)
           CreateEgg();
 
         // Apply movement
@@ -1208,7 +1216,7 @@ public static class Powerups {
           name += "...";
         }
 
-        _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", 9900, false);
+        _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", ushort.MaxValue, false);
 
         // Callbacks
         _plyDamageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
@@ -1271,7 +1279,7 @@ public static class Powerups {
           IObject attacker = Game.GetObject(args.SourceID);
 
           if (Eggs.Contains(attacker)) {
-            player.DealDamage(args.Damage * DMG_MULT);
+            player.DealDamage(args.Damage * EGG_DMG_MULT);
 
             Game.PlayEffect("CFTXT", attacker.GetWorldPosition(), "*BAM*");
 
@@ -1303,6 +1311,7 @@ public static class Powerups {
       }
     }
 
+    // STONE SKIN - Danila015
     public class StoneSkin : Powerup {
       private
       const float HEAVY_EXP = 1.034f;
@@ -1418,6 +1427,7 @@ public static class Powerups {
       }
     }
 
+    // FIRE BREATH - dsafxP
     public class FireBreath : Powerup {
       private const float EFFECT_COOLDOWN = 175;
       private const float FIRE_RATE = 100;
@@ -1512,7 +1522,7 @@ public static class Powerups {
             FIRE_TYPE);
           }
       }
-      
+
       public override void TimeOut() {
         // Play effects indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
@@ -1527,6 +1537,7 @@ public static class Powerups {
       }
     }
 
+    // MANA SHIELD - Danger Ross
     public class ManaShield : Powerup {
       private const string centerobj = "InvisibleBlockNoCollision";
 
@@ -1889,6 +1900,7 @@ public static class Powerups {
       }
     }
 
+    // AIR DASH - Danila015
     public class AirDash : Powerup {
       private const uint TRAIL_COOLDOWN = 5;
 
@@ -1978,6 +1990,7 @@ public static class Powerups {
       }
     }
 
+    // THORNS - dsafxP - Motto73
     public class Thorns : Powerup {
       private const float EFFECT_COOLDOWN = 100;
       private const float DMG_MULT = 2.25f;
@@ -2037,7 +2050,8 @@ public static class Powerups {
         Game.PlayEffect("TR_B", v);
       }
     }
-    
+
+    // GRABBY HANDS - dsafxP - Danila015
     public class GrabbyHands : Powerup {
       private const float EFFECT_DISTANCE = 5;
 

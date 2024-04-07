@@ -1,8 +1,8 @@
 // SUPER DOVE - Luminous
 public class SuperDove : Powerup {
-  private const float ATTACK_COOLDOWN = 500;
   private const float SPEED = 5;
-  private const float DMG_MULT = 21;
+  private const float EGG_COOLDOWN = 400;
+  private const float EGG_DMG_MULT = 22;
 
   private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
   private static readonly Vector2 _blockPosition = new Vector2(0, 4984);
@@ -93,8 +93,8 @@ public class SuperDove : Powerup {
       return;
     }
 
-    // Attack
-    if (Time % ATTACK_COOLDOWN == 0)
+    // Egg
+    if (Time % EGG_COOLDOWN == 0)
       CreateEgg();
 
     // Apply movement
@@ -130,7 +130,7 @@ public class SuperDove : Powerup {
       name += "...";
     }
 
-    _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", 9900, false);
+    _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", ushort.MaxValue, false);
 
     // Callbacks
     _plyDamageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
@@ -193,7 +193,7 @@ public class SuperDove : Powerup {
       IObject attacker = Game.GetObject(args.SourceID);
 
       if (Eggs.Contains(attacker)) {
-        player.DealDamage(args.Damage * DMG_MULT);
+        player.DealDamage(args.Damage * EGG_DMG_MULT);
 
         Game.PlayEffect("CFTXT", attacker.GetWorldPosition(), "*BAM*");
 
