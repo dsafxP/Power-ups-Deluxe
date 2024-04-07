@@ -1,12 +1,22 @@
-// FIRE TURRET - dsafxP
+// BLOOD TURRET - dsafxP
 public class Turret : Powerup {
+  private const bool PIERCING = true;
+  private const float SPEED = 11;
+  private const float DMG = 11;
+  
+  private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
+    FilterOnMaskBits = true,
+    AbsorbProjectile = RayCastFilterMode.True,
+    MaskBits = ushort.MaxValue
+  };
+  
   private static readonly Vector2 _offset = new Vector2(0, 24);
 
   private Wisp _wisp;
 
   public override string Name {
     get {
-      return "FIRE TURRET";
+      return "BLOOD TURRET";
     }
   }
 
@@ -23,29 +33,49 @@ public class Turret : Powerup {
   protected override void Activate() {
     _wisp = new Wisp(Player) {
       Offset = _offset,
-        Effect = "FNDTRA",
-        Cooldown = 750
+      Effect = "BLD",
+      Cooldown = 750
     };
 
-    _wisp.OnShoot += Shoot;
+    _wisp.OnShoot = Shoot;
 
     Game.PlaySound("Flamethrower", Vector2.Zero);
   }
 
-  private void Shoot(Vector2 target, Vector2 shooter) {
-    Game.PlaySound("SilencedPistol", shooter);
-    Game.PlaySound("Flamethrower", Vector2.Zero);
+  private void Shoot(Vector2 target) {
+    Game.PlaySound("ImpactFlesh", Vector2.Zero);
+    Game.PlaySound("ImpactFlesh", Vector2.Zero);
+    Game.PlaySound("Heartbeat", Vector2.Zero);
 
-    Game.SpawnProjectile(ProjectileItem.PISTOL, shooter, Vector2Helper.DirectionTo(shooter, target),
-        ProjectilePowerup.Fire)
-      .Velocity /= 2;
+    new CustomProjectile(_wisp.Position, 
+    Vector2Helper.DirectionTo(_wisp.Position, target), _raycastInput) {
+      Effect = "TR_B",
+      Speed = SPEED,
+      Piercing = PIERCING,
+      OnPlayerHit = _OnPlayerHit,
+      OnObjectHit = _OnObjectHit
+    };
+  }
+  
+  private static void _OnPlayerHit(IPlayer hit, Vector2 pos) {
+    hit.DealDamage(DMG);
+    
+    Game.PlayEffect("BLD", pos);
+    Game.PlaySound("ImpactFlesh", Vector2.Zero);
+  }
+  
+  private static void _OnObjectHit(IObject hit, Vector2 pos) {
+    hit.DealDamage(DMG);
+    
+    Game.PlayEffect("BLD", pos);
+    Game.PlaySound("ImpactFlesh", Vector2.Zero);
   }
 
   public override void TimeOut() {
     // Play sound effect indicating expiration of powerup
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-    Game.PlaySound("Flamethrower", Vector2.Zero);
-    Game.PlayEffect("FIRE", _wisp.Position);
+    Game.PlaySound("PlayerGib", Vector2.Zero);
+    Game.PlayEffect("GIB", _wisp.Position);
   }
 
   public override void OnEnabled(bool enabled) {
@@ -54,8 +84,7 @@ public class Turret : Powerup {
   }
 
   private class Wisp {
-    private
-    const uint EFFECT_COOLDOWN = 50;
+    private const uint EFFECT_COOLDOWN = 50;
 
     private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
       IncludeOverlap = true,
@@ -101,7 +130,7 @@ public class Turret : Powerup {
       }
     }
 
-    public delegate void OnShootCallback(Vector2 target, Vector2 shooter);
+    public delegate void OnShootCallback(Vector2 target);
     public OnShootCallback OnShoot;
 
     public Wisp(IPlayer player) {
@@ -143,7 +172,7 @@ public class Turret : Powerup {
           RayCastResult rayCastResult = Game.RayCast(position, closestTarget, _raycastInput)[0];
 
           if (rayCastResult.IsPlayer)
-            OnShoot.Invoke(closestTarget, position);
+            OnShoot.Invoke(closestTarget);
         }
       }
     }

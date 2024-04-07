@@ -933,15 +933,25 @@ public static class Powerups {
       }
     }
 
-    // FIRE TURRET - dsafxP
-    public class Turret : Powerup {
+    // BLOOD TURRET - dsafxP
+    public class Turret: Powerup {
+      private const bool PIERCING = true;
+      private const float SPEED = 11;
+      private const float DMG = 11;
+
+      private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
+        FilterOnMaskBits = true,
+          AbsorbProjectile = RayCastFilterMode.True,
+          MaskBits = ushort.MaxValue
+      };
+
       private static readonly Vector2 _offset = new Vector2(0, 24);
 
       private Wisp _wisp;
 
       public override string Name {
         get {
-          return "FIRE TURRET";
+          return "BLOOD TURRET";
         }
       }
 
@@ -951,36 +961,56 @@ public static class Powerups {
         }
       }
 
-      public Turret(IPlayer player) : base(player) {
+      public Turret(IPlayer player): base(player) {
         Time = 14000;
       }
 
       protected override void Activate() {
         _wisp = new Wisp(Player) {
           Offset = _offset,
-            Effect = "FNDTRA",
+            Effect = "BLD",
             Cooldown = 750
         };
 
-        _wisp.OnShoot += Shoot;
+        _wisp.OnShoot = Shoot;
 
         Game.PlaySound("Flamethrower", Vector2.Zero);
       }
 
-      private void Shoot(Vector2 target, Vector2 shooter) {
-        Game.PlaySound("SilencedPistol", shooter);
-        Game.PlaySound("Flamethrower", Vector2.Zero);
+      private void Shoot(Vector2 target) {
+        Game.PlaySound("ImpactFlesh", Vector2.Zero);
+        Game.PlaySound("ImpactFlesh", Vector2.Zero);
+        Game.PlaySound("Heartbeat", Vector2.Zero);
 
-        Game.SpawnProjectile(ProjectileItem.PISTOL, shooter, Vector2Helper.DirectionTo(shooter, target),
-            ProjectilePowerup.Fire)
-          .Velocity /= 2;
+        new CustomProjectile(_wisp.Position,
+          Vector2Helper.DirectionTo(_wisp.Position, target), _raycastInput) {
+          Effect = "TR_B",
+            Speed = SPEED,
+            Piercing = PIERCING,
+            OnPlayerHit = _OnPlayerHit,
+            OnObjectHit = _OnObjectHit
+        };
+      }
+
+      private static void _OnPlayerHit(IPlayer hit, Vector2 pos) {
+        hit.DealDamage(DMG);
+
+        Game.PlayEffect("BLD", pos);
+        Game.PlaySound("ImpactFlesh", Vector2.Zero);
+      }
+
+      private static void _OnObjectHit(IObject hit, Vector2 pos) {
+        hit.DealDamage(DMG);
+
+        Game.PlayEffect("BLD", pos);
+        Game.PlaySound("ImpactFlesh", Vector2.Zero);
       }
 
       public override void TimeOut() {
         // Play sound effect indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-        Game.PlaySound("Flamethrower", Vector2.Zero);
-        Game.PlayEffect("FIRE", _wisp.Position);
+        Game.PlaySound("PlayerGib", Vector2.Zero);
+        Game.PlayEffect("GIB", _wisp.Position);
       }
 
       public override void OnEnabled(bool enabled) {
@@ -989,7 +1019,8 @@ public static class Powerups {
       }
 
       private class Wisp {
-        private const uint EFFECT_COOLDOWN = 50;
+        private
+        const uint EFFECT_COOLDOWN = 50;
 
         private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
           IncludeOverlap = true,
@@ -1035,7 +1066,7 @@ public static class Powerups {
           }
         }
 
-        public delegate void OnShootCallback(Vector2 target, Vector2 shooter);
+        public delegate void OnShootCallback(Vector2 target);
         public OnShootCallback OnShoot;
 
         public Wisp(IPlayer player) {
@@ -1077,7 +1108,7 @@ public static class Powerups {
               RayCastResult rayCastResult = Game.RayCast(position, closestTarget, _raycastInput)[0];
 
               if (rayCastResult.IsPlayer)
-                OnShoot.Invoke(closestTarget, position);
+                OnShoot.Invoke(closestTarget);
             }
           }
         }
@@ -2532,5 +2563,187 @@ public static class Vector2Helper {
     float cos = (float) Math.Cos(angle);
 
     return new Vector2(cos, sin);
+  }
+}
+
+/// <summary>
+/// Represents a custom projectile with customizable behavior and collision handling.
+/// </summary>
+public class CustomProjectile {
+  private const uint COOLDOWN = 0;
+
+  private Vector2 _direction;
+  private Vector2 _position;
+  private Vector2 _subPosition;
+
+  private RayCastInput _rayCastCollision;
+
+  private Events.UpdateCallback _updateCallback = null;
+
+  /// <summary>
+  /// Indicates whether the projectile pierces through objects or not.
+  /// </summary>
+  public bool Piercing = false;
+
+  /// <summary>
+  /// Indicates whether the projectile hits rolling players or not.
+  /// </summary>
+  public bool IgnoreRolling = false;
+
+  /// <summary>
+  /// Speed of the projectile.
+  /// </summary>
+  public float Speed = 1;
+
+  /// <summary>
+  /// Effect to be played on movement.
+  /// </summary>
+  public string Effect = string.Empty;
+
+  /// <summary>
+  /// Information about the collision to be used for ray casting.
+  /// </summary>
+  public RayCastInput RayCastCollision {
+    get {
+      return _rayCastCollision;
+    }
+    set {
+      _rayCastCollision = value;
+      _rayCastCollision.ClosestHitOnly = true;
+    }
+  }
+
+  /// <summary>
+  /// Current position of the projectile.
+  /// </summary>
+  public Vector2 Position {
+    get {
+      return _position;
+    }
+    set {
+      _position = value;
+      _subPosition = _position;
+    }
+  }
+
+  /// <summary>
+  /// Direction of the projectile.
+  /// </summary>
+  public Vector2 Direction {
+    get {
+      return _direction;
+    }
+    set {
+      _direction = Vector2.Normalize(value);
+    }
+  }
+
+  /// <summary>
+  /// Velocity of the projectile.
+  /// </summary>
+  public Vector2 Velocity {
+    get {
+      return Direction * Speed;
+    }
+    set {
+      Speed = value.Length();
+      Direction = value;
+    }
+  }
+
+  /// <summary>
+  /// Indicates whether the projectile is enabled or not.
+  /// </summary>
+  public bool Enabled {
+    get {
+      return _updateCallback != null;
+    }
+    set {
+      if (value != Enabled) {
+        if (value) {
+          _updateCallback = Events.UpdateCallback.Start(Update, COOLDOWN);
+        } else {
+          _updateCallback.Stop();
+          _updateCallback = null;
+        }
+      }
+    }
+  }
+
+  /// <summary>
+  /// Delegate for handling when the projectile hits a player.
+  /// </summary>
+  /// <param name="hitPlayer">The player hit by the projectile.</param>
+  /// <param name="hitPosition">The position at which the projectile hit.</param>
+  public delegate void OnPlayerHitCallback(IPlayer hitPlayer, Vector2 hitPosition);
+  public OnPlayerHitCallback OnPlayerHit;
+
+  /// <summary>
+  /// Delegate for handling when the projectile hits an object.
+  /// </summary>
+  /// <param name="hitObject">The object hit by the projectile.</param>
+  /// <param name="hitPosition">The position at which the projectile hit.</param>
+  public delegate void OnObjectHitCallback(IObject hitObject, Vector2 hitPosition);
+  public OnObjectHitCallback OnObjectHit;
+
+  /// <summary>
+  /// Initializes a new instance of the CustomProjectile class.
+  /// </summary>
+  /// <param name="pos">Initial position of the projectile.</param>
+  /// <param name="direction">Initial direction of the projectile.</param>
+  /// <param name="rayCastCollision">Information about the collision to be used for ray casting.</param>
+  public CustomProjectile(Vector2 pos, Vector2 direction, RayCastInput rayCastCollision) {
+    Position = pos;
+    Direction = direction;
+    RayCastCollision = rayCastCollision;
+    Enabled = true;
+  }
+
+  private void Update(float dlt) {
+    _position += Velocity;
+
+    Game.DrawLine(_subPosition, Position, Color.Yellow);
+
+    RayCastResult checkedResult = Game.RayCast(_subPosition, Position, RayCastCollision)[0];
+
+    bool dodged = false;
+
+    if (checkedResult.Hit) {
+      if (checkedResult.IsPlayer && OnPlayerHit != null) {
+        IPlayer hitPlayer = (IPlayer) checkedResult.HitObject;
+
+        dodged = !IgnoreRolling && (hitPlayer.IsRolling || hitPlayer.IsDiving);
+
+        if (!dodged)
+          OnPlayerHit.Invoke(hitPlayer, checkedResult.Position);
+      }
+
+      if (!checkedResult.IsPlayer && OnObjectHit != null)
+        OnObjectHit.Invoke(checkedResult.HitObject, checkedResult.Position);
+
+      if (!Piercing && !dodged || !checkedResult.IsPlayer && !checkedResult.HitObject.Destructable)
+        Enabled = false;
+    }
+
+    Game.PlayEffect(Effect, _subPosition);
+
+    Vector2 trailEnd = checkedResult.Hit && !dodged && !Piercing ? checkedResult.Position : Position;
+
+    Trail(Draw, _subPosition, trailEnd, 5);
+
+    _subPosition += Velocity;
+  }
+
+  private void Draw(Vector2 pos) {
+    Game.PlayEffect(Effect, pos);
+  }
+
+  private static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
+    int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
+
+    for (int i = 0; i < count; i++) {
+      Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
+      func(pos);
+    }
   }
 }

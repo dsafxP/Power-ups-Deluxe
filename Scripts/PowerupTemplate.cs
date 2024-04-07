@@ -509,8 +509,7 @@ public static class Vector2Helper {
 /// Represents a custom projectile with customizable behavior and collision handling.
 /// </summary>
 public class CustomProjectile {
-  private
-  const uint COOLDOWN = 0;
+  private const uint COOLDOWN = 0;
 
   private Vector2 _direction;
   private Vector2 _position;
@@ -614,14 +613,16 @@ public class CustomProjectile {
   /// Delegate for handling when the projectile hits a player.
   /// </summary>
   /// <param name="hitPlayer">The player hit by the projectile.</param>
-  public delegate void OnPlayerHitCallback(IPlayer hitPlayer);
+  /// <param name="hitPosition">The position at which the projectile hit.</param>
+  public delegate void OnPlayerHitCallback(IPlayer hitPlayer, Vector2 hitPosition);
   public OnPlayerHitCallback OnPlayerHit;
 
   /// <summary>
   /// Delegate for handling when the projectile hits an object.
   /// </summary>
   /// <param name="hitObject">The object hit by the projectile.</param>
-  public delegate void OnObjectHitCallback(IObject hitObject);
+  /// <param name="hitPosition">The position at which the projectile hit.</param>
+  public delegate void OnObjectHitCallback(IObject hitObject, Vector2 hitPosition);
   public OnObjectHitCallback OnObjectHit;
 
   /// <summary>
@@ -653,11 +654,11 @@ public class CustomProjectile {
         dodged = !IgnoreRolling && (hitPlayer.IsRolling || hitPlayer.IsDiving);
 
         if (!dodged)
-          OnPlayerHit.Invoke(checkedResult.HitObject as IPlayer);
+          OnPlayerHit.Invoke(hitPlayer, checkedResult.Position);
       }
 
       if (!checkedResult.IsPlayer && OnObjectHit != null)
-        OnObjectHit.Invoke(checkedResult.HitObject);
+        OnObjectHit.Invoke(checkedResult.HitObject, checkedResult.Position);
 
       if (!Piercing && !dodged || !checkedResult.IsPlayer && !checkedResult.HitObject.Destructable)
         Enabled = false;
