@@ -934,7 +934,7 @@ public static class Powerups {
     }
 
     // BLOOD TURRET - dsafxP
-    public class Turret: Powerup {
+    public class Turret : Powerup {
       private const bool PIERCING = true;
       private const float SPEED = 11;
       private const float DMG = 11;
@@ -961,8 +961,8 @@ public static class Powerups {
         }
       }
 
-      public Turret(IPlayer player): base(player) {
-        Time = 14000;
+      public Turret(IPlayer player) : base(player) {
+        Time = 17000;
       }
 
       protected override void Activate() {
