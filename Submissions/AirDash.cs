@@ -30,7 +30,7 @@ public class AirDash : Powerup {
   }
 
   public AirDash(IPlayer player) : base(player) {
-    Time = 24000; // 24 s
+    Time = 27000; // 27 s
     Dashing = false;
   }
 
