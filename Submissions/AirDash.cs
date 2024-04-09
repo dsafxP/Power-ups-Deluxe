@@ -1,7 +1,6 @@
+// AIR DASH - Danila015
 public class AirDash : Powerup {
-  private const uint TRAIL_COOLDOWN = 5;
-
-  private static readonly Vector2 _velocity = new Vector2(18, 5);
+  private static readonly Vector2 _velocity = new Vector2(17, 5);
 
   private Vector2 Velocity {
     get {
@@ -39,17 +38,11 @@ public class AirDash : Powerup {
   public override void Update(float dlt, float dltSecs) {
     EmptyUppercutCheck(0);
 
-    Game.WriteToConsole(Dashing);
-
     if (Dashing) {
       if (!Player.IsMeleeAttacking && Player.IsOnGround) {
         Dashing = false;
 
         return;
-      }
-
-      if (Time % TRAIL_COOLDOWN == 0) {
-        Game.PlayEffect("ImpactDefault", Player.GetWorldPosition());
       }
     }
   }
@@ -65,6 +58,8 @@ public class AirDash : Powerup {
     Game.PlaySound("Sawblade", Vector2.Zero);
 
     Dashing = true;
+
+    Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero, Player.UniqueID, EffectName.DustTrail, 1.5f);
 
     Player.SetWorldPosition(Player.GetWorldPosition() + Vector2Helper.Up * 2); // Sticky feet
 
