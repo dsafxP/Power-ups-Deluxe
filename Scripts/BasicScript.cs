@@ -301,6 +301,8 @@ public static class Powerups {
           
           Box.SetAngle(ANGULAR);
           Box.SetAngularVelocity(ANGULAR);
+          
+          Box.SetHealth(Box.GetMaxHealth());
         
           if (_elapsed % EffectCooldown == 0)
             Game.PlayEffect(Effect, Box.GetWorldPosition());
