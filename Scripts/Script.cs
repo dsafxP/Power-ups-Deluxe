@@ -2141,6 +2141,16 @@ public static class Powerups {
         }
       }
 
+      private IPlayer[] ActiveEnemies {
+        get {
+          return Game.GetPlayers()
+            .Where(p => (p.GetTeam() != Player.GetTeam() ||
+                p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
+              p.IsInputEnabled)
+            .ToArray();
+        }
+      }
+
       public override string Name {
         get {
           return "GRABBY HANDS";
@@ -2161,30 +2171,31 @@ public static class Powerups {
 
       public override void Update(float dlt, float dltSecs) {
         WeaponItemType[] emptyWeaponItemTypes = EmptyWeaponItemTypes;
-        IPlayer closestEnemy = ClosestEnemy;
+        IPlayer[] enemies = ActiveEnemies;
 
-        if (emptyWeaponItemTypes.Any() && closestEnemy != null) {
-          WeaponItemType toGrab = emptyWeaponItemTypes
-            .FirstOrDefault(s => closestEnemy.CurrentWeaponDrawn == s);
+        if (emptyWeaponItemTypes.Any() && enemies.Any())
+          foreach(IPlayer enemy in enemies) {
+            WeaponItemType toGrab = emptyWeaponItemTypes
+              .FirstOrDefault(s => enemy.CurrentWeaponDrawn == s);
 
-          if (toGrab != null) {
-            Vector2 enemyPos = closestEnemy.GetWorldPosition();
-            Vector2 playerPos = Player.GetWorldPosition();
+            if (toGrab != null) {
+              Vector2 enemyPos = enemy.GetWorldPosition();
+              Vector2 playerPos = Player.GetWorldPosition();
 
-            IObjectWeaponItem weapon = closestEnemy.Disarm(toGrab,
-              Vector2Helper.DirectionTo(playerPos, enemyPos), true);
+              IObjectWeaponItem weapon = enemy.Disarm(toGrab,
+                Vector2Helper.DirectionTo(playerPos, enemyPos), true);
 
-            if (weapon != null) {
-              weapon.SetWorldPosition(playerPos);
+              if (weapon != null) {
+                weapon.SetWorldPosition(playerPos);
 
-              Game.PlayEffect("H_T", playerPos);
-              Game.PlayEffect("H_T", enemyPos);
-              PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
+                Game.PlayEffect("H_T", playerPos);
+                Game.PlayEffect("H_T", enemyPos);
+                PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
 
-              Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
+                Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
+              }
             }
           }
-        }
       }
 
       public override void TimeOut() {
