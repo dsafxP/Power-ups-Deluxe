@@ -73,7 +73,7 @@ public class StoneSkin : Powerup {
   }
 
   public override void TimeOut() {
-    Game.PlayEffect("DestroyCloth", Player.GetWorldPosition());
+    Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
     Game.PlaySound("DestroyStone", Vector2.Zero);
   }
 

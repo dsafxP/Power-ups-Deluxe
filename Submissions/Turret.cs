@@ -33,7 +33,7 @@ public class Turret : Powerup {
   protected override void Activate() {
     _wisp = new Wisp(Player) {
       Offset = _offset,
-      Effect = "BLD",
+      Effect = EffectName.Blood,
       Cooldown = 750
     };
 
@@ -49,7 +49,7 @@ public class Turret : Powerup {
 
     new CustomProjectile(_wisp.Position, 
     Vector2Helper.DirectionTo(_wisp.Position, target), _raycastInput) {
-      Effect = "TR_B",
+      Effect = EffectName.BloodTrail,
       Speed = SPEED,
       Piercing = PIERCING,
       OnPlayerHit = _OnPlayerHit,
@@ -60,14 +60,14 @@ public class Turret : Powerup {
   private static void _OnPlayerHit(IPlayer hit, Vector2 pos) {
     hit.DealDamage(DMG);
     
-    Game.PlayEffect("BLD", pos);
+    Game.PlayEffect(EffectName.Blood, pos);
     Game.PlaySound("ImpactFlesh", Vector2.Zero);
   }
   
   private static void _OnObjectHit(IObject hit, Vector2 pos) {
     hit.DealDamage(DMG);
     
-    Game.PlayEffect("BLD", pos);
+    Game.PlayEffect(EffectName.Blood, pos);
     Game.PlaySound("ImpactFlesh", Vector2.Zero);
   }
 
@@ -75,7 +75,7 @@ public class Turret : Powerup {
     // Play sound effect indicating expiration of powerup
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
     Game.PlaySound("PlayerGib", Vector2.Zero);
-    Game.PlayEffect("GIB", _wisp.Position);
+    Game.PlayEffect(EffectName.Gib, _wisp.Position);
   }
 
   public override void OnEnabled(bool enabled) {

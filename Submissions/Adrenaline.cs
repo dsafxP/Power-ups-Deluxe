@@ -69,7 +69,7 @@ public class Adrenaline : Powerup {
 
     // Play effect
     if (Time % EFFECT_COOLDOWN == 0)
-      Game.PlayEffect("ImpactDefault", Player.GetWorldPosition());
+      Game.PlayEffect(EffectName.ImpactDefault, Player.GetWorldPosition());
   }
 
   protected override void Activate() {}
@@ -77,6 +77,6 @@ public class Adrenaline : Powerup {
   public override void TimeOut() {
     // Play effects indicating expiration of powerup
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-    Game.PlayEffect("H_T", Player.GetWorldPosition());
+    Game.PlayEffect(EffectName.PlayerLandFull, Player.GetWorldPosition());
   }
 }

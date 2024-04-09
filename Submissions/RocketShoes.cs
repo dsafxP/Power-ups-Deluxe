@@ -89,7 +89,7 @@ public class RocketShoes : Powerup {
 
   public override void TimeOut() {
     Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
-    Game.PlayEffect("S_P", Player.GetWorldPosition());
+    Game.PlayEffect(EffectName.Sparks, Player.GetWorldPosition());
   }
 
   public override void OnEnabled(bool enabled) {

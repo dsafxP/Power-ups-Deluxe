@@ -174,7 +174,7 @@ public class SuperDove : Powerup {
   private IObject CreateEgg(bool missile = true) {
     Vector2 dovePos = Dove.GetWorldPosition();
 
-    Game.PlayEffect("BulletHitCloth", dovePos);
+    Game.PlayEffect(EffectName.BulletHitCloth, dovePos);
     Game.PlaySound("Baseball", Vector2.Zero);
 
     Vector2 vel = Velocity;
@@ -195,7 +195,7 @@ public class SuperDove : Powerup {
       if (Eggs.Contains(attacker)) {
         player.DealDamage(args.Damage * EGG_DMG_MULT);
 
-        Game.PlayEffect("CFTXT", attacker.GetWorldPosition(), "*BAM*");
+        Game.PlayEffect(EffectName.CustomFloatText, attacker.GetWorldPosition(), "*BAM*");
 
         attacker.Destroy();
       }

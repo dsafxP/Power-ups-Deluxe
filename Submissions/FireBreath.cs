@@ -76,7 +76,7 @@ public class FireBreath : Powerup {
       Player.ClearFire();
 
     if (Time % EFFECT_COOLDOWN == 0) // Effect
-      Game.PlayEffect("TR_F", Player.GetWorldPosition() + _effectOffset);
+      Game.PlayEffect(EffectName.FireTrail, Player.GetWorldPosition() + _effectOffset);
 
     if (Time % FIRE_RATE == 0) // Attack
       if (EnemiesInRange) {
@@ -99,7 +99,7 @@ public class FireBreath : Powerup {
   public override void TimeOut() {
     // Play effects indicating expiration of powerup
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-    Game.PlayEffect("PLRB", Player.GetWorldPosition());
+    Game.PlayEffect(EffectName.PlayerBurned, Player.GetWorldPosition());
   }
 
   private Vector2 GetRandomFireVelocity(Random random) {

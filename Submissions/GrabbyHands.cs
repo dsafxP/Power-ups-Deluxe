@@ -85,8 +85,8 @@ public class GrabbyHands : Powerup {
           if (weapon != null) {
             weapon.SetWorldPosition(playerPos);
 
-            Game.PlayEffect("H_T", playerPos);
-            Game.PlayEffect("H_T", enemyPos);
+            Game.PlayEffect(EffectName.PlayerLandFull, playerPos);
+            Game.PlayEffect(EffectName.PlayerLandFull, enemyPos);
             PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
 
             Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
@@ -101,6 +101,6 @@ public class GrabbyHands : Powerup {
   }
 
   private static void Draw(Vector2 v) {
-    Game.PlayEffect("GLM", v);
+    Game.PlayEffect(EffectName.ItemGleam, v);
   }
 }

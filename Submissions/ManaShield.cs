@@ -206,7 +206,7 @@ public class ManaShield : Powerup {
           }
 
           Game.PlaySound("GrenadeBounce", projectile.Position);
-          Game.PlayEffect("S_P", projectile.Position);
+          Game.PlayEffect(EffectName.Sparks, projectile.Position);
 
           projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
           projectile.Position = projectile.Position + (normal * 2);
@@ -277,7 +277,7 @@ public class ManaShield : Powerup {
 
     if (Time % 50 == 0) {
       if (_rng.Next(0, 6) == 1) {
-        Game.PlayEffect("GLM", RandomPoint(RADIUS - 6) + Player.GetWorldPosition() + offset);
+        Game.PlayEffect(EffectName.ItemGleam, RandomPoint(RADIUS - 6) + Player.GetWorldPosition() + offset);
       }
     }
 
@@ -338,7 +338,7 @@ public class ManaShield : Powerup {
         debris.SetAngularVelocity(((float) _rng.NextDouble() - 0.5f) * 20);
         toFade.Add(debris);
       } else {
-        Game.PlayEffect("DestroyGlass", dir + Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.DestroyGlass, dir + Player.GetWorldPosition());
       }
     }
 

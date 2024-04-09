@@ -672,7 +672,7 @@ public static class Powerups {
 
         // Play effect
         if (Time % EFFECT_COOLDOWN == 0)
-          Game.PlayEffect("ImpactDefault", Player.GetWorldPosition());
+          Game.PlayEffect(EffectName.ImpactDefault, Player.GetWorldPosition());
       }
 
       protected override void Activate() {}
@@ -680,7 +680,7 @@ public static class Powerups {
       public override void TimeOut() {
         // Play effects indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-        Game.PlayEffect("H_T", Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.PlayerLandFull, Player.GetWorldPosition());
       }
     }
     
@@ -786,7 +786,7 @@ public static class Powerups {
       // This cool effect was made by Danger Ross!
       private void Draw(Vector2 pos) {
         PointShape.Swirl(
-          (v => Game.PlayEffect("GLM",
+          (v => Game.PlayEffect(EffectName.ItemGleam,
                Vector2Helper.Rotated(v - pos,
                    (float)(Time % 1500 * (MathHelper.TwoPI / 1500)))
                    + pos)),
@@ -861,7 +861,7 @@ public static class Powerups {
           projs.CritChanceDealtModifier = 100;
           projs.PowerupBounceActive = true;
 
-          Game.PlayEffect("Electric", projs.Position);
+          Game.PlayEffect(EffectName.Electric, projs.Position);
           Game.PlaySound("ShellBounce", Vector2.Zero, 1);
           Game.PlaySound("ElectricSparks", Vector2.Zero, 1);
         }
@@ -876,7 +876,7 @@ public static class Powerups {
 
       private void Draw(Vector2 pos) {
         PointShape.Circle(v => {
-          Game.PlayEffect("GLM", Vector2Helper.Rotated(v - pos,
+          Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
                    (float)(Time % 1500 * (MathHelper.TwoPI / 1500)))
                    + pos);
         }, pos, SPHERE_SIZE / 2, 45);
@@ -979,7 +979,7 @@ public static class Powerups {
 
       public override void TimeOut() {
         Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
-        Game.PlayEffect("S_P", Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.Sparks, Player.GetWorldPosition());
       }
 
       public override void OnEnabled(bool enabled) {
@@ -1138,7 +1138,7 @@ public static class Powerups {
       protected override void Activate() {
         _wisp = new Wisp(Player) {
           Offset = _offset,
-            Effect = "BLD",
+            Effect = EffectName.Blood,
             Cooldown = 750
         };
 
@@ -1154,7 +1154,7 @@ public static class Powerups {
 
         new CustomProjectile(_wisp.Position,
           Vector2Helper.DirectionTo(_wisp.Position, target), _raycastInput) {
-          Effect = "TR_B",
+          Effect = EffectName.BloodTrail,
             Speed = SPEED,
             Piercing = PIERCING,
             OnPlayerHit = _OnPlayerHit,
@@ -1165,14 +1165,14 @@ public static class Powerups {
       private static void _OnPlayerHit(IPlayer hit, Vector2 pos) {
         hit.DealDamage(DMG);
 
-        Game.PlayEffect("BLD", pos);
+        Game.PlayEffect(EffectName.Blood, pos);
         Game.PlaySound("ImpactFlesh", Vector2.Zero);
       }
 
       private static void _OnObjectHit(IObject hit, Vector2 pos) {
         hit.DealDamage(DMG);
 
-        Game.PlayEffect("BLD", pos);
+        Game.PlayEffect(EffectName.Blood, pos);
         Game.PlaySound("ImpactFlesh", Vector2.Zero);
       }
 
@@ -1180,7 +1180,7 @@ public static class Powerups {
         // Play sound effect indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
         Game.PlaySound("PlayerGib", Vector2.Zero);
-        Game.PlayEffect("GIB", _wisp.Position);
+        Game.PlayEffect(EffectName.Gib, _wisp.Position);
       }
 
       public override void OnEnabled(bool enabled) {
@@ -1461,7 +1461,7 @@ public static class Powerups {
       private IObject CreateEgg(bool missile = true) {
         Vector2 dovePos = Dove.GetWorldPosition();
 
-        Game.PlayEffect("BulletHitCloth", dovePos);
+        Game.PlayEffect(EffectName.BulletHitCloth, dovePos);
         Game.PlaySound("Baseball", Vector2.Zero);
 
         Vector2 vel = Velocity;
@@ -1482,7 +1482,7 @@ public static class Powerups {
           if (Eggs.Contains(attacker)) {
             player.DealDamage(args.Damage * EGG_DMG_MULT);
 
-            Game.PlayEffect("CFTXT", attacker.GetWorldPosition(), "*BAM*");
+            Game.PlayEffect(EffectName.CustomFloatText, attacker.GetWorldPosition(), "*BAM*");
 
             attacker.Destroy();
           }
@@ -1588,7 +1588,7 @@ public static class Powerups {
       }
 
       public override void TimeOut() {
-        Game.PlayEffect("DestroyCloth", Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
         Game.PlaySound("DestroyStone", Vector2.Zero);
       }
 
@@ -1704,7 +1704,7 @@ public static class Powerups {
           Player.ClearFire();
 
         if (Time % EFFECT_COOLDOWN == 0) // Effect
-          Game.PlayEffect("TR_F", Player.GetWorldPosition() + _effectOffset);
+          Game.PlayEffect(EffectName.FireTrail, Player.GetWorldPosition() + _effectOffset);
 
         if (Time % FIRE_RATE == 0) // Attack
           if (EnemiesInRange) {
@@ -1727,7 +1727,7 @@ public static class Powerups {
       public override void TimeOut() {
         // Play effects indicating expiration of powerup
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-        Game.PlayEffect("PLRB", Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.PlayerBurned, Player.GetWorldPosition());
       }
 
       private Vector2 GetRandomFireVelocity(Random random) {
@@ -1945,7 +1945,7 @@ public static class Powerups {
               }
 
               Game.PlaySound("GrenadeBounce", projectile.Position);
-              Game.PlayEffect("S_P", projectile.Position);
+              Game.PlayEffect(EffectName.Sparks, projectile.Position);
 
               projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
               projectile.Position = projectile.Position + (normal * 2);
@@ -2016,7 +2016,7 @@ public static class Powerups {
 
         if (Time % 50 == 0) {
           if (_rng.Next(0, 6) == 1) {
-            Game.PlayEffect("GLM", RandomPoint(RADIUS - 6) + Player.GetWorldPosition() + offset);
+            Game.PlayEffect(EffectName.ItemGleam, RandomPoint(RADIUS - 6) + Player.GetWorldPosition() + offset);
           }
         }
 
@@ -2077,7 +2077,7 @@ public static class Powerups {
             debris.SetAngularVelocity(((float) _rng.NextDouble() - 0.5f) * 20);
             toFade.Add(debris);
           } else {
-            Game.PlayEffect("DestroyGlass", dir + Player.GetWorldPosition());
+            Game.PlayEffect(EffectName.DestroyGlass, dir + Player.GetWorldPosition());
           }
         }
 
@@ -2219,7 +2219,7 @@ public static class Powerups {
 
       public override void TimeOut() {
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-        Game.PlayEffect("GIB", Player.GetWorldPosition());
+        Game.PlayEffect(EffectName.Gib, Player.GetWorldPosition());
       }
 
       public override void OnEnabled(bool enabled) {
@@ -2236,13 +2236,13 @@ public static class Powerups {
           attacker.DealDamage(arg.HitDamage * DMG_MULT); // Damage attacker
 
           // Effect
-          Game.PlayEffect("BLD", arg.HitPosition);
+          Game.PlayEffect(EffectName.Blood, arg.HitPosition);
           Game.PlaySound("MeleeHitSharp", Vector2.Zero);
         }
       }
 
       private static void Draw(Vector2 v) {
-        Game.PlayEffect("TR_B", v);
+        Game.PlayEffect(EffectName.BloodTrail, v);
       }
     }
 
@@ -2333,8 +2333,8 @@ public static class Powerups {
               if (weapon != null) {
                 weapon.SetWorldPosition(playerPos);
 
-                Game.PlayEffect("H_T", playerPos);
-                Game.PlayEffect("H_T", enemyPos);
+                Game.PlayEffect(EffectName.PlayerLandFull, playerPos);
+                Game.PlayEffect(EffectName.PlayerLandFull, enemyPos);
                 PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
 
                 Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
@@ -2349,7 +2349,7 @@ public static class Powerups {
       }
 
       private static void Draw(Vector2 v) {
-        Game.PlayEffect("GLM", v);
+        Game.PlayEffect(EffectName.ItemGleam, v);
       }
     }
   }

@@ -60,7 +60,7 @@ public class Sphere : Powerup {
       projs.CritChanceDealtModifier = 100;
       projs.PowerupBounceActive = true;
 
-      Game.PlayEffect("Electric", projs.Position);
+      Game.PlayEffect(EffectName.Electric, projs.Position);
       Game.PlaySound("ShellBounce", Vector2.Zero, 1);
       Game.PlaySound("ElectricSparks", Vector2.Zero, 1);
     }
@@ -75,7 +75,7 @@ public class Sphere : Powerup {
 
   private void Draw(Vector2 pos) {
     PointShape.Circle(v => {
-      Game.PlayEffect("GLM", Vector2Helper.Rotated(v - pos,
+      Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
           (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
         pos);
     }, pos, SPHERE_SIZE / 2, 45);

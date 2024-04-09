@@ -34,7 +34,7 @@ public class Thorns : Powerup {
   
   public override void TimeOut() {
     Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-    Game.PlayEffect("GIB", Player.GetWorldPosition());
+    Game.PlayEffect(EffectName.Gib, Player.GetWorldPosition());
   }
   
   public override void OnEnabled(bool enabled) {
@@ -51,12 +51,12 @@ public class Thorns : Powerup {
       attacker.DealDamage(arg.HitDamage * DMG_MULT); // Damage attacker
       
       // Effect
-      Game.PlayEffect("BLD", arg.HitPosition);
+      Game.PlayEffect(EffectName.Blood, arg.HitPosition);
       Game.PlaySound("MeleeHitSharp", Vector2.Zero);
     }
   }
   
   private static void Draw(Vector2 v) {
-    Game.PlayEffect("TR_B", v);
+    Game.PlayEffect(EffectName.BloodTrail, v);
   }
 }

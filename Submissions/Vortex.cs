@@ -100,7 +100,7 @@ public class Vortex : Powerup {
   // This cool effect was made by Danger Ross!
   private void Draw(Vector2 pos) {
     PointShape.Swirl(
-      (v => Game.PlayEffect("GLM",
+      (v => Game.PlayEffect(EffectName.ItemGleam,
         Vector2Helper.Rotated(v - pos,
           (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
         pos)),
