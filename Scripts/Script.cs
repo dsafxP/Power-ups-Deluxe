@@ -606,7 +606,7 @@ public static class Powerups {
       private const uint EFFECT_COOLDOWN = 50; // Cooldown between each effect
       private const float SPEED_MULT = 0.75f; // Moving while punching speed multiplier
       private const float BOUNCE_SPEED = 9;
-      private const float JUMP_ATTACK_SPEED = 1;
+      private const float JUMP_ATTACK_SPEED = 2;
 
       private static readonly VirtualKey[] _inputKeys = { // Keys that will trigger movement
         VirtualKey.AIM_RUN_LEFT,
