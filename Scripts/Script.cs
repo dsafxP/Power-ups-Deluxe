@@ -16,6 +16,11 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
   IObjectActivateTrigger caller = args.Caller as IObjectActivateTrigger;
   IPlayer sender = args.Sender as IPlayer;
+  
+  if (sender == null) { // Get
+    sender = Game.GetObjectsByArea < IPlayer > (caller.GetAABB())
+    .FirstOrDefault(p => !p.IsDead && p.IsInputEnabled && p.IsBot);
+  }
 
   Vector2 offset = new Vector2(0, 26);
 
@@ -81,42 +86,32 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 }
 
 public static class Powerups {
-  private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
   private static readonly Random _rng = new Random();
-  private static readonly List < IObject > _boxes = new List < IObject > ();
+  private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
 
   private static Events.ObjectCreatedCallback _objectCreatedCallback = null;
-  private static Events.ObjectTerminatedCallback _objectTerminateCallback = null;
 
   public static bool Enabled {
     get {
-      return _objectCreatedCallback != null && _objectTerminateCallback != null;
+      return _objectCreatedCallback != null;
     }
     set {
       if (value != Enabled)
-        if (value) {
+        if (value)
           _objectCreatedCallback = Events.ObjectCreatedCallback.Start(OnObjectCreated);
-          _objectTerminateCallback = Events.ObjectTerminatedCallback.Start(OnObjectTerminated);
-        } else {
+        else {
           _objectCreatedCallback.Stop();
 
           _objectCreatedCallback = null;
-
-          _objectTerminateCallback.Stop();
-
-          _objectTerminateCallback = null;
         }
     }
   }
 
   public static float SpawnChance = 15;
 
-  public static IObject CreatePowerupBox(Vector2 pos) {
+  public static SupplyBox CreatePowerupBox(Vector2 pos) {
     // Create box
     IObject box = Game.CreateObject("CardboardBox00", pos);
-
-    // Make box targetable by bots
-    box.SetTargetAIData(_boxTargetData);
 
     // Create helmet
     Vector2 helmOffset = new Vector2(2, -0.5f);
@@ -138,11 +133,19 @@ public static class Powerups {
 
     destroyTargets.AddObjectToDestroy(helm);
     destroyTargets.AddObjectToDestroy(weldJoint);
+    
+    // Bot support
+    box.SetTargetAIData(_boxTargetData);
 
-    // Add to list
-    _boxes.Add(box);
+    // Instance
+    SupplyBox supply = new SupplyBox(box) {
+      Effect = "ImpactDefault",
+      EffectCooldown = 300,
+      SlowFallMultiplier = 0.77f,
+      Destroyed = OnPowerupBoxDestroyed
+    };
 
-    return box;
+    return supply;
   }
 
   public static IObject CreatePowerupSyringe(Vector2 pos) {
@@ -181,35 +184,7 @@ public static class Powerups {
     syringe.SetTargetAIData(_boxTargetData);
 
     // Make pickupable for bots
-    Events.UpdateCallback updateCallback = null;
-
-    updateCallback = Events.UpdateCallback.Start((float dlt) => {
-      if (syringe == null) {
-        updateCallback.Stop();
-
-        return;
-      }
-
-      if (syringe.IsRemoved) {
-        updateCallback.Stop();
-
-        return;
-      }
-
-      // Play effect
-      Game.PlayEffect("GLM", syringe.GetWorldPosition() + offset);
-
-      // Get nearby bots
-      Area area = syringe.GetAABB();
-
-      area.SetDimensions(PICKUP_AREA, PICKUP_AREA);
-
-      IPlayer activator = Game.GetObjectsByArea < IPlayer > (area)
-        .FirstOrDefault(p => p.IsBot && !p.IsDead && p.IsInputEnabled);
-
-      if (activator != null) // Activate if bot found
-        OnPowerupSyringe(new TriggerArgs(activateTrigger, activator, false));
-    }, PICKUP_CHECK_COOLDOWN);
+    new ActivateTriggerBot(activateTrigger);
 
     return syringe;
   }
@@ -235,6 +210,12 @@ public static class Powerups {
 
     return randomType;
   }
+  
+  private static void OnPowerupBoxDestroyed(IObject destroyed) {
+    CreatePowerupSyringe(destroyed.GetWorldPosition());
+    
+    Game.PlaySound("DestroyWood", Vector2.Zero);
+  }
 
   private static void OnObjectCreated(IObject[] objs) {
     // Get random supply crates
@@ -245,16 +226,172 @@ public static class Powerups {
       supplyCrate.Remove();
     }
   }
+  
+  public class SupplyBox {
+    private const float RAYCAST_COOLDOWN = 300;
+    private const float ANGULAR = 0;
+    
+    private static readonly RayCastInput _collision = new RayCastInput(true) {
+      AbsorbProjectile = RayCastFilterMode.True,
+      BlockFire = RayCastFilterMode.True,
+      FilterOnMaskBits = true,
+      MaskBits = ushort.MaxValue
+    };
+    private static readonly Vector2 _rayCastOffset = new Vector2(0, -72);
+    
+    private Events.UpdateCallback _updateCallback = null;
+    private Events.ObjectTerminatedCallback _objTerminatedCallback = null;
+    
+    private float _elapsed = 0;
+    private bool _slowFall = true;
+    
+    public IObject Box;
+    
+    public string Effect = string.Empty;
+    public float EffectCooldown = 1000;
+    public float SlowFallMultiplier = 1;
+    
+    public bool Enabled {
+      get {
+        return _updateCallback != null && _objTerminatedCallback != null;
+      }
+      set {
+        if (value != Enabled)
+          if (value) {
+            _updateCallback = Events.UpdateCallback.Start(Update);
+            _objTerminatedCallback = Events.ObjectTerminatedCallback.Start(OnObjectTerminated);
+          } else {
+            _updateCallback.Stop();
 
-  private static void OnObjectTerminated(IObject[] objs) {
-    // Get powerup boxes
-    foreach(IObject box in objs
-      .Where(o => _boxes.Contains(o))) {
-      CreatePowerupSyringe(box.GetWorldPosition());
+            _updateCallback = null;
+            
+            _objTerminatedCallback.Stop();
+            
+            _objTerminatedCallback = null;
+          }
+      }
+    }
+    
+    public delegate void DestroyedCallback(IObject destroyed);
+    public DestroyedCallback Destroyed;
+    
+    public SupplyBox(IObject box) {
+      Box = box;
+      Enabled = true;
+    }
+    
+    private void Update(float dlt) {
+      if (Box == null) {
+        Enabled = false;
+        
+        return;
+      }
+      
+      if (Box.IsRemoved) {
+        Enabled = false;
+        
+        return;
+      }
+      
+      _elapsed += dlt;
+      
+      Vector2 vel = Box.GetLinearVelocity();
+      
+      if (_slowFall) {
+        if (vel.Y < 0) {
+          vel.Y *= SlowFallMultiplier;
+        
+          Box.SetLinearVelocity(vel);
+          
+          Box.SetAngle(ANGULAR);
+          Box.SetAngularVelocity(ANGULAR);
+        
+          if (_elapsed % EffectCooldown == 0)
+            Game.PlayEffect(Effect, Box.GetWorldPosition());
+        }
+        
+        if (_elapsed % RAYCAST_COOLDOWN == 0) {
+          Vector2 rayCastStart = Box.GetWorldPosition();
+          Vector2 rayCastEnd = rayCastStart + _rayCastOffset;
+          
+          Game.DrawLine(rayCastStart, rayCastEnd, Color.Yellow);
+          
+          RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _collision)[0];
+          
+          _slowFall = !result.Hit;
+        }
+      }
+    }
+    
+    private void OnObjectTerminated(IObject[] objs) {
+      if (objs.Any(o => o == Box)) {
+        Enabled = false;
+        
+        if (Destroyed != null)
+          Destroyed.Invoke(Box);
+      }
+    }
+  }
+  
+  public class ActivateTriggerBot {
+    private const uint UPDATE_DELAY = 50;
 
-      Game.PlaySound("DestroyWood", Vector2.Zero);
+    private List < IPlayer > _activators = new List < IPlayer > ();
+    private Events.UpdateCallback _updateCallback = null;
 
-      _boxes.Remove(box);
+    private IPlayer Activator {
+      get {
+        return Game.GetObjectsByArea < IPlayer > (Trigger.GetAABB())
+          .FirstOrDefault(p => p.IsBot && !p.IsDead && p.IsInputEnabled &&
+            !_activators.Contains(p) && (Trigger.GetUseType() == ActivateTriggerUseType.Individual || !_activators.Any()));
+      }
+    }
+
+    public IObjectActivateTrigger Trigger;
+
+    public bool Enabled {
+      get {
+        return _updateCallback != null;
+      }
+      set {
+        if (value != Enabled)
+          if (value)
+            _updateCallback = Events.UpdateCallback.Start(Update, UPDATE_DELAY);
+          else {
+            _updateCallback.Stop();
+
+            _updateCallback = null;
+          }
+      }
+    }
+
+    public ActivateTriggerBot(IObjectActivateTrigger trigger) {
+      Trigger = trigger;
+      Enabled = true;
+    }
+
+    private void Update(float delta) {
+      if (Trigger == null) {
+        Enabled = false;
+
+        return;
+      }
+
+      if (!Trigger.IsEnabled)
+        return;
+
+      IPlayer activator = Activator;
+
+      if (activator != null) {
+        Trigger.Trigger();
+
+        // List handling
+        _activators.Add(activator);
+
+        Events.UpdateCallback.Start(activatorRemovalElapsed => {
+          _activators.Remove(activator);
+        }, (uint) Trigger.GetCooldown(), 1);
+      }
     }
   }
 
@@ -263,8 +400,7 @@ public static class Powerups {
   /// </summary>
   public abstract class Powerup {
     // Interval for the main update callback event
-    private
-    const uint COOLDOWN = 0;
+    private const uint COOLDOWN = 0;
 
     // Main update callback event
     private Events.UpdateCallback _updateCallback = null;
