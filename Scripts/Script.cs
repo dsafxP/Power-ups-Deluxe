@@ -1162,7 +1162,10 @@ public static class Powerups {
         };
       }
 
-      private static void _OnPlayerHit(IPlayer hit, Vector2 pos) {
+      private void _OnPlayerHit(IPlayer hit, Vector2 pos) {
+        if (hit == Player)
+          return;
+
         hit.DealDamage(DMG);
 
         Game.PlayEffect(EffectName.Blood, pos);
@@ -1199,6 +1202,23 @@ public static class Powerups {
             ProjectileHit = RayCastFilterMode.True,
             AbsorbProjectile = RayCastFilterMode.True
         };
+
+        private IPlayer ClosestEnemy {
+          get {
+            List < IPlayer > enemies = Game.GetPlayers()
+              .Where(p => (p.GetTeam() != Player.GetTeam() ||
+                  p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
+                p != Player)
+              .ToList();
+
+            Vector2 playerPos = Player.GetWorldPosition();
+
+            enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
+              .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
+
+            return enemies.FirstOrDefault();
+          }
+        }
 
         private float _elapsed = 0;
         private Events.UpdateCallback _updateCallback = null;
@@ -1267,11 +1287,7 @@ public static class Powerups {
           if (OnShoot != null && CanFire) {
             _elapsed = Cooldown;
 
-            IPlayer closestPlayer = Game.GetPlayers()
-              .Where(p => p != Player && !p.IsDead &&
-                (p.GetTeam() != Player.GetTeam() || p.GetTeam() == PlayerTeam.Independent))
-              .OrderBy(p => Vector2.Distance(position, Player.GetWorldPosition()))
-              .FirstOrDefault();
+            IPlayer closestPlayer = ClosestEnemy;
 
             if (closestPlayer != null) {
               Vector2 closestTarget = closestPlayer.GetWorldPosition();
