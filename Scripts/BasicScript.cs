@@ -2,9 +2,9 @@ private static void PlayPowerupEffect(Vector2 pos) {
   Game.PlaySound("LogoSlam", pos, 1);
   Game.PlaySound("MuffledExplosion", pos, 1);
 
-  Game.PlayEffect("EXP", pos);
+  Game.PlayEffect(EffectName.Explosion, pos);
 
-  Game.PlayEffect("CAM_S", pos, 1f, 1000f, true);
+  Game.PlayEffect(EffectName.CameraShaker, pos, 1f, 1000f, true);
 }
 
 public static void OnPowerupSyringe(TriggerArgs args) {
@@ -12,7 +12,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
   IObjectActivateTrigger caller = args.Caller as IObjectActivateTrigger;
   IPlayer sender = args.Sender as IPlayer;
-  
+
   if (sender == null) { // Get
     sender = Game.GetObjectsByArea < IPlayer > (caller.GetAABB())
     .FirstOrDefault(p => !p.IsDead && p.IsInputEnabled && p.IsBot);
@@ -21,7 +21,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
   Vector2 offset = new Vector2(0, 26);
 
   if (sender.CurrentPowerupItem.WeaponItem == POWERUP_WEAPONITEM) {
-    Game.PlayEffect("CFTXT", sender.GetWorldPosition() + offset, "CAN'T PICKUP");
+    Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, "CAN'T PICKUP");
 
     return;
   }
@@ -32,7 +32,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
   sender.GiveWeaponItem(POWERUP_WEAPONITEM);
 
-  Game.PlayEffect("CFTXT", sender.GetWorldPosition() + offset, "POWER-UP BOOST");
+  Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, "POWER-UP BOOST");
 
   Events.PlayerWeaponRemovedActionCallback weaponRemovedActionCallback = null;
 
@@ -65,13 +65,10 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
           PlayPowerupEffect(sender.GetWorldPosition());
 
-          Game.PlayEffect("CFTXT", sender.GetWorldPosition() + offset, powerUp.Name);
+          Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, powerUp.Name);
 
-          if (POWERUP_WEAPONITEM == WeaponItem.STRENGTHBOOST)
-            sender.SetStrengthBoostTime(0);
-
-          if (POWERUP_WEAPONITEM == WeaponItem.SPEEDBOOST)
-            sender.SetSpeedBoostTime(0);
+          sender.SetStrengthBoostTime(0);
+          sender.SetSpeedBoostTime(0);
 
           weaponRemovedActionCallback.Stop();
 
@@ -129,7 +126,7 @@ public static class Powerups {
 
     destroyTargets.AddObjectToDestroy(helm);
     destroyTargets.AddObjectToDestroy(weldJoint);
-    
+
     // Bot support
     box.SetTargetAIData(_boxTargetData);
 
@@ -145,10 +142,6 @@ public static class Powerups {
   }
 
   public static IObject CreatePowerupSyringe(Vector2 pos) {
-    const uint PICKUP_CHECK_COOLDOWN = 500;
-    const float PICKUP_AREA = 25;
-    Vector2 offset = new Vector2(2, 3); // effect offset
-
     // Create syringe
     IObject syringe = Game.CreateObject("ItemStrengthBoostEmpty", pos);
 
@@ -206,10 +199,10 @@ public static class Powerups {
 
     return randomType;
   }
-  
+
   private static void OnPowerupBoxDestroyed(IObject destroyed) {
     CreatePowerupSyringe(destroyed.GetWorldPosition());
-    
+
     Game.PlaySound("DestroyWood", Vector2.Zero);
   }
 
@@ -222,11 +215,11 @@ public static class Powerups {
       supplyCrate.Remove();
     }
   }
-  
+
   public class SupplyBox {
     private const float RAYCAST_COOLDOWN = 300;
     private const float ANGULAR = 0;
-    
+
     private static readonly RayCastInput _collision = new RayCastInput(true) {
       AbsorbProjectile = RayCastFilterMode.True,
       BlockFire = RayCastFilterMode.True,
@@ -234,19 +227,19 @@ public static class Powerups {
       MaskBits = ushort.MaxValue
     };
     private static readonly Vector2 _rayCastOffset = new Vector2(0, -64);
-    
+
     private Events.UpdateCallback _updateCallback = null;
     private Events.ObjectTerminatedCallback _objTerminatedCallback = null;
-    
+
     private float _elapsed = 0;
     private bool _slowFall = true;
-    
+
     public IObject Box;
-    
+
     public string Effect = string.Empty;
     public float EffectCooldown = 1000;
     public float SlowFallMultiplier = 1;
-    
+
     public bool Enabled {
       get {
         return _updateCallback != null && _objTerminatedCallback != null;
@@ -260,77 +253,77 @@ public static class Powerups {
             _updateCallback.Stop();
 
             _updateCallback = null;
-            
+
             _objTerminatedCallback.Stop();
-            
+
             _objTerminatedCallback = null;
           }
       }
     }
-    
+
     public delegate void DestroyedCallback(IObject destroyed);
     public DestroyedCallback Destroyed;
-    
+
     public SupplyBox(IObject box) {
       Box = box;
       Enabled = true;
     }
-    
+
     private void Update(float dlt) {
       if (Box == null) {
         Enabled = false;
-        
+
         return;
       }
-      
+
       if (Box.IsRemoved) {
         Enabled = false;
-        
+
         return;
       }
-      
+
       _elapsed += dlt;
-      
+
       Vector2 vel = Box.GetLinearVelocity();
-      
+
       if (_slowFall) {
         if (vel.Y < 0) {
           vel.Y *= SlowFallMultiplier;
-        
+
           Box.SetLinearVelocity(vel);
-          
+
           Box.SetAngle(ANGULAR);
           Box.SetAngularVelocity(ANGULAR);
-          
+
           Box.SetHealth(Box.GetMaxHealth());
-        
+
           if (_elapsed % EffectCooldown == 0)
             Game.PlayEffect(Effect, Box.GetWorldPosition());
         }
-        
+
         if (_elapsed % RAYCAST_COOLDOWN == 0) {
           Vector2 rayCastStart = Box.GetWorldPosition();
           Vector2 rayCastEnd = rayCastStart + _rayCastOffset;
-          
+
           Game.DrawLine(rayCastStart, rayCastEnd, Color.Yellow);
-          
+
           RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _collision)[0];
-          
+
           _slowFall = !result.Hit;
         }
       }
     }
-    
+
     private void OnObjectTerminated(IObject[] objs) {
       if (objs.Any(o => o == Box)) {
         Enabled = false;
-        
+
         if (Destroyed != null)
           Destroyed.Invoke(Box);
       }
     }
   }
-  
+
   public class ActivateTriggerBot {
     private const uint UPDATE_DELAY = 50;
 
