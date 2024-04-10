@@ -15,7 +15,7 @@ public class FireBreath : Powerup {
   private static readonly Vector2 _fireOffset = new Vector2(8, 0);
 
   private static readonly Vector2 _rayCastEndOffset = new Vector2(48, 8);
-  private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 8);
+  private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 4);
 
   private static readonly Type[] _types = {
     typeof (IPlayer)
@@ -25,18 +25,30 @@ public class FireBreath : Powerup {
     Types = _types
   };
 
+  private Vector2 RayCastEndOffset {
+    get {
+      Vector2 v = _rayCastEndOffset;
+      v.X *= Player.FacingDirection;
+
+      return v;
+    }
+  }
+
+  private Vector2 RayCastStartOffset {
+    get {
+      Vector2 v = _rayCastStartOffset;
+      v.X *= Player.FacingDirection;
+
+      return v;
+    }
+  }
+
   private bool EnemiesInRange {
     get {
       Vector2 playerPos = Player.GetWorldPosition();
 
-      Vector2 rayCastStartOffset = _rayCastStartOffset;
-      rayCastStartOffset.X *= Player.FacingDirection;
-
-      Vector2 rayCastEndOffset = _rayCastEndOffset;
-      rayCastEndOffset.X *= Player.FacingDirection;
-
-      Vector2 rayCastStart = playerPos + rayCastStartOffset;
-      Vector2 rayCastEnd = playerPos + rayCastEndOffset;
+      Vector2 rayCastStart = playerPos + RayCastStartOffset;
+      Vector2 rayCastEnd = playerPos + RayCastEndOffset;
 
       Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
 
