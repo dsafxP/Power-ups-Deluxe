@@ -1159,7 +1159,8 @@ public static class Powerups {
         if (hit == Player)
           return;
 
-        hit.DealDamage(DMG);
+        hit.DealDamage(DMG * hit.GetModifiers()
+          .ProjectileDamageTakenModifier);
 
         Game.PlayEffect(EffectName.Blood, pos);
         Game.PlaySound("ImpactFlesh", Vector2.Zero);
