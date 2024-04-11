@@ -327,7 +327,7 @@ public static class Powerups {
   public class ActivateTriggerBot {
     private const uint UPDATE_DELAY = 50;
 
-    private List < IPlayer > _activators = new List < IPlayer > ();
+    private readonly List < IPlayer > _activators = new List < IPlayer > ();
     private Events.UpdateCallback _updateCallback = null;
 
     private IPlayer Activator {
