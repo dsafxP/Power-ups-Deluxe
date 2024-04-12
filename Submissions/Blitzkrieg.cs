@@ -1,3 +1,5 @@
+private static readonly Random _rng = new Random();
+
 // BLITZKRIEG - dsafxP
 public class Blitzkrieg : Powerup {
   private const float ATTACK_COOLDOWN = 250;
@@ -16,6 +18,7 @@ public class Blitzkrieg : Powerup {
     "WpnMineThrown"
   };
 
+  private readonly List < IObject > _explosives = new List < IObject > ();
   private PlayerModifiers _modifiers;
 
   private static string RandomThrowableID {
@@ -52,6 +55,14 @@ public class Blitzkrieg : Powerup {
       return "dsafxP";
     }
   }
+  
+  public IObject[] Explosives {
+    get {
+      _explosives.RemoveAll(item => item == null || item.IsRemoved);
+      
+      return _explosives.ToArray();
+    }
+  }
 
   public Blitzkrieg(IPlayer player) : base(player) {
     Time = 19000; // 19 s
@@ -74,10 +85,22 @@ public class Blitzkrieg : Powerup {
       Throw(true);
     }
   }
+  
+  public override void TimeOut() {
+    Game.PlaySound("C4Detonate", Vector2.Zero);
+  }
 
   public override void OnEnabled(bool enabled) {
-    if (!enabled)
+    if (!enabled) {
       Player.SetModifiers(_modifiers);
+      
+      foreach(IObject exp in Explosives) {
+        Game.PlayEffect(EffectName.DestroyDefault, exp.GetWorldPosition());
+        Game.PlaySound("DestroyDefault", Vector2.Zero);
+        
+        exp.Remove();
+      }
+    }
   }
 
   private IObject Throw(bool missile = false) {
@@ -97,6 +120,8 @@ public class Blitzkrieg : Powerup {
 
     Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero, thrown.UniqueID,
       EffectName.ItemGleam, 2f);
+      
+    _explosives.Add(thrown);
 
     return thrown;
   }

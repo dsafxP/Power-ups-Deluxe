@@ -50,8 +50,8 @@ public class SuperDove : Powerup {
     }
   }
 
+  private readonly List < IObject > _eggs = new List < IObject > ();
   private IDialogue _dialog;
-  private List < IObject > _eggs = new List < IObject > ();
 
   public IObject Dove {
     get;
@@ -60,6 +60,8 @@ public class SuperDove : Powerup {
 
   public IObject[] Eggs {
     get {
+      _eggs.RemoveAll(item => item == null || item.IsRemoved);
+      
       return _eggs.ToArray();
     }
   }
