@@ -2906,6 +2906,8 @@ public class CustomProjectile {
 
   private Events.UpdateCallback _updateCallback = null;
 
+  private float _distanceTravelled = 0;
+
   /// <summary>
   /// Indicates whether the projectile pierces through objects or not.
   /// </summary>
@@ -2920,6 +2922,11 @@ public class CustomProjectile {
   /// Speed of the projectile.
   /// </summary>
   public float Speed = 1;
+
+  /// <summary>
+  /// The maximum distance the projectile can travel before being disabled.
+  /// </summary>
+  public float MaxDistanceTravelled = 1000;
 
   /// <summary>
   /// Effect to be played on movement.
@@ -2997,6 +3004,20 @@ public class CustomProjectile {
   }
 
   /// <summary>
+  /// The distance that the projectile has travelled.
+  /// </summary>
+  public float DistanceTravelled {
+    get {
+      return _distanceTravelled;
+    }
+    set {
+      _distanceTravelled = value;
+
+      Enabled = value <= MaxDistanceTravelled;
+    }
+  }
+
+  /// <summary>
   /// Delegate for handling when the projectile hits a player.
   /// </summary>
   /// <param name="hitPlayer">The player hit by the projectile.</param>
@@ -3026,7 +3047,11 @@ public class CustomProjectile {
   }
 
   private void Update(float dlt) {
-    _position += Velocity;
+    Vector2 vel = Velocity;
+
+    DistanceTravelled += vel.Length();
+
+    _position += vel;
 
     Game.DrawLine(_subPosition, Position, Color.Yellow);
 
@@ -3047,8 +3072,7 @@ public class CustomProjectile {
       if (!checkedResult.IsPlayer && OnObjectHit != null)
         OnObjectHit.Invoke(checkedResult.HitObject, checkedResult.Position);
 
-      if (!Piercing && !dodged || !checkedResult.IsPlayer && !checkedResult.HitObject.Destructable)
-        Enabled = false;
+      Enabled = !(!Piercing && !dodged || !checkedResult.IsPlayer && !checkedResult.HitObject.Destructable);
     }
 
     Game.PlayEffect(Effect, _subPosition);
@@ -3057,7 +3081,7 @@ public class CustomProjectile {
 
     Trail(Draw, _subPosition, trailEnd, 5);
 
-    _subPosition += Velocity;
+    _subPosition += vel;
   }
 
   private void Draw(Vector2 pos) {
