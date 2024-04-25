@@ -3,18 +3,13 @@ public class Adrenaline : Powerup {
   private const uint EFFECT_COOLDOWN = 50; // Cooldown between each effect
   private const float SPEED_MULT = 0.75f; // Moving while punching speed multiplier
   private const float BOUNCE_SPEED = 9;
-  private const float JUMP_ATTACK_SPEED = 2;
+  
+  private static readonly Vector2 _jumpAttackSpeed = new Vector2(0, 2);
 
   private static readonly VirtualKey[] _inputKeys = { // Keys that will trigger movement
     VirtualKey.AIM_RUN_LEFT,
     VirtualKey.AIM_RUN_RIGHT
   };
-  
-  private Vector2 JumpAttackSpeed {
-    get {
-      return new Vector2(0, JUMP_ATTACK_SPEED);
-    }
-  }
   
   private bool PlayerValid {
     get {
@@ -64,8 +59,8 @@ public class Adrenaline : Powerup {
     
     // Jump attack spam
     if ((Player.IsJumpAttacking || Player.IsJumpKicking) && 
-    Player.GetLinearVelocity().Y > JUMP_ATTACK_SPEED)
-      Player.SetLinearVelocity(JumpAttackSpeed);
+    Player.GetLinearVelocity().Y > _jumpAttackSpeed.Y)
+      Player.SetLinearVelocity(_jumpAttackSpeed);
 
     // Play effect
     if (Time % EFFECT_COOLDOWN == 0)
