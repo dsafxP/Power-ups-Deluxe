@@ -84,7 +84,7 @@ public class StoneSkin : Powerup {
     }
   }
 
-  public static IProfile ColorProfile(IProfile pr, string col, string colI) {
+  private static IProfile ColorProfile(IProfile pr, string col, string colI) {
     if (pr.Accesory != null)
       pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
 
