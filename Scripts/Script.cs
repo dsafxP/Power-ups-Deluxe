@@ -61,6 +61,9 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
           weaponRemovedActionCallback = null;
         } else { // Powerup item used
+          sender.SetStrengthBoostTime(0);
+          sender.SetSpeedBoostTime(0);
+
           Type powerUpType = Powerups.GetRandomPowerupType();
 
           Powerups.Powerup powerUp = (Powerups.Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
@@ -70,9 +73,6 @@ public static void OnPowerupSyringe(TriggerArgs args) {
           PlayPowerupEffect(sender.GetWorldPosition());
 
           Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, powerUp.Name);
-
-          sender.SetStrengthBoostTime(0);
-          sender.SetSpeedBoostTime(0);
 
           weaponRemovedActionCallback.Stop();
 
@@ -1353,7 +1353,7 @@ public static class Powerups {
       public IObject[] Eggs {
         get {
           _eggs.RemoveAll(item => item == null || item.IsRemoved);
-          
+
           return _eggs.ToArray();
         }
       }
@@ -2498,7 +2498,7 @@ public static class Powerups {
         return thrown;
       }
     }
-    
+
     // STARRED - Tomo
     public class Star : Powerup {
       public const float EFFECT_COOLDOWN = 50;
@@ -2662,7 +2662,7 @@ public static class Powerups {
         return pr;
       }
     }
-    
+
     // OVERHEAL - Danila015
     public class Overheal : Powerup {
       private const float REGEN_COOLDOWN = 100;
@@ -2756,7 +2756,7 @@ public static class Powerups {
         Game.PlayEffect(EffectName.Blood, v);
       }
     }
-    
+
     // BERSERK - Danila015
     public class Berserk : Powerup {
       private const float EFFECT_COOLDOWN = 100;
@@ -2834,7 +2834,7 @@ public static class Powerups {
         Game.PlayEffect(EffectName.WoodParticles, v);
       }
     }
-    
+
     // KAMIKAZE - Danila015
     public class Kamikaze : Powerup {
       private const float EFFECT_COOLDOWN = 500;
@@ -2905,7 +2905,7 @@ public static class Powerups {
         Player.SetLinearVelocity(Vector2.Zero);
       }
     }
-    
+
     // PUNCHBACK - dsafxP
     public class Punchback : Powerup {
       private const string TXT_EFFECT = "BULLETS LEFT: {0}"; // 0 for bullets left

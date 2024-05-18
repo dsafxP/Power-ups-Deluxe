@@ -57,6 +57,9 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
           weaponRemovedActionCallback = null;
         } else { // Powerup item used
+          sender.SetStrengthBoostTime(0);
+          sender.SetSpeedBoostTime(0);
+
           Type powerUpType = Powerups.GetRandomPowerupType();
 
           Powerups.Powerup powerUp = (Powerups.Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
@@ -66,9 +69,6 @@ public static void OnPowerupSyringe(TriggerArgs args) {
           PlayPowerupEffect(sender.GetWorldPosition());
 
           Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, powerUp.Name);
-
-          sender.SetStrengthBoostTime(0);
-          sender.SetSpeedBoostTime(0);
 
           weaponRemovedActionCallback.Stop();
 
@@ -221,7 +221,7 @@ public static class Powerups {
     private const float ANGULAR = 0;
 
     private static readonly RayCastInput _collision = new RayCastInput(true) {
-      AbsorbProjectile = RayCastFilterMode.True,
+      ProjectileHit = RayCastFilterMode.True,
       BlockFire = RayCastFilterMode.True,
       FilterOnMaskBits = true,
       MaskBits = ushort.MaxValue
