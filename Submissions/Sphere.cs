@@ -1,7 +1,10 @@
 // SPHERE - dsafxP
 public class Sphere : Powerup {
   private const uint EFFECT_COOLDOWN = 50;
+  private const float EFFECT_SEPARATION = 45;
   private const float SPHERE_SIZE = 100;
+  
+  private const float SPHERE_RADIUS = SPHERE_SIZE / 2;
 
   private Area SphereArea {
     get {
@@ -78,7 +81,7 @@ public class Sphere : Powerup {
       Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
           (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
         pos);
-    }, pos, SPHERE_SIZE / 2, 45);
+    }, pos, SPHERE_RADIUS, EFFECT_SEPARATION);
   }
 
   private PlayerTeam GetTeamOrDefault(IPlayer player,

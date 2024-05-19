@@ -790,7 +790,10 @@ public static class Powerups {
     // SPHERE - dsafxP
     public class Sphere : Powerup {
       private const uint EFFECT_COOLDOWN = 50;
+      private const float EFFECT_SEPARATION = 45;
       private const float SPHERE_SIZE = 100;
+
+      private const float SPHERE_RADIUS = SPHERE_SIZE / 2;
 
       private Area SphereArea {
         get {
@@ -805,19 +808,19 @@ public static class Powerups {
       private IProjectile[] ProjectilesInSphere {
         get {
           return Game.GetProjectiles()
-          .Where(pr => SphereArea.Contains(pr.Position) && pr.InitialOwnerPlayerID != Player.UniqueID &&
-          (GetTeamOrDefault(Game.GetPlayer(pr.InitialOwnerPlayerID)) != Player.GetTeam() ||
-          Player.GetTeam() == PlayerTeam.Independent)
-          && !pr.PowerupBounceActive)
-          .ToArray();
+            .Where(pr => SphereArea.Contains(pr.Position) && pr.InitialOwnerPlayerID != Player.UniqueID &&
+              (GetTeamOrDefault(Game.GetPlayer(pr.InitialOwnerPlayerID)) != Player.GetTeam() ||
+                Player.GetTeam() == PlayerTeam.Independent) &&
+              !pr.PowerupBounceActive)
+            .ToArray();
         }
       }
 
       private IObject[] MissilesInSphere {
         get {
           return Game.GetObjectsByArea(SphereArea)
-          .Where(o => o.IsMissile)
-          .ToArray();
+            .Where(o => o.IsMissile)
+            .ToArray();
         }
       }
 
@@ -865,13 +868,13 @@ public static class Powerups {
       private void Draw(Vector2 pos) {
         PointShape.Circle(v => {
           Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
-                   (float)(Time % 1500 * (MathHelper.TwoPI / 1500)))
-                   + pos);
-        }, pos, SPHERE_SIZE / 2, 45);
+              (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+            pos);
+        }, pos, SPHERE_RADIUS, EFFECT_SEPARATION);
       }
 
       private PlayerTeam GetTeamOrDefault(IPlayer player,
-      PlayerTeam defaultTeam = PlayerTeam.Independent) {
+        PlayerTeam defaultTeam = PlayerTeam.Independent) {
         return player != null ? player.GetTeam() : defaultTeam;
       }
     }
@@ -3085,7 +3088,7 @@ public static class Powerups {
         }
       }
 
-      public Magnet(IPlayer player): base(player) {
+      public Magnet(IPlayer player) : base(player) {
         Time = 31000; // 31 s
       }
 
