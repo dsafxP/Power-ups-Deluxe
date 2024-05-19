@@ -3039,7 +3039,8 @@ public static class Powerups {
         "WpnGrenadesThrown",
         "WpnMolotovsThrown",
         "WpnC4Thrown",
-        "WpnMineThrown"
+        "WpnMineThrown",
+        "WpnShurikenThrown"
       };
 
       private Area MagnetArea {

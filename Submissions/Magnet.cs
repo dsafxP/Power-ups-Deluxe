@@ -18,7 +18,8 @@ public class Magnet : Powerup {
     "WpnGrenadesThrown",
     "WpnMolotovsThrown",
     "WpnC4Thrown",
-    "WpnMineThrown"
+    "WpnMineThrown",
+    "WpnShurikenThrown"
   };
 
   private Area MagnetArea {
