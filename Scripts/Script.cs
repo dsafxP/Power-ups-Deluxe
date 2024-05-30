@@ -1,5 +1,88 @@
-public void AfterStartup() {
+public void OnStartup() {
   Powerups.Enabled = true;
+  
+  Events.UserMessageCallback.Start(HandleCommand);
+  
+  Config.Update();
+}
+
+public void HandleCommand(UserMessageCallbackArgs args) {
+  IUser user = args.User;
+  
+  if (!args.IsCommand)
+    return;
+  
+  switch(args.Command) {
+    case "PD_CRATE_CHANCE": {
+      if (!user.IsModerator && !user.IsHost) {
+        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
+        Color.Red, user.UserIdentifier);
+    
+        break;
+      }
+      
+      float crateChance;
+      
+      if (float.TryParse(args.CommandArguments.Trim(), out crateChance)) {
+        Config.SpecialCrateChance = crateChance;
+        
+        Game.ShowChatMessage(string.Format("Set special crate chance to {0}.", Config.SpecialCrateChance), 
+        Color.Green, user.UserIdentifier);
+      } else {
+        Game.ShowChatMessage("Specify a valid number.", 
+        Color.Red, user.UserIdentifier);
+      }
+    }
+    break;
+    
+    case "PD_POWERUP": {
+      if (!user.IsModerator && !user.IsHost) {
+        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
+        Color.Red, user.UserIdentifier);
+    
+        break;
+      }
+      
+      IUser target = GetUser(args.CommandArguments.Trim());
+      IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
+      
+      if (targetPlayer != null) {
+        OnPowerupSyringe(new TriggerArgs(null, targetPlayer, false));
+      }
+    }
+    break;
+  }
+}
+
+public static class Config {
+  private const string SPECIAL_CRATE_KEY = "SpecialCrateChance";
+  
+  public static float SpecialCrateChance {
+    get {
+      return Powerups.SpawnChance;
+    }
+    set {
+      float val = MathHelper.Clamp(value, 0, 100);
+      Powerups.SpawnChance = val;
+      
+      Game.LocalStorage.SetItem(SPECIAL_CRATE_KEY, val);
+    }
+  }
+  
+  public static void Update() {
+    float specialCrateChance;
+    
+    if (Game.LocalStorage.TryGetItemFloat(SPECIAL_CRATE_KEY, out specialCrateChance)) {
+      Powerups.SpawnChance = specialCrateChance;
+    }
+  }
+}
+
+public IUser GetUser(string arg) {
+  return string.IsNullOrEmpty(arg) ? null :
+  Game.GetActiveUsers()
+  .FirstOrDefault(u => u.AccountName == arg || u.Name == arg || 
+  (arg.All(char.IsDigit) ? u.GameSlotIndex == int.Parse(arg) : false));
 }
 
 private static void PlayPowerupEffect(Vector2 pos) {
@@ -31,8 +114,10 @@ public static void OnPowerupSyringe(TriggerArgs args) {
   }
 
   // Remove syringe
-  caller.GetHighlightObject()
+  if (caller != null) {
+    caller.GetHighlightObject()
     .Remove();
+  }
 
   sender.GiveWeaponItem(POWERUP_WEAPONITEM);
 
@@ -225,7 +310,7 @@ public static class Powerups {
     private const float ANGULAR = 0;
 
     private static readonly RayCastInput _collision = new RayCastInput(true) {
-      AbsorbProjectile = RayCastFilterMode.True,
+      ProjectileHit = RayCastFilterMode.True,
       BlockFire = RayCastFilterMode.True,
       FilterOnMaskBits = true,
       MaskBits = ushort.MaxValue
