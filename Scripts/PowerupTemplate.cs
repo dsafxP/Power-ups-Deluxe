@@ -497,7 +497,7 @@ public static class Vector2Helper {
   /// <summary>
   /// Returns a unit vector rotated by the specified angle (in radians).
   /// </summary>
-  public static Vector2 FromAngle(Vector2 v, float angle) {
+  public static Vector2 FromAngle(float angle) {
     float sin = (float) Math.Sin(angle);
     float cos = (float) Math.Cos(angle);
 
