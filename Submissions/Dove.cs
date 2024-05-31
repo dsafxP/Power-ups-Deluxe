@@ -35,7 +35,7 @@ public class SuperDove : Powerup {
         
         if (closestEnemy != null) {
           vel = Vector2Helper.DirectionTo(Dove.GetWorldPosition(), 
-          ClosestEnemy.GetWorldPosition()) + Vector2Helper.Up;
+          closestEnemy.GetWorldPosition()) + Vector2Helper.Up;
         }
       } else {
         vel.X += Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : 0;

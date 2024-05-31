@@ -1420,7 +1420,7 @@ public static class Powerups {
 
             if (closestEnemy != null) {
               vel = Vector2Helper.DirectionTo(Dove.GetWorldPosition(),
-                ClosestEnemy.GetWorldPosition()) + Vector2Helper.Up;
+                closestEnemy.GetWorldPosition()) + Vector2Helper.Up;
             }
           } else {
             vel.X += Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : 0;
@@ -3240,8 +3240,11 @@ public static class Powerups {
     // TELEKINESIS - dsafxP
     public class Telekinesis : Powerup {
       private const float EFFECT_COOLDOWN = 50;
-      private const float FORCE = 5;
+      private const float VORTEX_FORCE = 5;
+      private const float THROW_FORCE = 9;
+      private const float BULLET_FORCE = 200;
       private const float LAUNCH_FORCE = 37;
+      private const float TRACK_THROW_SIZE = 30;
 
       private static readonly Vector2 _vortexOffset = new Vector2(0, 32);
       private static readonly Vector2 _rayCastEndOffset = new Vector2(56, -1);
@@ -3252,9 +3255,36 @@ public static class Powerups {
           ProjectileHit = RayCastFilterMode.True
       };
 
+      private readonly List < IObject > _thrown = new List < IObject > ();
+
       private Events.PlayerKeyInputCallback _keyCallback = null;
+      private Events.ObjectCreatedCallback _objectCreatedCallback = null;
 
       private IObject _sticky = null;
+
+      private Vector2 InputDirection {
+        get {
+          Vector2 vel = Vector2.Zero;
+
+          if (Player.IsBot) {
+            IPlayer closestEnemy = ClosestEnemy;
+
+            if (closestEnemy != null) {
+              vel = Vector2Helper.DirectionTo(Player.GetWorldPosition(),
+                closestEnemy.GetWorldPosition());
+            }
+          } else {
+            vel.X += Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : 0;
+            vel.X -= Player.KeyPressed(VirtualKey.AIM_RUN_LEFT) ? 1 : 0;
+
+            vel.Y += Player.KeyPressed(VirtualKey.AIM_CLIMB_UP) ||
+              Player.KeyPressed(VirtualKey.JUMP) ? 1 : 0;
+            vel.Y -= Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN) ? 1 : 0;
+          }
+
+          return vel;
+        }
+      }
 
       private Vector2 RayCastEndOffset {
         get {
@@ -3318,6 +3348,25 @@ public static class Powerups {
         }
       }
 
+      private Area TrackThrowArea {
+        get {
+          Area playerArea = Player.GetAABB();
+
+          playerArea.SetDimensions(TRACK_THROW_SIZE, TRACK_THROW_SIZE);
+
+          return playerArea;
+        }
+      }
+
+      public IObject[] Thrown {
+        get {
+          _thrown.RemoveAll(item => item == null || item.IsRemoved ||
+            !item.IsMissile);
+
+          return _thrown.ToArray();
+        }
+      }
+
       public override string Name {
         get {
           return "TELEKINESIS";
@@ -3331,7 +3380,7 @@ public static class Powerups {
       }
 
       public Telekinesis(IPlayer player) : base(player) {
-        Time = 24000;
+        Time = 24000; // 24 s
       }
 
       protected override void Activate() {}
@@ -3341,12 +3390,26 @@ public static class Powerups {
           Vector2 pos = Player.GetWorldPosition() + _vortexOffset;
           Vector2 stickyPos = _sticky.GetWorldPosition();
 
-          _sticky.SetLinearVelocity(Vector2Helper.DirectionTo(stickyPos, pos) * FORCE);
+          _sticky.SetLinearVelocity(Vector2Helper.DirectionTo(stickyPos, pos) * VORTEX_FORCE);
 
           _sticky.SetAngularVelocity(1);
 
           if (Time % EFFECT_COOLDOWN == 0)
             Game.PlayEffect(EffectName.ImpactDefault, stickyPos);
+        }
+
+        Vector2 inputDirection = InputDirection;
+
+        foreach(IObject thrown in Thrown) {
+          thrown.SetLinearVelocity(inputDirection * THROW_FORCE);
+          thrown.SetAngularVelocity(THROW_FORCE);
+        }
+
+        foreach(IProjectile fired in Game.GetProjectiles()
+          .Where(p => p.OwnerPlayerID == Player.UniqueID)) {
+          fired.Direction = inputDirection;
+          fired.Velocity = inputDirection != Vector2.Zero ? inputDirection * BULLET_FORCE :
+            fired.Direction * BULLET_FORCE;
         }
       }
 
@@ -3357,9 +3420,13 @@ public static class Powerups {
       public override void OnEnabled(bool enabled) {
         if (enabled) {
           _keyCallback = Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
+          _objectCreatedCallback = Events.ObjectCreatedCallback.Start(OnObjectCreated);
         } else {
           _keyCallback.Stop();
           _keyCallback = null;
+
+          _objectCreatedCallback.Stop();
+          _objectCreatedCallback = null;
         }
       }
 
@@ -3394,6 +3461,12 @@ public static class Powerups {
             }
           }
         }
+      }
+
+      private void OnObjectCreated(IObject[] objs) {
+        _thrown.AddRange(objs
+          .Where(o => o.IsMissile && TrackThrowArea
+            .Intersects(o.GetAABB())));
       }
     }
   }
