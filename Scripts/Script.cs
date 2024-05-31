@@ -1728,127 +1728,133 @@ public static class Powerups {
       }
     }
 
-   // FIRE BREATH - Danila015
-   public class FireBreath : Powerup {
-     private const float EFFECT_COOLDOWN = 175;
-     private const float FIRE_RATE = 100;
-     private const float TIME_DECREASE = 250;
+    // FIRE BREATH - Danila015
+    public class FireBreath : Powerup {
+      private const float EFFECT_COOLDOWN = 175;
+      private const float FIRE_RATE = 100;
+      private const float TIME_DECREASE = 250;
 
-     private const float RANDOM_SPEED_EXP = 2;
-     private const float SPEED = 0.1f;
+      private const float RANDOM_SPEED_EXP = 2;
+      private const float SPEED = 0.1f;
 
-     private const FireNodeType FIRE_TYPE = FireNodeType.Flamethrower;
+      private const FireNodeType FIRE_TYPE = FireNodeType.Flamethrower;
 
-     private static readonly Vector2 _effectOffset = new Vector2(0, 8);
-     private static readonly Vector2 _fireOffset = new Vector2(8, 0);
+      private static readonly Vector2 _effectOffset = new Vector2(0, 8);
+      private static readonly Vector2 _fireOffset = new Vector2(8, 0);
 
-     private static readonly Vector2 _rayCastEndOffset = new Vector2(48, 8);
-     private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 4);
+      private static readonly Vector2 _rayCastEndOffset = new Vector2(48, 8);
+      private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 4);
 
-     private static readonly Type[] _types = {
-       typeof (IPlayer)
-     };
+      private static readonly Type[] _types = {
+        typeof (IPlayer)
+      };
 
-     private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
-       Types = _types
-     };
+      private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
+        Types = _types
+      };
 
-     private Vector2 RayCastEndOffset {
-       get {
-         Vector2 v = _rayCastEndOffset;
-         v.X *= Player.FacingDirection;
+      private Vector2 RayCastEndOffset {
+        get {
+          Vector2 v = _rayCastEndOffset;
+          v.X *= Player.FacingDirection;
 
-         return v;
-       }
-     }
+          return v;
+        }
+      }
 
-     private Vector2 RayCastStartOffset {
-       get {
-         Vector2 v = _rayCastStartOffset;
-         v.X *= Player.FacingDirection;
+      private Vector2 RayCastStartOffset {
+        get {
+          Vector2 v = _rayCastStartOffset;
+          v.X *= Player.FacingDirection;
 
-         return v;
-       }
-     }
+          return v;
+        }
+      }
 
-     private bool EnemiesInRange {
-       get {
-         Vector2 playerPos = Player.GetWorldPosition();
+      private RayCastResult RayCast {
+        get {
+          Vector2 playerPos = Player.GetWorldPosition();
 
-         Vector2 rayCastStart = playerPos + RayCastStartOffset;
-         Vector2 rayCastEnd = playerPos + RayCastEndOffset;
+          Vector2 rayCastStart = playerPos + RayCastStartOffset;
+          Vector2 rayCastEnd = playerPos + RayCastEndOffset;
 
-         Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
+          Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
 
-         RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+          return Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+        }
+      }
 
-         if (result.IsPlayer) {
-           IPlayer hit = (IPlayer) result.HitObject;
+      private bool EnemiesInRange {
+        get {
+          RayCastResult result = RayCast;
 
-           return (hit.GetTeam() == PlayerTeam.Independent || hit.GetTeam() != Player.GetTeam()) &&
-             !hit.IsDead;
-         }
+          if (result.IsPlayer) {
+            IPlayer hit = (IPlayer) result.HitObject;
 
-         return false;
-       }
-     }
+            return (hit.GetTeam() == PlayerTeam.Independent || hit.GetTeam() != Player.GetTeam()) &&
+              !hit.IsDead;
+          }
 
-     public override string Name {
-       get {
-         return "FIRE BREATH";
-       }
-     }
+          return false;
+        }
+      }
 
-     public override string Author {
-       get {
-         return "Danila015";
-       }
-     }
+      public override string Name {
+        get {
+          return "FIRE BREATH";
+        }
+      }
 
-     public FireBreath(IPlayer player) : base(player) {
-       Time = 25000; // 25 s
-     }
+      public override string Author {
+        get {
+          return "Danila015";
+        }
+      }
 
-     protected override void Activate() {}
+      public FireBreath(IPlayer player) : base(player) {
+        Time = 25000; // 25 s
+      }
 
-     public override void Update(float dlt, float dltSecs) {
-       if (Player.IsBurning) // Fire resistance
-         Player.ClearFire();
+      protected override void Activate() {}
 
-       if (Time % EFFECT_COOLDOWN == 0) // Effect
-         Game.PlayEffect(EffectName.FireTrail, Player.GetWorldPosition() + _effectOffset);
+      public override void Update(float dlt, float dltSecs) {
+        if (Player.IsBurning) // Fire resistance
+          Player.ClearFire();
 
-       if (Time % FIRE_RATE == 0) // Attack
-         if (EnemiesInRange) {
-           Time -= TIME_DECREASE; // Decrease time
+        if (Time % EFFECT_COOLDOWN == 0) // Effect
+          Game.PlayEffect(EffectName.FireTrail, Player.GetWorldPosition() + _effectOffset);
 
-           //Game.WriteToConsole(Time);
+        if (Time % FIRE_RATE == 0) // Attack
+          if (EnemiesInRange) {
+            Time -= TIME_DECREASE; // Decrease time
 
-           Game.PlaySound("Flamethrower", Vector2.Zero);
+            //Game.WriteToConsole(Time);
 
-           // Calculate offset
-           Vector2 fireOffset = _fireOffset;
-           fireOffset.X *= Player.FacingDirection;
+            Game.PlaySound("Flamethrower", Vector2.Zero);
 
-           Game.SpawnFireNode(Player.GetWorldPosition() + fireOffset,
-             GetRandomFireVelocity(_rng) * SPEED,
-             FIRE_TYPE);
-         }
-     }
+            // Calculate offset
+            Vector2 fireOffset = _fireOffset;
+            fireOffset.X *= Player.FacingDirection;
 
-     public override void TimeOut() {
-       // Play effects indicating expiration of powerup
-       Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-       Game.PlayEffect(EffectName.PlayerBurned, Player.GetWorldPosition());
-     }
+            Game.SpawnFireNode(Player.GetWorldPosition() + fireOffset,
+              GetRandomFireVelocity(_rng) * SPEED,
+              FIRE_TYPE);
+          }
+      }
 
-     private Vector2 GetRandomFireVelocity(Random random) {
-       float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
-       float y = _rayCastEndOffset.Y * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+      public override void TimeOut() {
+        // Play effects indicating expiration of powerup
+        Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+        Game.PlayEffect(EffectName.PlayerBurned, Player.GetWorldPosition());
+      }
 
-       return new Vector2(x, y);
-     }
-   }
+      private Vector2 GetRandomFireVelocity(Random random) {
+        float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+        float y = _rayCastEndOffset.Y * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+
+        return new Vector2(x, y);
+      }
+    }
 
     // MANA SHIELD - Danger Ross
     public class ManaShield : Powerup {
@@ -3238,8 +3244,8 @@ public static class Powerups {
       private const float LAUNCH_FORCE = 37;
 
       private static readonly Vector2 _vortexOffset = new Vector2(0, 32);
-      private static readonly Vector2 _rayCastEndOffset = new Vector2(56, 0);
-      private static readonly Vector2 _rayCastStartOffset = Vector2.Zero;
+      private static readonly Vector2 _rayCastEndOffset = new Vector2(56, -1);
+      private static readonly Vector2 _rayCastStartOffset = new Vector2(0, -1);
 
       private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
         AbsorbProjectile = RayCastFilterMode.Any,
@@ -3268,7 +3274,7 @@ public static class Powerups {
         }
       }
 
-      private IObject FrontObject {
+      private RayCastResult RayCast {
         get {
           Vector2 playerPos = Player.GetWorldPosition();
 
@@ -3277,7 +3283,13 @@ public static class Powerups {
 
           Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
 
-          RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+          return Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+        }
+      }
+
+      private IObject FrontObject {
+        get {
+          RayCastResult result = RayCast;
           IObject hit = result.HitObject;
 
           if (hit == null)

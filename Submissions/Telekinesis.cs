@@ -5,8 +5,8 @@ public class Telekinesis : Powerup {
   private const float LAUNCH_FORCE = 37;
 
   private static readonly Vector2 _vortexOffset = new Vector2(0, 32);
-  private static readonly Vector2 _rayCastEndOffset = new Vector2(56, 0);
-  private static readonly Vector2 _rayCastStartOffset = Vector2.Zero;
+  private static readonly Vector2 _rayCastEndOffset = new Vector2(56, -1);
+  private static readonly Vector2 _rayCastStartOffset = new Vector2(0, -1);
 
   private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
     AbsorbProjectile = RayCastFilterMode.Any,
@@ -34,8 +34,8 @@ public class Telekinesis : Powerup {
       return v;
     }
   }
-
-  private IObject FrontObject {
+  
+  private RayCastResult RayCast {
     get {
       Vector2 playerPos = Player.GetWorldPosition();
 
@@ -44,7 +44,13 @@ public class Telekinesis : Powerup {
 
       Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
 
-      RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+      return Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+    }
+  }
+
+  private IObject FrontObject {
+    get {
+      RayCastResult result = RayCast;
       IObject hit = result.HitObject;
 
       if (hit == null)

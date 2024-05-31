@@ -42,8 +42,8 @@ public class FireBreath : Powerup {
       return v;
     }
   }
-
-  private bool EnemiesInRange {
+  
+  private RayCastResult RayCast {
     get {
       Vector2 playerPos = Player.GetWorldPosition();
 
@@ -52,8 +52,14 @@ public class FireBreath : Powerup {
 
       Game.DrawLine(rayCastStart, rayCastEnd, Color.Red);
 
-      RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+      return Game.RayCast(rayCastStart, rayCastEnd, _rayCastInput)[0];
+    }
+  }
 
+  private bool EnemiesInRange {
+    get {
+      RayCastResult result = RayCast;
+      
       if (result.IsPlayer) {
         IPlayer hit = (IPlayer) result.HitObject;
 
