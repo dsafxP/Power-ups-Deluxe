@@ -1386,10 +1386,11 @@ public static class Powerups {
     public class SuperDove : Powerup {
       private const float SPEED = 5;
       private const float EGG_COOLDOWN = 400;
-      private const float EGG_DMG_MULT = 22;
+      private const float EGG_DMG_MULT = 23;
 
       private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
       private static readonly Vector2 _blockPosition = new Vector2(0, 4984);
+      private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
 
       private Events.PlayerDamageCallback _plyDamageCallback;
       private Events.ObjectDamageCallback _objDamageCallback;
@@ -1398,7 +1399,8 @@ public static class Powerups {
         get {
           List < IPlayer > enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
-              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead)
+                p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
+              p != Player)
             .ToList();
 
           Vector2 playerPos = Dove.GetWorldPosition();
@@ -1580,6 +1582,13 @@ public static class Powerups {
 
           if (Eggs.Contains(attacker)) {
             player.DealDamage(args.Damage * EGG_DMG_MULT);
+
+            player.SetInputEnabled(false);
+            player.AddCommand(_playerCommand);
+
+            Events.UpdateCallback.Start((float _dlt) => {
+              player.SetInputEnabled(true);
+            }, 1, 1);
 
             Game.PlayEffect(EffectName.CustomFloatText, attacker.GetWorldPosition(), "*BAM*");
 
