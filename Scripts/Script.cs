@@ -633,9 +633,6 @@ public static class Powerups {
       }
 
       public override void Update(float dlt, float dltSecs) {
-        // Apply modifier: FireDamageTakenModifier set to 0 to indicate immunity to fire damage
-        Player.SetModifiers(_fireMod);
-
         Player.SetMaxFire(); // Ensure player has maximum fire level while powerup is active
       }
 
@@ -647,6 +644,8 @@ public static class Powerups {
 
         _modifiers.CurrentHealth = -1;
         _modifiers.CurrentEnergy = -1;
+
+        Player.SetModifiers(_fireMod);
 
         if (Player.IsBot) {
           BotBehaviorSet botSet = Player.GetBotBehaviorSet();
