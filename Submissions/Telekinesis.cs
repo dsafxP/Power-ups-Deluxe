@@ -97,7 +97,8 @@ public class Telekinesis : Powerup {
     get {
       List < IPlayer > enemies = Game.GetPlayers()
         .Where(p => (p.GetTeam() != Player.GetTeam() ||
-          p.GetTeam() == PlayerTeam.Independent) && !p.IsDead && p != _sticky)
+          p.GetTeam() == PlayerTeam.Independent) && !p.IsDead && 
+          p != _sticky && p != Player)
         .ToList();
 
       Vector2 playerPos = Player.GetWorldPosition();

@@ -315,7 +315,7 @@ public static class Powerups {
       FilterOnMaskBits = true,
       MaskBits = ushort.MaxValue
     };
-    private static readonly Vector2 _rayCastOffset = new Vector2(0, -64);
+    private static readonly Vector2 _rayCastOffset = new Vector2(0, -48);
 
     private Events.UpdateCallback _updateCallback = null;
     private Events.ObjectTerminatedCallback _objTerminatedCallback = null;
@@ -3336,7 +3336,8 @@ public static class Powerups {
         get {
           List < IPlayer > enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
-              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead && p != _sticky)
+              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead && 
+              p != _sticky && p != Player)
             .ToList();
 
           Vector2 playerPos = Player.GetWorldPosition();

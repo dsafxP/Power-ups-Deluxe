@@ -315,7 +315,7 @@ public static class Powerups {
       FilterOnMaskBits = true,
       MaskBits = ushort.MaxValue
     };
-    private static readonly Vector2 _rayCastOffset = new Vector2(0, -64);
+    private static readonly Vector2 _rayCastOffset = new Vector2(0, -48);
 
     private Events.UpdateCallback _updateCallback = null;
     private Events.ObjectTerminatedCallback _objTerminatedCallback = null;
