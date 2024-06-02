@@ -399,6 +399,9 @@ public static class Powerups {
           RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _collision)[0];
 
           _slowFall = !result.Hit;
+          
+          if(!_slowFall)
+            Box.SetLinearVelocity(Vector2.Zero);
         }
       }
     }
