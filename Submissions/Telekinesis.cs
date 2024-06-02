@@ -142,7 +142,7 @@ public class Telekinesis : Powerup {
   }
 
   public Telekinesis(IPlayer player) : base(player) {
-    Time = 24000; // 24 s
+    Time = 27000; // 27 s
   }
 
   protected override void Activate() {}

@@ -61,7 +61,7 @@ public class GrabbyHands : Powerup {
   }
 
   public GrabbyHands(IPlayer player) : base(player) {
-    Time = 11000; // 11 s
+    Time = 14000; // 14 s
   }
 
   protected override void Activate() {}
