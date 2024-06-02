@@ -12,7 +12,7 @@ public class Kamikaze : Powerup {
   };
 
   private static readonly PlayerModifiers _explodeMod = new PlayerModifiers() {
-    ExplosionDamageTakenModifier = 0.125 f
+    ExplosionDamageTakenModifier = 0.125f
   };
 
   private PlayerModifiers _modifiers;
