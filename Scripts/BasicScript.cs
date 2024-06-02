@@ -13,6 +13,22 @@ public void HandleCommand(UserMessageCallbackArgs args) {
     return;
   
   switch(args.Command) {
+    case "PD_HELP": {
+      int uid = user.UserIdentifier;
+      
+      Game.ShowChatMessage("Available commands:", 
+      Color.Green, uid);
+      Game.ShowChatMessage("PD_HELP - Shows command help.", 
+      Color.Green, uid);
+      Game.ShowChatMessage("PD_CRATE_CHANCE <chance> - Sets the spawn chance of a power-up crate.", 
+      Color.Green, uid);
+      Game.ShowChatMessage("PD_POWERUP [player] - Gives a player a power-up syringe.", 
+      Color.Green, uid);
+      Game.ShowChatMessage("Required options are shown with <>, optional parameters are shown with [].", 
+      Color.Yellow, uid);
+    }
+    break;
+    
     case "PD_CRATE_CHANCE": {
       if (!user.IsModerator && !user.IsHost) {
         Game.ShowChatMessage("You don't have enough perms to execute this command.", 
@@ -48,6 +64,9 @@ public void HandleCommand(UserMessageCallbackArgs args) {
       
       if (targetPlayer != null) {
         OnPowerupSyringe(new TriggerArgs(null, targetPlayer, false));
+      } else {
+        Game.ShowChatMessage("Invalid player.", 
+        Color.Red, user.UserIdentifier);
       }
     }
     break;
