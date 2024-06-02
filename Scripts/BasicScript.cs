@@ -507,9 +507,6 @@ public static class Powerups {
     // Main update callback event
     private Events.UpdateCallback _updateCallback = null;
 
-    // Used for calculating delta time
-    private float _lastUpdate;
-
     public abstract string Name {
       get;
     }
@@ -553,7 +550,6 @@ public static class Powerups {
     /// <param name="player">The player associated with this power-up.</param>
     public Powerup(IPlayer player) {
       Player = player;
-      _lastUpdate = Game.TotalElapsedGameTime;
       Enabled = true;
       Activate();
     }
@@ -563,9 +559,6 @@ public static class Powerups {
     /// </summary>
     /// <param name="dlt">The time delta since the last update.</param>
     private void Update(float dlt) {
-      dlt = Game.TotalElapsedGameTime - _lastUpdate;
-      _lastUpdate = Game.TotalElapsedGameTime;
-
       // Check if the player is still valid
       if (Player == null) {
         Enabled = false;
