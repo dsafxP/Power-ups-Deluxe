@@ -1029,7 +1029,7 @@ public static class Powerups {
       }
 
       public RocketShoes(IPlayer player) : base(player) {
-        Time = 15000;
+        Time = 20000; // 20 s
       }
 
       protected override void Activate() {
