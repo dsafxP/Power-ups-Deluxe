@@ -27,14 +27,6 @@ public class Sphere : Powerup {
     }
   }
 
-  private IObject[] MissilesInSphere {
-    get {
-      return Game.GetObjectsByArea(SphereArea)
-        .Where(o => o.IsMissile)
-        .ToArray();
-    }
-  }
-
   public override string Name {
     get {
       return "SPHERE";

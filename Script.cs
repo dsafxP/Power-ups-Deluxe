@@ -1,3 +1,5 @@
+private static readonly Random _rng = new Random();
+
 public void OnStartup() {
   Powerups.Enabled = true;
   
@@ -106,7 +108,7 @@ public void HandleCommand(UserMessageCallbackArgs args) {
         IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
       
         if (targetPlayer != null) {
-          Powerups.Powerup powerUp = (Powerups.Powerup) Activator.CreateInstance(powerUpType, targetPlayer); 
+          Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, targetPlayer); 
           
           Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), 
           Color.Yellow, targetPlayer.UserIdentifier);
@@ -232,7 +234,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 
           Type powerUpType = Powerups.GetRandomPowerupType();
 
-          Powerups.Powerup powerUp = (Powerups.Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
+          Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
 
           Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), Color.Yellow, sender.UserIdentifier);
 
@@ -249,7 +251,6 @@ public static void OnPowerupSyringe(TriggerArgs args) {
 }
 
 public static class Powerups {
-  private static readonly Random _rng = new Random();
   private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
 
   private static Events.ObjectCreatedCallback _objectCreatedCallback = null;
@@ -559,129 +560,6 @@ public static class Powerups {
     }
   }
 
-  /// <summary>
-  /// Represents a base power-up that can be activated and updated over time.
-  /// </summary>
-  public abstract class Powerup {
-    // Interval for the main update callback event
-    private const uint COOLDOWN = 0;
-
-    // Main update callback event
-    private Events.UpdateCallback _updateCallback = null;
-
-    public abstract string Name {
-      get;
-    }
-
-    public abstract string Author {
-      get;
-    }
-
-    // Time left for the power-up to be active
-    public float Time = 1000;
-
-    // The player associated with this power-up
-    public IPlayer Player;
-
-    /// <summary>
-    /// Gets or sets whether the power-up is enabled.
-    /// </summary>
-    public bool Enabled {
-      get {
-        return _updateCallback != null;
-      }
-      set {
-        if (value != Enabled) {
-          if (value) {
-            _updateCallback = Events.UpdateCallback.Start(Update, COOLDOWN);
-
-            OnEnabled(true);
-          } else {
-            _updateCallback.Stop();
-            _updateCallback = null;
-
-            OnEnabled(false);
-          }
-        }
-      }
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Powerup"/> class.
-    /// </summary>
-    /// <param name="player">The player associated with this power-up.</param>
-    public Powerup(IPlayer player) {
-      Player = player;
-      Enabled = true;
-      Activate();
-    }
-
-    /// <summary>
-    /// Updates the power-up with the specified time delta.
-    /// </summary>
-    /// <param name="dlt">The time delta since the last update.</param>
-    private void Update(float dlt) {
-      // Check if the player is still valid
-      if (Player == null) {
-        Enabled = false;
-
-        return;
-      }
-
-      // Check if the player is dead or removed
-      if (Player.IsDead || Player.IsRemoved) {
-        Enabled = false;
-
-        return;
-      }
-
-      // Check if the power-up has timed out
-      if (Time <= 0) {
-        TimeOut();
-
-        Enabled = false;
-
-        return;
-      }
-
-      // Update the time left for the power-up
-      Time -= dlt;
-
-      // Invoke the virtual Update method
-      Update(dlt, dlt / 1000);
-    }
-
-    /// <summary>
-    /// Virtual method for actions upon activating the power-up.
-    /// </summary>
-    protected abstract void Activate();
-
-    /// <summary>
-    /// Virtual method for updating the power-up.
-    /// </summary>
-    /// <param name="dlt">The time delta since the last update.</param>
-    /// <param name="dltSecs">The time delta in seconds since the last
-    /// update.</param>
-    public virtual void Update(float dlt, float dltSecs) {
-      // Implement in derived classes
-    }
-
-    /// <summary>
-    /// Virtual method called when the power-up times out.
-    /// </summary>
-    public virtual void TimeOut() {
-      // Implement in derived classes
-    }
-
-    /// <summary>
-    /// Virtual method called when the power-up is enabled or disabled. Called by
-    /// the constructor.
-    /// </summary>
-    public virtual void OnEnabled(bool enabled) {
-      // Implement in derived classes
-    }
-  }
-
   public static class AvailablePowerups {
     // FLAME - dsafxP
     public class Flame : Powerup {
@@ -977,14 +855,6 @@ public static class Powerups {
         }
       }
 
-      private IObject[] MissilesInSphere {
-        get {
-          return Game.GetObjectsByArea(SphereArea)
-            .Where(o => o.IsMissile)
-            .ToArray();
-        }
-      }
-
       public override string Name {
         get {
           return "SPHERE";
@@ -1149,9 +1019,10 @@ public static class Powerups {
 
     // CLONE-O-MATIC - Ebomb09
     public class Clone : Powerup {
+      private readonly float _healthPerMilSec;
+      
       private IPlayer _clonePlayer;
       private float _accumulatedDamage = 0;
-      private float _healthPerMilSec;
 
       public override string Name {
         get {
@@ -1296,10 +1167,9 @@ public static class Powerups {
         _wisp = new Wisp(Player) {
           Offset = _offset,
             Effect = EffectName.Blood,
-            Cooldown = 750
+            Cooldown = 750,
+            OnShoot = Shoot
         };
-
-        _wisp.OnShoot = Shoot;
 
         Game.PlaySound("Flamethrower", Vector2.Zero);
       }
@@ -1954,12 +1824,9 @@ public static class Powerups {
       private const byte COLOR_G = 244;
       private const byte COLOR_B = 244;
 
-      private List < IObject > allItems = new List < IObject > ();
-
-      private IObjectText[] effects = new IObjectText[8];
-      private IObjectText[] damageEffect = new IObjectText[3];
-
-      private Events.CallbackDelegate[] handlers = new Events.CallbackDelegate[2];
+      private readonly List < IObject > allItems = new List < IObject > ();
+      private readonly IObjectText[] effects = new IObjectText[8];
+      private readonly Events.CallbackDelegate[] handlers = new Events.CallbackDelegate[2];
 
       private IObject bird;
 
@@ -2151,7 +2018,7 @@ public static class Powerups {
               Game.PlayEffect(EffectName.Sparks, projectile.Position);
 
               projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
-              projectile.Position = projectile.Position + (normal * 2);
+              projectile.Position += normal * 2;
 
               health -= (projectile.GetProperties().ObjectDamage * (float)(angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
 
@@ -2189,7 +2056,7 @@ public static class Powerups {
             if (modhp.CurrentHealth == 0)
               modhp.CurrentHealth = preservedHealth;
             else
-              modhp.CurrentHealth = modhp.CurrentHealth + args.Damage; //THIS DOESNT BLOCK ALL DAMAGE
+              modhp.CurrentHealth += args.Damage; //THIS DOESNT BLOCK ALL DAMAGE
             Player.SetModifiers(modhp);
             queueDisable = true;
           }
@@ -3720,6 +3587,129 @@ public static class Powerups {
         return w;
       }
     }
+  }
+}
+
+/// <summary>
+/// Represents a base power-up that can be activated and updated over time.
+/// </summary>
+public abstract class Powerup {
+  // Interval for the main update callback event
+  private const uint COOLDOWN = 0;
+
+  // Main update callback event
+  private Events.UpdateCallback _updateCallback = null;
+
+  public abstract string Name {
+    get;
+  }
+
+  public abstract string Author {
+    get;
+  }
+
+  // Time left for the power-up to be active
+  public float Time = 1000;
+
+  // The player associated with this power-up
+  public IPlayer Player;
+
+  /// <summary>
+  /// Gets or sets whether the power-up is enabled.
+  /// </summary>
+  public bool Enabled {
+    get {
+      return _updateCallback != null;
+    }
+    set {
+      if (value != Enabled) {
+        if (value) {
+          _updateCallback = Events.UpdateCallback.Start(Update, COOLDOWN);
+
+          OnEnabled(true);
+        } else {
+          _updateCallback.Stop();
+          _updateCallback = null;
+
+          OnEnabled(false);
+        }
+      }
+    }
+  }
+
+  /// <summary>
+  /// Initializes a new instance of the <see cref="Powerup"/> class.
+  /// </summary>
+  /// <param name="player">The player associated with this power-up.</param>
+  public Powerup(IPlayer player) {
+    Player = player;
+    Enabled = true;
+    Activate();
+  }
+
+  /// <summary>
+  /// Updates the power-up with the specified time delta.
+  /// </summary>
+  /// <param name="dlt">The time delta since the last update.</param>
+  private void Update(float dlt) {
+    // Check if the player is still valid
+    if (Player == null) {
+      Enabled = false;
+
+      return;
+    }
+
+    // Check if the player is dead or removed
+    if (Player.IsDead || Player.IsRemoved) {
+      Enabled = false;
+
+      return;
+    }
+
+    // Check if the power-up has timed out
+    if (Time <= 0) {
+      TimeOut();
+
+      Enabled = false;
+
+      return;
+    }
+
+    // Update the time left for the power-up
+    Time -= dlt;
+
+    // Invoke the virtual Update method
+    Update(dlt, dlt / 1000);
+  }
+
+  /// <summary>
+  /// Virtual method for actions upon activating the power-up.
+  /// </summary>
+  protected abstract void Activate();
+
+  /// <summary>
+  /// Virtual method for updating the power-up.
+  /// </summary>
+  /// <param name="dlt">The time delta since the last update.</param>
+  /// <param name="dltSecs">The time delta in seconds since the last
+  /// update.</param>
+  public virtual void Update(float dlt, float dltSecs) {
+    // Implement in derived classes
+  }
+
+  /// <summary>
+  /// Virtual method called when the power-up times out.
+  /// </summary>
+  public virtual void TimeOut() {
+    // Implement in derived classes
+  }
+
+  /// <summary>
+  /// Virtual method called when the power-up is enabled or disabled. Called by
+  /// the constructor.
+  /// </summary>
+  public virtual void OnEnabled(bool enabled) {
+    // Implement in derived classes
   }
 }
 

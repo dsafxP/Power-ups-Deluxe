@@ -12,12 +12,9 @@ public class ManaShield : Powerup {
   private const byte COLOR_G = 244;
   private const byte COLOR_B = 244;
 
-  private List < IObject > allItems = new List < IObject > ();
-
-  private IObjectText[] effects = new IObjectText[8];
-  private IObjectText[] damageEffect = new IObjectText[3];
-
-  private Events.CallbackDelegate[] handlers = new Events.CallbackDelegate[2];
+  private readonly List < IObject > allItems = new List < IObject > ();
+  private readonly IObjectText[] effects = new IObjectText[8];
+  private readonly Events.CallbackDelegate[] handlers = new Events.CallbackDelegate[2];
 
   private IObject bird;
 
@@ -209,7 +206,7 @@ public class ManaShield : Powerup {
           Game.PlayEffect(EffectName.Sparks, projectile.Position);
 
           projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
-          projectile.Position = projectile.Position + (normal * 2);
+          projectile.Position += normal * 2;
 
           health -= (projectile.GetProperties().ObjectDamage * (float)(angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
 
@@ -247,7 +244,7 @@ public class ManaShield : Powerup {
         if (modhp.CurrentHealth == 0)
           modhp.CurrentHealth = preservedHealth;
         else
-          modhp.CurrentHealth = modhp.CurrentHealth + args.Damage; //THIS DOESNT BLOCK ALL DAMAGE
+          modhp.CurrentHealth += args.Damage; //THIS DOESNT BLOCK ALL DAMAGE
         Player.SetModifiers(modhp);
         queueDisable = true;
       }

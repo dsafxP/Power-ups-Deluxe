@@ -1,8 +1,9 @@
 // CLONE-O-MATIC - Ebomb09
 public class Clone : Powerup {
+  private readonly float _healthPerMilSec;
+  
   private IPlayer _clonePlayer;
   private float _accumulatedDamage = 0;
-  private float _healthPerMilSec;
 
   public override string Name {
     get {

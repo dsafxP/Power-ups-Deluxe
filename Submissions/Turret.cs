@@ -34,10 +34,9 @@ public class Turret : Powerup {
     _wisp = new Wisp(Player) {
       Offset = _offset,
       Effect = EffectName.Blood,
-      Cooldown = 750
+      Cooldown = 750,
+      OnShoot = Shoot
     };
-
-    _wisp.OnShoot = Shoot;
 
     Game.PlaySound("Flamethrower", Vector2.Zero);
   }
