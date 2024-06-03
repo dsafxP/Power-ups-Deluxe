@@ -1,109 +1,115 @@
-// PUNCHBACK - dsafxP
-public class Punchback : Powerup {
-  private const string TXT_EFFECT = "BULLETS LEFT: {0}"; // 0 for bullets left
-  private const ProjectileItem PROJ_ITEM = ProjectileItem.PISTOL45;
-  private const ProjectilePowerup PROJ_POWERUP = ProjectilePowerup.Bouncing;
+using SFDGameScriptInterface;
 
-  private static readonly Vector2 _muzzleOffset = new Vector2(8, 4);
+namespace PowerupsDeluxe {
+  public partial class GameScript : GameScriptInterface {
+    // PUNCHBACK - dsafxP
+    public class Punchback : Powerup {
+      private const string TXT_EFFECT = "BULLETS LEFT: {0}"; // 0 for bullets left
+      private const ProjectileItem PROJ_ITEM = ProjectileItem.PISTOL45;
+      private const ProjectilePowerup PROJ_POWERUP = ProjectilePowerup.Bouncing;
 
-  private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
-  private Events.ProjectileHitCallback _projHitCallback = null;
+      private static readonly Vector2 _muzzleOffset = new Vector2(8, 4);
 
-  private ushort _bulletsAbsorbed = 0;
+      private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
+      private Events.ProjectileHitCallback _projHitCallback = null;
 
-  private Vector2 MuzzleOffset {
-    get {
-      Vector2 v = _muzzleOffset;
+      private ushort _bulletsAbsorbed = 0;
 
-      v.X *= Player.FacingDirection;
+      private Vector2 MuzzleOffset {
+        get {
+          Vector2 v = _muzzleOffset;
 
-      return v;
-    }
-  }
+          v.X *= Player.FacingDirection;
 
-  private IPlayer ClosestEnemy {
-    get {
-      List < IPlayer > enemies = Game.GetPlayers()
-        .Where(p => (p.GetTeam() != Player.GetTeam() ||
-            p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
-          p != Player)
-        .ToList();
+          return v;
+        }
+      }
 
-      Vector2 playerPos = Player.GetWorldPosition();
+      private IPlayer ClosestEnemy {
+        get {
+          List<IPlayer> enemies = Game.GetPlayers()
+            .Where(p => (p.GetTeam() != Player.GetTeam() ||
+                p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
+              p != Player)
+            .ToList();
 
-      enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
-        .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
+          Vector2 playerPos = Player.GetWorldPosition();
 
-      return enemies.FirstOrDefault();
-    }
-  }
+          enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
+            .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
 
-  public override string Name {
-    get {
-      return "PUNCHBACK";
-    }
-  }
+          return enemies.FirstOrDefault();
+        }
+      }
 
-  public override string Author {
-    get {
-      return "dsafxP";
-    }
-  }
+      public override string Name {
+        get {
+          return "PUNCHBACK";
+        }
+      }
 
-  public Punchback(IPlayer player) : base(player) {
-    Time = 25000; // 25 s
-  }
+      public override string Author {
+        get {
+          return "dsafxP";
+        }
+      }
 
-  protected override void Activate() {}
+      public Punchback(IPlayer player) : base(player) {
+        Time = 25000; // 25 s
+      }
 
-  public override void TimeOut() {
-    Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
-    Game.PlayEffect(EffectName.Sparks, Player.GetWorldPosition());
-  }
+      protected override void Activate() { }
 
-  public override void OnEnabled(bool enabled) {
-    if (enabled) {
-      _meleeActionCallback = Events.PlayerMeleeActionCallback.Start(OnPlayerMeleeAction);
-      _projHitCallback = Events.ProjectileHitCallback.Start(OnProjectileHit);
-    } else {
-      _meleeActionCallback.Stop();
-      _meleeActionCallback = null;
+      public override void TimeOut() {
+        Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
+        Game.PlayEffect(EffectName.Sparks, Player.GetWorldPosition());
+      }
 
-      _projHitCallback.Stop();
-      _projHitCallback = null;
-    }
-  }
+      public override void OnEnabled(bool enabled) {
+        if (enabled) {
+          _meleeActionCallback = Events.PlayerMeleeActionCallback.Start(OnPlayerMeleeAction);
+          _projHitCallback = Events.ProjectileHitCallback.Start(OnProjectileHit);
+        } else {
+          _meleeActionCallback.Stop();
+          _meleeActionCallback = null;
 
-  private void OnPlayerMeleeAction(IPlayer player, PlayerMeleeHitArg[] args) {
-    if (player != Player)
-      return;
+          _projHitCallback.Stop();
+          _projHitCallback = null;
+        }
+      }
 
-    IPlayer closestEnemy = ClosestEnemy;
+      private void OnPlayerMeleeAction(IPlayer player, PlayerMeleeHitArg[] args) {
+        if (player != Player)
+          return;
 
-    if (_bulletsAbsorbed > 0 && closestEnemy != null) {
-      _bulletsAbsorbed--;
+        IPlayer closestEnemy = ClosestEnemy;
 
-      Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
-        string.Format(TXT_EFFECT, _bulletsAbsorbed));
+        if (_bulletsAbsorbed > 0 && closestEnemy != null) {
+          _bulletsAbsorbed--;
 
-      Game.PlaySound("Pistol45", Vector2.Zero);
+          Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
+            string.Format(TXT_EFFECT, _bulletsAbsorbed));
 
-      Vector2 bulletPos = Player.GetWorldPosition() + MuzzleOffset;
+          Game.PlaySound("Pistol45", Vector2.Zero);
 
-      Game.SpawnProjectile(PROJ_ITEM, bulletPos,
-        Vector2Helper.DirectionTo(bulletPos, closestEnemy.GetWorldPosition()), PROJ_POWERUP);
-    }
-  }
+          Vector2 bulletPos = Player.GetWorldPosition() + MuzzleOffset;
 
-  private void OnProjectileHit(IProjectile projectile, ProjectileHitArgs args) {
-    if (args.HitObjectID == Player.UniqueID) {
-      _bulletsAbsorbed++;
+          Game.SpawnProjectile(PROJ_ITEM, bulletPos,
+            Vector2Helper.DirectionTo(bulletPos, closestEnemy.GetWorldPosition()), PROJ_POWERUP);
+        }
+      }
 
-      Player.SetHealth(Player.GetHealth() + args.Damage); // Heal
+      private void OnProjectileHit(IProjectile projectile, ProjectileHitArgs args) {
+        if (args.HitObjectID == Player.UniqueID) {
+          _bulletsAbsorbed++;
 
-      Game.PlayEffect(EffectName.Block, args.HitPosition);
+          Player.SetHealth(Player.GetHealth() + args.Damage); // Heal
 
-      Game.PlaySound("MeleeDrawMetal", Vector2.Zero);
+          Game.PlayEffect(EffectName.Block, args.HitPosition);
+
+          Game.PlaySound("MeleeDrawMetal", Vector2.Zero);
+        }
+      }
     }
   }
 }

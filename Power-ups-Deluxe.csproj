@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net4.6.2</TargetFramework>
+    <LangVersion>6</LangVersion>
+    <RootNamespace>PowerupsDeluxe</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="SFD.GameScriptInterface">
+      <HintPath>SFD.GameScriptInterface.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

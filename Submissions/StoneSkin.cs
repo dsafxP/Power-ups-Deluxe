@@ -1,114 +1,120 @@
-// STONE SKIN - Danila015
-public class StoneSkin : Powerup {
-  private const float HEAVY_EXP = 1.034f;
+using SFDGameScriptInterface;
 
-  private static readonly PlayerModifiers _stoneMod = new PlayerModifiers() {
-    ImpactDamageTakenModifier = 0,
-      ExplosionDamageTakenModifier = 0.25f,
-      ProjectileDamageTakenModifier = 0.25f,
-      ProjectileCritChanceTakenModifier = 0,
-      MeleeStunImmunity = 1,
-      MeleeDamageTakenModifier = 0.25f,
-      SprintSpeedModifier = 0.75f
-  };
+namespace PowerupsDeluxe {
+  public partial class GameScript : GameScriptInterface {
+    // STONE SKIN - Danila015
+    public class StoneSkin : Powerup {
+      private const float HEAVY_EXP = 1.034f;
 
-  private IProfile _profile;
-  private PlayerModifiers _modifiers;
-  
-  private IProfile StoneProfile {
-    get {
-      IProfile playerProfile = Player.GetProfile();
-    
-      playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}", 
-      playerProfile.Gender == Gender.Male ? string.Empty : "_fem"), "Skin5");
-      
-      return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
-    }
-  }
+      private static readonly PlayerModifiers _stoneMod = new PlayerModifiers() {
+        ImpactDamageTakenModifier = 0,
+        ExplosionDamageTakenModifier = 0.25f,
+        ProjectileDamageTakenModifier = 0.25f,
+        ProjectileCritChanceTakenModifier = 0,
+        MeleeStunImmunity = 1,
+        MeleeDamageTakenModifier = 0.25f,
+        SprintSpeedModifier = 0.75f
+      };
 
-  public override string Name {
-    get {
-      return "STONE SKIN";
-    }
-  }
+      private IProfile _profile;
+      private PlayerModifiers _modifiers;
 
-  public override string Author {
-    get {
-      return "Danila015";
-    }
-  }
+      private IProfile StoneProfile {
+        get {
+          IProfile playerProfile = Player.GetProfile();
 
-  public StoneSkin(IPlayer player) : base(player) {
-    Time = 13000; // 13 s
-  }
+          playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}",
+          playerProfile.Gender == Gender.Male ? string.Empty : "_fem"), "Skin5");
 
-  protected override void Activate() {
-    _profile = Player.GetProfile(); // Store profile
+          return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
+        }
+      }
 
-    _modifiers = Player.GetModifiers(); // Store original player modifiers
+      public override string Name {
+        get {
+          return "STONE SKIN";
+        }
+      }
 
-    _modifiers.CurrentHealth = -1;
-    _modifiers.CurrentEnergy = -1;
+      public override string Author {
+        get {
+          return "Danila015";
+        }
+      }
 
-    Player.SetProfile(StoneProfile);
+      public StoneSkin(IPlayer player) : base(player) {
+        Time = 13000; // 13 s
+      }
 
-    Player.SetModifiers(_stoneMod);
-  }
+      protected override void Activate() {
+        _profile = Player.GetProfile(); // Store profile
 
-  public override void Update(float dlt, float dltSecs) {
-    if (Player.IsBurning)
-      Player.ClearFire();
+        _modifiers = Player.GetModifiers(); // Store original player modifiers
 
-    if (!Player.IsOnGround) {
-      Vector2 playerLinearVelocity = Player.GetLinearVelocity();
+        _modifiers.CurrentHealth = -1;
+        _modifiers.CurrentEnergy = -1;
 
-      if (playerLinearVelocity.Y < 0) {
-        playerLinearVelocity.Y *= HEAVY_EXP;
+        Player.SetProfile(StoneProfile);
 
-        playerLinearVelocity.X /= dlt; // Normalize X
+        Player.SetModifiers(_stoneMod);
+      }
 
-        Player.SetLinearVelocity(playerLinearVelocity);
+      public override void Update(float dlt, float dltSecs) {
+        if (Player.IsBurning)
+          Player.ClearFire();
+
+        if (!Player.IsOnGround) {
+          Vector2 playerLinearVelocity = Player.GetLinearVelocity();
+
+          if (playerLinearVelocity.Y < 0) {
+            playerLinearVelocity.Y *= HEAVY_EXP;
+
+            playerLinearVelocity.X /= dlt; // Normalize X
+
+            Player.SetLinearVelocity(playerLinearVelocity);
+          }
+        }
+      }
+
+      public override void TimeOut() {
+        Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
+        Game.PlaySound("DestroyStone", Vector2.Zero);
+      }
+
+      public override void OnEnabled(bool enabled) {
+        if (!enabled) { // Restore player
+          Player.SetModifiers(_modifiers);
+          Player.SetProfile(_profile);
+        }
+      }
+
+      private static IProfile ColorProfile(IProfile pr, string col, string colI) {
+        if (pr.Accesory != null)
+          pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
+
+        if (pr.ChestOver != null)
+          pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
+
+        if (pr.ChestUnder != null)
+          pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
+
+        if (pr.Feet != null)
+          pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
+
+        if (pr.Hands != null)
+          pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
+
+        if (pr.Head != null)
+          pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
+
+        if (pr.Legs != null)
+          pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
+
+        if (pr.Waist != null)
+          pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
+
+        return pr;
       }
     }
-  }
-
-  public override void TimeOut() {
-    Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
-    Game.PlaySound("DestroyStone", Vector2.Zero);
-  }
-
-  public override void OnEnabled(bool enabled) {
-    if (!enabled) { // Restore player
-      Player.SetModifiers(_modifiers);
-      Player.SetProfile(_profile);
-    }
-  }
-
-  private static IProfile ColorProfile(IProfile pr, string col, string colI) {
-    if (pr.Accesory != null)
-      pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
-
-    if (pr.ChestOver != null)
-      pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
-
-    if (pr.ChestUnder != null)
-      pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
-
-    if (pr.Feet != null)
-      pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
-
-    if (pr.Hands != null)
-      pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
-
-    if (pr.Head != null)
-      pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
-
-    if (pr.Legs != null)
-      pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
-
-    if (pr.Waist != null)
-      pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
-
-    return pr;
   }
 }
