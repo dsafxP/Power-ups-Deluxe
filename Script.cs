@@ -24,7 +24,7 @@ public void HandleCommand(UserMessageCallbackArgs args) {
       Color.Green, uid);
       Game.ShowChatMessage("PD_POWERUPS - Displays all the power-ups with their codenames.", 
       Color.Green, uid);
-      Game.ShowChatMessage("PD_CRATE_CHANCE <chance> - Sets the spawn chance of a power-up crate.", 
+      Game.ShowChatMessage("PD_CRATE_CHANCE [chance] - Sets or gets the spawn chance of a power-up crate.",
       Color.Green, uid);
       Game.ShowChatMessage("PD_SYRINGE [player] - Gives a player a power-up syringe.", 
       Color.Green, uid);
@@ -54,6 +54,15 @@ public void HandleCommand(UserMessageCallbackArgs args) {
         Game.ShowChatMessage("You don't have enough perms to execute this command.", 
         Color.Red, user.UserIdentifier);
     
+        break;
+      }
+      
+      string arg = args.CommandArguments.Trim();
+
+      if (string.IsNullOrEmpty(arg)) {
+        Game.ShowChatMessage(string.Format("Special crate chance is set to {0}.", Config.SpecialCrateChance),
+        Color.Green, user.UserIdentifier);
+
         break;
       }
       
