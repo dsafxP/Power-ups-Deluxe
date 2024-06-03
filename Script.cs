@@ -3,7 +3,7 @@ using SFDGameScriptInterface;
 namespace PowerupsDeluxe {
   public partial class GameScript : GameScriptInterface {
     public GameScript() : base(null) { }
-    
+
     private static readonly Random _rng = new Random();
 
     public void OnStartup() {
@@ -30,7 +30,7 @@ namespace PowerupsDeluxe {
             Color.Green, uid);
             Game.ShowChatMessage("PD_POWERUPS - Displays all the power-ups with their codenames.",
             Color.Green, uid);
-            Game.ShowChatMessage("PD_CRATE_CHANCE <chance> - Sets the spawn chance of a power-up crate.",
+            Game.ShowChatMessage("PD_CRATE_CHANCE [chance] - Sets or gets the spawn chance of a power-up crate.",
             Color.Green, uid);
             Game.ShowChatMessage("PD_SYRINGE [player] - Gives a player a power-up syringe.",
             Color.Green, uid);
@@ -63,9 +63,18 @@ namespace PowerupsDeluxe {
               break;
             }
 
+            string arg = args.CommandArguments.Trim();
+
+            if (string.IsNullOrEmpty(arg)) {
+              Game.ShowChatMessage(string.Format("Special crate chance is set to {0}.", Config.SpecialCrateChance),
+              Color.Green, user.UserIdentifier);
+
+              break;
+            }
+
             float crateChance;
 
-            if (float.TryParse(args.CommandArguments.Trim(), out crateChance)) {
+            if (float.TryParse(arg, out crateChance)) {
               Config.SpecialCrateChance = crateChance;
 
               Game.ShowChatMessage(string.Format("Set special crate chance to {0}.", Config.SpecialCrateChance),

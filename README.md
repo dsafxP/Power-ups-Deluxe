@@ -20,7 +20,7 @@ Steam🔜 | [MythoLogic Forum Post](https://mythologicinteractiveforums.com/view
 |-|-|
 |`PD_HELP`|Shows command help.|
 |`PD_POWERUPS`|Displays all the power-ups with their codenames.|
-|`PD_CRATE_CHANCE <chance>`|Sets the spawn chance of a power-up crate.|
+|`PD_CRATE_CHANCE [chance]`|Sets or gets the spawn chance of a power-up crate.|
 |`PD_SYRINGE [player]`|Gives a player a power-up syringe.|
 |`PD_POWERUP <powerup> [player]`|Gives a player a power-up.|
 
