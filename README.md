@@ -2,9 +2,8 @@
 
 # 💉 Power-ups Deluxe
 
-![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/dsafxP/Power-ups-Deluxe%2FSubmissions?type=file&extension=cs&label=submissions)
-![GitHub last commit](https://img.shields.io/github/last-commit/dsafxP/Power-ups-Deluxe)
-![GitHub License](https://img.shields.io/github/license/dsafxP/Power-ups-Deluxe)
+[![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/dsafxP/Power-ups-Deluxe%2FSubmissions?type=file&extension=cs&label=submissions)](Submissions)
+[![GitHub License](https://img.shields.io/github/license/dsafxP/Power-ups-Deluxe)](LICENSE)
 
 The collaborative [Superfighters Deluxe](http://superfightersdeluxe.com) script Power-ups Deluxe.
 
@@ -20,8 +19,10 @@ Steam🔜 | [MythoLogic Forum Post](https://mythologicinteractiveforums.com/view
 |Command|Description|
 |-|-|
 |`PD_HELP`|Shows command help.|
+|`PD_POWERUPS`|Displays all the power-ups with their codenames.|
 |`PD_CRATE_CHANCE <chance>`|Sets the spawn chance of a power-up crate.|
-|`PD_POWERUP [player]`|Gives a player a power-up syringe.|
+|`PD_SYRINGE [player]`|Gives a player a power-up syringe.|
+|`PD_POWERUP <powerup> [player]`|Gives a player a power-up.|
 
 Required options are shown with <>, optional parameters are shown with [].
 

@@ -20,12 +20,30 @@ public void HandleCommand(UserMessageCallbackArgs args) {
       Color.Green, uid);
       Game.ShowChatMessage("PD_HELP - Shows command help.", 
       Color.Green, uid);
+      Game.ShowChatMessage("PD_POWERUPS - Displays all the power-ups with their codenames.", 
+      Color.Green, uid);
       Game.ShowChatMessage("PD_CRATE_CHANCE <chance> - Sets the spawn chance of a power-up crate.", 
       Color.Green, uid);
-      Game.ShowChatMessage("PD_POWERUP [player] - Gives a player a power-up syringe.", 
+      Game.ShowChatMessage("PD_SYRINGE [player] - Gives a player a power-up syringe.", 
+      Color.Green, uid);
+      Game.ShowChatMessage("PD_POWERUP <powerup> [player] - Gives a player a power-up.", 
       Color.Green, uid);
       Game.ShowChatMessage("Required options are shown with <>, optional parameters are shown with [].", 
       Color.Yellow, uid);
+    }
+    break;
+    
+    case "PD_POWERUPS": {
+      int uid = user.UserIdentifier;
+      
+      Game.ShowChatMessage("Available power-ups:", 
+      Color.Green, uid);
+      
+      foreach(string powerUpName in typeof(Powerups.AvailablePowerups)
+      .GetNestedTypes()
+      .Select(t => t.Name))
+        Game.ShowChatMessage(powerUpName, 
+        Color.Green, uid);
     }
     break;
     
@@ -51,7 +69,7 @@ public void HandleCommand(UserMessageCallbackArgs args) {
     }
     break;
     
-    case "PD_POWERUP": {
+    case "PD_SYRINGE": {
       if (!user.IsModerator && !user.IsHost) {
         Game.ShowChatMessage("You don't have enough perms to execute this command.", 
         Color.Red, user.UserIdentifier);
@@ -67,6 +85,42 @@ public void HandleCommand(UserMessageCallbackArgs args) {
       } else {
         Game.ShowChatMessage("Invalid player.", 
         Color.Red, user.UserIdentifier);
+      }
+    }
+    break;
+    
+    case "PD_POWERUP": {
+      if (!user.IsModerator && !user.IsHost) {
+        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
+        Color.Red, user.UserIdentifier);
+    
+        break;
+      }
+      
+      string[] arg = args.CommandArguments.Split(' ');
+      
+      Type powerUpType = GetPowerup(arg[0]);
+      
+      if (powerUpType != null) {
+        IUser target = GetUser(arg.ElementAtOrDefault(1));
+        IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
+      
+        if (targetPlayer != null) {
+          Powerups.Powerup powerUp = (Powerups.Powerup) Activator.CreateInstance(powerUpType, targetPlayer); 
+          
+          Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), 
+          Color.Yellow, targetPlayer.UserIdentifier);
+          
+          PlayPowerupEffect(targetPlayer.GetWorldPosition());
+        } else {
+          Game.ShowChatMessage("Invalid player.", 
+          Color.Red, user.UserIdentifier);
+        }
+      } else {
+        Game.ShowChatMessage("Invalid power-up.", 
+        Color.Red, user.UserIdentifier);
+    
+        break;
       }
     }
     break;
@@ -102,6 +156,14 @@ public IUser GetUser(string arg) {
   Game.GetActiveUsers()
   .FirstOrDefault(u => u.AccountName == arg || u.Name == arg || 
   (arg.All(char.IsDigit) ? u.GameSlotIndex == int.Parse(arg) : false));
+}
+
+public Type GetPowerup(string arg) {
+  string nest = "SFDScript.GameScript+Powerups+AvailablePowerups+" + arg;
+  System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+  
+  return assembly.GetTypes()
+  .FirstOrDefault(t => t.FullName.Equals(nest, StringComparison.OrdinalIgnoreCase));
 }
 
 private static void PlayPowerupEffect(Vector2 pos) {
