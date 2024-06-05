@@ -184,6 +184,12 @@ Below is a list of the available power-ups.
 - **Duration:** 17 seconds
 - **Description:** A blood orb will follow the player, shooting blood projectiles at enemies.
 
+### Vampirism
+
+- **Author:** [Danila015](https://steamcommunity.com/profiles/76561198847470828)
+- **Duration:** 21 seconds
+- **Description:** The player gains the ability to drain life from opponents, causing them to bleed.
+
 ### Vortex
 
 - **Author:** dsafxP
