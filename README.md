@@ -70,6 +70,12 @@ Below is a list of the available power-ups.
 - **Duration:** 24 seconds
 - **Description:** Spawns a clone of the player that assists them but slowly ages and eventually dies as a result.
 
+### Drone
+
+- **Author:** dsafxP
+- **Duration:** 25 seconds
+- **Description:** The player gains control of a versatile drone that deals damage to nearby enemies.
+
 ### Fire breath
 
 - **Author:** [Danila015](https://steamcommunity.com/profiles/76561198847470828)
