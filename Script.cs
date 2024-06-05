@@ -3619,12 +3619,6 @@ namespace PowerupsDeluxe {
 
           private float _elapsed = 0;
 
-          public bool CanShake {
-            get {
-              return _elapsed <= 0;
-            }
-          }
-
           private float Shake {
             get {
               return SHAKE_INTENSITY * (Player.IsRunning ? 1.5f :
@@ -3658,6 +3652,12 @@ namespace PowerupsDeluxe {
                 .Where(p => (p.GetTeam() == PlayerTeam.Independent || p.GetTeam() != Player.GetTeam()) &&
                   !p.IsDisabled && p != Player)
                 .ToArray();
+            }
+          }
+
+          public bool CanShake {
+            get {
+              return _elapsed <= 0;
             }
           }
 
