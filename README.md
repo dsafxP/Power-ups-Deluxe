@@ -2,7 +2,7 @@
 
 # 💉 Power-ups Deluxe
 
-[![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/dsafxP/Power-ups-Deluxe%2FSubmissions?type=file&extension=cs&label=submissions)](Submissions)
+[![GitHub repo file or directory count](https://img.shields.io/github/directory-file-count/dsafxP/Power-ups-Deluxe%2FSubmissions?type=file&extension=cs&label=submissions&color=purple)](Submissions)
 [![GitHub License](https://img.shields.io/github/license/dsafxP/Power-ups-Deluxe)](LICENSE)
 
 The collaborative [Superfighters Deluxe](http://superfightersdeluxe.com) script Power-ups Deluxe.
