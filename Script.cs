@@ -43,7 +43,8 @@ public void HandleCommand(UserMessageCallbackArgs args) {
       
       foreach(string powerUpName in typeof(Powerups.AvailablePowerups)
       .GetNestedTypes()
-      .Select(t => t.Name))
+      .Select(t => t.Name)
+      .OrderBy(n => n))
         Game.ShowChatMessage(powerUpName, 
         Color.Green, uid);
     }
