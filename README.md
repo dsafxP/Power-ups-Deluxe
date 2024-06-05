@@ -118,6 +118,12 @@ Below is a list of the available power-ups.
 - **Duration:** 25 seconds
 - **Description:** Blocks a single hit of any kind and deflects projectiles, but will break against anything larger than a bullet.
 
+### Overcharge
+
+- **Author:** dsafxP, [Danila015](https://steamcommunity.com/profiles/76561198847470828) & [Eiga](https://steamcommunity.com/profiles/76561198351198371)
+- **Duration:** 33 seconds
+- **Description:** The player can perform consecutive kicks and uppercuts to increase their force, but failing to maintain the combo will cause them to lose the bonus.
+
 ### Overheal
 
 - **Author:** [Danila015](https://steamcommunity.com/profiles/76561198847470828)
