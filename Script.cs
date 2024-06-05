@@ -3898,7 +3898,6 @@ public static class Powerups {
     
     // OVERCHARGE - dsafxP - Danila015 - Eiga
     public class Overcharge : Powerup {
-      private const float EFFECT_COOLDOWN = 175;
       private const float CHARGE_INTENSITY = 0.3f; // Charges * Value
       private const float CHARGE_DELAY = 2000;
       private const string CHARGE_TEXT = "+{0}"; // 0 for charges
