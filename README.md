@@ -82,6 +82,12 @@ Below is a list of the available power-ups.
 - **Duration:** 20 seconds
 - **Description:** The player ignites without taking damage, gaining a slight movement boost and the ability to spread fire everywhere.
 
+### Giant
+
+- **Author:** [Tomo](https://steamcommunity.com/profiles/76561198337852780)
+- **Duration:** 17 seconds
+- **Description:** The player becomes massive, gaining complete immunity to stuns and reduced damage. Their melee strength is increased, allowing them to quickly destroy objects. Although they move slower, they can shake nearby objects and players, stunning and throwing them with powerful ground slams.
+
 ### Grabby hands
 
 - **Author:** dsafxP & [Danila015](https://steamcommunity.com/profiles/76561198847470828)
