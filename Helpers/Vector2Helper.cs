@@ -2,42 +2,10 @@
 /// A helper class for performing various operations on Vector2 objects.
 /// </summary>
 public static class Vector2Helper {
-  private static readonly Vector2 _up = new Vector2(0, 1);
-  private static readonly Vector2 _down = new Vector2(0, -1);
-  private static readonly Vector2 _right = new Vector2(1, 0);
-  private static readonly Vector2 _left = new Vector2(-1, 0);
-
-  /// <summary>
-  /// Gets the Vector2 representing upward direction.
-  /// </summary>
-  public static Vector2 Up
-  {
-    get { return _up; }
-  }
-
-  /// <summary>
-  /// Gets the Vector2 representing downward direction.
-  /// </summary>
-  public static Vector2 Down
-  {
-    get { return _down; }
-  }
-
-  /// <summary>
-  /// Gets the Vector2 representing rightward direction.
-  /// </summary>
-  public static Vector2 Right
-  {
-    get { return _right; }
-  }
-
-  /// <summary>
-  /// Gets the Vector2 representing leftward direction.
-  /// </summary>
-  public static Vector2 Left
-  {
-    get { return _left; }
-  }
+  public static readonly Vector2 Up = new Vector2(0, 1);
+  public static readonly Vector2 Down = new Vector2(0, -1);
+  public static readonly Vector2 Right = new Vector2(1, 0);
+  public static readonly Vector2 Left = new Vector2(-1, 0);
 
   /// <summary>
   /// Returns the absolute value of each component of the specified vector.
