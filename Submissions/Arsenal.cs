@@ -69,7 +69,7 @@ public class Arsenal : Powerup {
 
   private WeaponItemType[] EmptyWeaponItemTypes {
     get {
-      HashSet < WeaponItemType > weaponItemTypes = new HashSet < WeaponItemType > {
+      List < WeaponItemType > weaponItemTypes = new List < WeaponItemType > {
         WeaponItemType.Melee,
         WeaponItemType.Rifle,
         WeaponItemType.Handgun,
