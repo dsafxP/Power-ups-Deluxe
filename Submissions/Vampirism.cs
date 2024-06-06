@@ -51,6 +51,10 @@ public class Vampirism : Powerup {
         Game.PlaySound("ImpactFlesh", Vector2.Zero, 0.5 f);
       }
   }
+  
+  public override void TimeOut() {
+    Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+  }
 
   public override void OnEnabled(bool enabled) {
     if (enabled) {

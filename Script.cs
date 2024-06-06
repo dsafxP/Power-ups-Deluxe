@@ -4057,6 +4057,10 @@ public static class Powerups {
             Game.PlaySound("ImpactFlesh", Vector2.Zero, 0.5f);
           }
       }
+      
+      public override void TimeOut() {
+        Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+      }
 
       public override void OnEnabled(bool enabled) {
         if (enabled) {
