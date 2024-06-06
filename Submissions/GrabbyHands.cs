@@ -8,13 +8,13 @@ namespace PowerupsDeluxe {
 
       private WeaponItemType[] EmptyWeaponItemTypes {
         get {
-          HashSet<WeaponItemType> weaponItemTypes = new HashSet<WeaponItemType> {
-        WeaponItemType.Melee,
-        WeaponItemType.Rifle,
-        WeaponItemType.Handgun,
-        WeaponItemType.Powerup,
-        WeaponItemType.Thrown
-      };
+          List<WeaponItemType> weaponItemTypes = new List<WeaponItemType> {
+            WeaponItemType.Melee,
+            WeaponItemType.Rifle,
+            WeaponItemType.Handgun,
+            WeaponItemType.Powerup,
+            WeaponItemType.Thrown
+          };
 
           weaponItemTypes.Remove(Player.CurrentMeleeWeapon.WeaponItemType);
           weaponItemTypes.Remove(Player.CurrentPrimaryWeapon.WeaponItemType);
