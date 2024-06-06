@@ -65,14 +65,7 @@ namespace PowerupsDeluxe {
       /// <param name="dlt">The time delta since the last update.</param>
       private void Update(float dlt) {
         // Check if the player is still valid
-        if (Player == null) {
-          Enabled = false;
-
-          return;
-        }
-
-        // Check if the player is dead or removed
-        if (Player.IsDead || Player.IsRemoved) {
+        if (Player == null || Player.IsRemoved || Player.IsDead) {
           Enabled = false;
 
           return;
