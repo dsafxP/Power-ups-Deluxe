@@ -178,6 +178,12 @@ Below is a list of the available power-ups.
 - **Duration:** 17 seconds
 - **Description:** Enemies will receive heavy damage when they hit the player.
 
+### Tri-strike
+
+- **Author** dsafxP & [Eiga](https://steamcommunity.com/profiles/76561198351198371)
+- **Duration:** 17 seconds
+- **Description:** The player's melee attacks become unblockable and stun the enemy with every hit, while also dealing slightly more damage and force.
+
 ### Blood turret
 
 - **Author:** dsafxP
