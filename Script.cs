@@ -3898,8 +3898,8 @@ public static class Powerups {
     
     // OVERCHARGE - dsafxP - Danila015 - Eiga
     public class Overcharge : Powerup {
-      private const float CHARGE_INTENSITY = 0.3f; // Charges * Value
-      private const float CHARGE_DELAY = 2000;
+      private const float CHARGE_INTENSITY = 0.33f; // Charges * Value
+      private const float CHARGE_DELAY = 6000;
       private const string CHARGE_TEXT = "+{0}"; // 0 for charges
 
       private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
@@ -3919,7 +3919,7 @@ public static class Powerups {
           float charge = _charges * CHARGE_INTENSITY;
 
           if (_charges > 0) {
-            _elapsed += CHARGE_DELAY;
+            _elapsed = CHARGE_DELAY;
 
             Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
               string.Format(CHARGE_TEXT, _charges));
