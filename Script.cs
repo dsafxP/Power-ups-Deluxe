@@ -4050,6 +4050,10 @@ namespace PowerupsDeluxe {
               }
           }
 
+          public override void TimeOut() {
+            Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+          }
+
           public override void OnEnabled(bool enabled) {
             if (enabled) {
               _meleeActionCallback = Events.PlayerMeleeActionCallback.Start(OnPlayerMeleeAction);
