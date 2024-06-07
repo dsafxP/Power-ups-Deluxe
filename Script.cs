@@ -4095,6 +4095,7 @@ namespace PowerupsDeluxe {
           }
         }
 
+        // TRI-STRIKE - dsafxP - Eiga
         public class Strike : Powerup {
           private const float EFFECT_COOLDOWN = 50;
           private const float EFFECT_SEPARATION = 5;
@@ -4104,10 +4105,10 @@ namespace PowerupsDeluxe {
           private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
 
           private static readonly Vector2[] _offsets = {
-        new Vector2(-10, 0),
-        new Vector2(10, 0),
-        new Vector2(0, 20),
-      };
+            new Vector2(-10, 0),
+            new Vector2(10, 0),
+            new Vector2(0, 20)
+          };
 
           private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
 
