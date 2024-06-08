@@ -783,7 +783,7 @@ public abstract class Powerup {
     }
 
     // Update the time left for the power-up
-    Time -= dlt * Game.SlowmotionModifier;
+    Time -= dlt;
 
     // Invoke the virtual Update method
     Update(dlt, dlt / 1000);
