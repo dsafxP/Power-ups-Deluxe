@@ -130,6 +130,12 @@ Below is a list of the available power-ups.
 - **Duration:** 40 seconds
 - **Description:** Initiates health regeneration for the player until fully healed, which then slightly improves the player's maximum health permanently. This effect stops upon any damage inflicted by another player.
 
+### [Ace Pitcher](Submissions/Pitcher.cs)
+
+- **Author:** dsafxP
+- **Duration:** 27 seconds
+- **Description:** The player achieves perfect accuracy, a laser sight, and gun ammo regeneration. This enables precise targeting of critical spots, causing enemies to bleed, and extends the player's ability to throw objects further.
+
 ### [Punchback](Submissions/Punchback.cs)
 
 - **Author:** dsafxP
@@ -160,6 +166,12 @@ Below is a list of the available power-ups.
 - **Duration:** 13 seconds
 - **Description:** The player's skin turns to stone, granting immunity to stun and reducing damage taken from all sources. However, they become slower, unable to run, and heavier, allowing them to fall onto enemies to deal heavy damage.
 
+### [Tri-strike](Submissions/Strike.cs)
+
+- **Author** dsafxP & [Eiga](https://steamcommunity.com/profiles/76561198351198371)
+- **Duration:** 17 seconds
+- **Description:** The player's melee attacks become unblockable and stun the enemy with every hit, while also dealing slightly more damage and force.
+
 ### [Super dove](Submissions/SuperDove.cs)
 
 - **Author:** [Luminous](https://steamcommunity.com/id/fakeluminous)
@@ -177,12 +189,6 @@ Below is a list of the available power-ups.
 - **Author:** dsafxP & [Motto73](https://steamcommunity.com/profiles/76561198279459977)
 - **Duration:** 17 seconds
 - **Description:** Enemies will receive heavy damage when they hit the player.
-
-### [Tri-strike](Submissions/Strike.cs)
-
-- **Author** dsafxP & [Eiga](https://steamcommunity.com/profiles/76561198351198371)
-- **Duration:** 17 seconds
-- **Description:** The player's melee attacks become unblockable and stun the enemy with every hit, while also dealing slightly more damage and force.
 
 ### [Blood turret](Submissions/Turret.cs)
 
