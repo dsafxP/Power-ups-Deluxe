@@ -81,7 +81,7 @@ namespace PowerupsDeluxe {
         }
 
         // Update the time left for the power-up
-        Time -= dlt;
+        Time -= dlt * Game.SlowmotionModifier;
 
         // Invoke the virtual Update method
         Update(dlt, dlt / 1000);
