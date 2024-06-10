@@ -98,24 +98,18 @@ namespace PowerupsDeluxe {
       /// <param name="dlt">The time delta since the last update.</param>
       /// <param name="dltSecs">The time delta in seconds since the last
       /// update.</param>
-      public virtual void Update(float dlt, float dltSecs) {
-        // Implement in derived classes
-      }
+      public abstract void Update(float dlt, float dltSecs);
 
       /// <summary>
       /// Virtual method called when the power-up times out.
       /// </summary>
-      public virtual void TimeOut() {
-        // Implement in derived classes
-      }
+      public abstract void TimeOut();
 
       /// <summary>
       /// Virtual method called when the power-up is enabled or disabled. Called by
       /// the constructor.
       /// </summary>
-      public virtual void OnEnabled(bool enabled) {
-        // Implement in derived classes
-      }
+      public abstract void OnEnabled(bool enabled);
     }
   }
 }
