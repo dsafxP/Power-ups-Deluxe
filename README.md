@@ -106,6 +106,12 @@ Below is a list of the available power-ups.
 - **Duration:** 7 seconds
 - **Description:** Initiates a timer that, upon expiration, triggers numerous explosions around the player, inflicting minimal harm to the player.
 
+### [Lagger](Submissions/Lagger.cs)
+
+- **Author:** dsafxP
+- **Duration:** 16 seconds
+- **Description:** The player teleports to their previous position periodically, gaining ability boosts proportionate to their ping.
+
 ### [Magnetic field](Submissions/Magnet.cs)
 
 - **Author:** [Tomo](https://steamcommunity.com/profiles/76561198337852780)
