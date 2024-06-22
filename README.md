@@ -186,6 +186,14 @@ Below is a list of the available power-ups.
 
 ![Punchback](img/gif/Punchback.gif)
 
+### [Reconstructor](Submissions/Reconstructor)
+
+- **Author:** [Danila015](https://steamcommunity.com/profiles/76561198847470828)
+- **Duration:** 24 seconds
+- **Description:** The player's skin transforms into a metal alloy, enabling self-healing from nearby debris and the ability to effortlessly destroy objects to create more debris.
+
+![Reconstructor](img/gif/Reconstructor.gif)
+
 ### [Rocket shoes](Submissions/RocketShoes.cs)
 
 - **Author:** [Ebomb09](https://steamcommunity.com/id/ebomb09)

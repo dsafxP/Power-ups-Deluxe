@@ -4,10 +4,10 @@ namespace PowerupsDeluxe {
   public partial class GameScript : GameScriptInterface {
     // STARRED - Tomo
     public class Star : Powerup {
-      public const float EFFECT_COOLDOWN = 50;
-      public const float THROW_COOLDOWN = 100;
-      public const float PUSH_FORCE = 7;
-      public const float PUSH_DMG = 16;
+      private const float EFFECT_COOLDOWN = 50;
+      private const float THROW_COOLDOWN = 100;
+      private const float PUSH_FORCE = 7;
+      private const float PUSH_DMG = 16;
 
       private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
       private static readonly PlayerModifiers _starMod = new PlayerModifiers() {
