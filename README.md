@@ -154,6 +154,14 @@ Below is a list of the available power-ups.
 
 ![ManaShield](img/gif/ManaShield.gif)
 
+### [One-tap](Submissions/Onetap.cs)
+
+- **Author:** [Danila015](https://steamcommunity.com/profiles/76561198847470828)
+- **Duration:** 10 seconds
+- **Description:** The player can instantly defeat a single enemy with one tap. If blocked, the remaining power-up time will be reduced.
+
+![Onetap](img/gif/Onetap.gif)
+
 ### [Overcharge](Submissions/Overcharge.cs)
 
 - **Author:** dsafxP, [Danila015](https://steamcommunity.com/profiles/76561198847470828) & [Eiga](https://steamcommunity.com/profiles/76561198351198371)
