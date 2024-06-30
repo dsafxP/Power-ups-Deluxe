@@ -4175,6 +4175,8 @@ namespace PowerupsDeluxe {
                 hit.SetInputEnabled(true);
               }, 1, 1);
 
+              IObjectWeaponItem disarmed = hit.Disarm(WeaponItemType.Melee);
+
               if (!hit.IsBlocking) {
                 hit.DealDamage(arg.HitDamage * STAND_DMG_MULT);
 
@@ -4186,7 +4188,8 @@ namespace PowerupsDeluxe {
                 Game.PlaySound("PlayerDive", Vector2.Zero);
 
                 PointShape.Polygon(Draw2, EffectPositions, EFFECT_SEPARATION);
-              }
+              } else if (disarmed != null)
+                disarmed.Destroy();
             }
           }
 
