@@ -77,6 +77,8 @@ public class Strike : Powerup {
       Events.UpdateCallback.Start((float _dlt) => {
         hit.SetInputEnabled(true);
       }, 1, 1);
+      
+      IObjectWeaponItem disarmed = hit.Disarm(WeaponItemType.Melee);
 
       if (!hit.IsBlocking) {
         hit.DealDamage(arg.HitDamage * STAND_DMG_MULT);
@@ -89,7 +91,8 @@ public class Strike : Powerup {
         Game.PlaySound("PlayerDive", Vector2.Zero);
 
         PointShape.Polygon(Draw2, EffectPositions, EFFECT_SEPARATION);
-      }
+      } else if (disarmed != null)
+        disarmed.Destroy();
     }
   }
 
