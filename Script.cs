@@ -1230,8 +1230,7 @@ public static class Powerups {
       }
 
       private class Wisp {
-        private
-        const uint EFFECT_COOLDOWN = 50;
+        private const uint EFFECT_COOLDOWN = 50;
 
         private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
           IncludeOverlap = true,
@@ -1303,13 +1302,7 @@ public static class Powerups {
         }
 
         private void Update(float dlt) {
-          if (Player == null) {
-            Enabled = false;
-
-            return;
-          }
-
-          if (Player.IsDead || Player.IsRemoved) {
+          if (Player == null || Player.IsDead || Player.IsRemoved) {
             Enabled = false;
 
             return;
