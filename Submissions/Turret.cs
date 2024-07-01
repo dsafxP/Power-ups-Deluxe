@@ -163,13 +163,7 @@ namespace PowerupsDeluxe {
         }
 
         private void Update(float dlt) {
-          if (Player == null) {
-            Enabled = false;
-
-            return;
-          }
-
-          if (Player.IsDead || Player.IsRemoved) {
+          if (Player == null || Player.IsDead || Player.IsRemoved) {
             Enabled = false;
 
             return;
