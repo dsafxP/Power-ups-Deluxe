@@ -74,6 +74,14 @@ Below is a list of the available power-ups.
 
 ![Blitzkrieg](img/gif/Blitzkrieg.gif)
 
+### [Burst](Submissions/Burst.cs)
+
+- **Author:** Danger Ross
+- **Duration:** 20 seconds
+- **Description:** The player can charge their melee attacks based on speed to unleash powerful bursts.
+
+![Burst](img/gif/Burst.gif)
+
 ### [Clone-o-matic](Submissions/Clone.cs)
 
 - **Author:** [Ebomb09](https://steamcommunity.com/id/ebomb09)
