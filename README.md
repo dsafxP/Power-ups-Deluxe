@@ -76,7 +76,7 @@ Below is a list of the available power-ups.
 
 ### [Burst](Submissions/Burst.cs)
 
-- **Author:** Danger Ross
+- **Author:** [Danger Ross](https://steamcommunity.com/profiles/76561198086215978)
 - **Duration:** 20 seconds
 - **Description:** The player can charge their melee attacks based on speed to unleash powerful bursts.
 
@@ -113,6 +113,14 @@ Below is a list of the available power-ups.
 - **Description:** The player ignites without taking damage, gaining a slight movement boost and the ability to spread fire everywhere.
 
 ![Flame](img/gif/Flame.gif)
+
+### [Flesh spirit](Submissions/Flesh.cs)
+
+- **Author:** [Danger Ross](https://steamcommunity.com/profiles/76561198086215978)
+- **Duration:** 19 seconds
+- **Description:** The player undergoes a massive transformation, becoming a flesh spirit capable of shooting tendrils and consuming enemies.
+
+![Flesh](img/gif/Flesh.gif)
 
 ### [Giant](Submissions/Giant.cs)
 
