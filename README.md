@@ -9,9 +9,6 @@ The collaborative [Superfighters Deluxe](http://superfightersdeluxe.com) script 
 
 This script enhances your gameplay experience by adding a variety of power-ups created by different scripters. These power-ups can be obtained through special crates and activated with a syringe.
 
-> [!IMPORTANT]  
-> The collaboration is ongoing! We're inviting you to contribute your own unique power-up ideas and scripts. Learn more in the [map editor discord](https://discord.gg/jvvZgrb).
-
 [![MythoLogic Interactive Forums Badge](https://img.shields.io/badge/MythoLogic%20Interactive%20Forums-Post-gray?logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAMAAAC6V%2B0%2FAAAAOVBMVEUAAAANDAYcGA0rJhU5Mx1HPyRWTCtkWTNzZjqBckGPf0msmVe7pV%2FKs2bYwG3nzXXKs2bnzXXmzHXlyS5qAAAAEnRSTlMAQEBAQEBAQEBAQEBAQEBAqqrF3zd3AAAAhUlEQVQY02WQSQICIQwESweXWZSh%2Fv9YD0BAzYVOk6U7AC%2BBApjoYQ0oHQTnjJ4GvgZ5DPL8HTTHGPRF5rpP1bU2gnppIgrApgtNGKW9aAmyV6Ki1dzkJdcsHbosWrb6t%2F%2Bry0NnSuED9Zwd1M3rxv3LTlw07YqSPcaVH63xFqV90lvRHT7a%2BhMh8eu5MAAAAABJRU5ErkJggg%3D%3D&labelColor=black&link=https%3A%2F%2Fmythologicinteractiveforums.com%2Fviewtopic.php%3Ff%3D42%26t%3D4414)](https://mythologicinteractiveforums.com/viewtopic.php?f=42&t=4414)
 
 ## ⚙️ Commands
