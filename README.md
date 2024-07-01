@@ -218,6 +218,14 @@ Below is a list of the available power-ups.
 
 ![RocketShoes](img/gif/RocketShoes.gif)
 
+### [Sentry](Submissions/Sentry.cs)
+
+- **Author:** dsafxP
+- **Duration:** 40 seconds
+- **Description:** A rapid-fire turret spawns beside the player, automatically targeting and shooting nearby enemies.
+
+![Sentry](img/gif/Sentry.gif)
+
 ### [Sphere](Submissions/Sphere.cs)
 
 - **Author:** dsafxP
