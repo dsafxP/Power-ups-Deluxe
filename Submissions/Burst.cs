@@ -29,7 +29,7 @@ public class Burst : Powerup {
     }
   }
 
-  public Burst(IPlayer player): base(player) {
+  public Burst(IPlayer player) : base(player) {
     Time = 20000; // 20 s
   }
 
