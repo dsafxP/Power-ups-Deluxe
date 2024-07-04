@@ -3342,8 +3342,10 @@ namespace PowerupsDeluxe {
               thrown.SetAngularVelocity(THROW_FORCE);
             }
 
-            foreach (IProjectile fired in Game.GetProjectiles()
-              .Where(p => p.OwnerPlayerID == Player.UniqueID)) {
+            foreach (IProjectile fired in Game.GetProjectiles()) {
+              if (fired.OwnerPlayerID != Player.UniqueID)
+                continue;
+
               fired.Direction = inputDirection;
               fired.Velocity = inputDirection != Vector2.Zero ? inputDirection * BULLET_FORCE :
                 fired.Direction * BULLET_FORCE;
@@ -3371,8 +3373,10 @@ namespace PowerupsDeluxe {
             if (player != Player)
               return;
 
-            foreach (VirtualKeyInfo pressed in keyEvents
-              .Where(k => k.Event == VirtualKeyEvent.Pressed && k.Key == VirtualKey.ACTIVATE)) {
+            foreach (VirtualKeyInfo pressed in keyEvents) {
+              if (pressed.Event != VirtualKeyEvent.Pressed && pressed.Key != VirtualKey.ACTIVATE)
+                continue;
+
               if (_sticky != null) {
                 _sticky.TrackAsMissile(true);
 
