@@ -76,8 +76,10 @@ namespace PowerupsDeluxe {
         if (player != Player)
           return;
 
-        foreach (PlayerMeleeHitArg arg in args
-          .Where(a => a.IsPlayer)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (!arg.IsPlayer)
+            continue;
+
           float dmg = arg.HitDamage;
 
           Player.SetHealth(Player.GetHealth() + dmg * HEAL_MULT);
