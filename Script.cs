@@ -1705,7 +1705,7 @@ namespace PowerupsDeluxe {
           private const FireNodeType FIRE_TYPE = FireNodeType.Flamethrower;
 
           private static readonly Vector2 _effectOffset = new Vector2(0, 8);
-          private static readonly Vector2 _fireOffset = new Vector2(8, 0);
+          private static readonly Vector2 _fireOffset = new Vector2(8);
 
           private static readonly Vector2 _rayCastEndOffset = new Vector2(48, 8);
           private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 4);
