@@ -41,7 +41,6 @@ namespace PowerupsDeluxe {
         _nextParticleTime = _rng.Next(30) * 50;
 
         _playerKeyInputEvent = Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
-        Game.RunCommand("/msg template power activated on " + Player.Name);
       }
 
       public void OnPlayerKeyInput(IPlayer player, VirtualKeyInfo[] keyEvents) {
