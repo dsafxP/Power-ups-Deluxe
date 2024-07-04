@@ -248,7 +248,7 @@ namespace PowerupsDeluxe {
               sender.SetStrengthBoostTime(0);
               sender.SetSpeedBoostTime(0);
 
-              Type powerUpType = Powerups.GetRandomPowerupType();
+              Type powerUpType = Powerups.GetRandomPowerupType(_rng);
 
               Powerup powerUp = (Powerup)Activator.CreateInstance(powerUpType, sender); // Activate random powerup
 
@@ -365,24 +365,14 @@ namespace PowerupsDeluxe {
         return syringe;
       }
 
-      public static Type GetRandomPowerupType(Random random = null) {
-        if (random == null)
-          random = _rng;
+      public static Type GetRandomPowerupType(Random random) {
+        Type[] nestedPowerups = typeof(AvailablePowerups).GetNestedTypes()
+          .ToArray();
 
-        Type[] nestedPowerups = typeof(AvailablePowerups).GetNestedTypes();
-
-        Type[] instantiableTypes = nestedPowerups.Where(t =>
-          //t.BaseType == typeof(Powerup) &&
-          t.GetConstructors().Any(c =>
-            c.GetParameters().Length == 1 &&
-            c.GetParameters()[0].ParameterType == typeof(IPlayer)
-          )
-        ).ToArray();
-
-        if (instantiableTypes.Length == 0)
+        if (nestedPowerups.Length == 0)
           throw new InvalidOperationException("No instantiable types found.");
 
-        Type randomType = instantiableTypes[random.Next(instantiableTypes.Length)];
+        Type randomType = nestedPowerups[random.Next(nestedPowerups.Length)];
 
         return randomType;
       }
@@ -395,8 +385,10 @@ namespace PowerupsDeluxe {
 
       private static void OnObjectCreated(IObject[] objs) {
         // Get random supply crates
-        foreach (IObject supplyCrate in objs
-          .Where(o => o.Name == "SupplyCrate00" && _rng.Next(101) < SpawnChance)) {
+        foreach (IObject supplyCrate in objs) {
+          if (supplyCrate.Name != "SupplyCrate00" || _rng.Next(101) >= SpawnChance)
+            continue;
+
           CreatePowerupBox(supplyCrate.GetWorldPosition());
 
           supplyCrate.Remove();
@@ -457,13 +449,7 @@ namespace PowerupsDeluxe {
         }
 
         private void Update(float dlt) {
-          if (Box == null) {
-            Enabled = false;
-
-            return;
-          }
-
-          if (Box.IsRemoved) {
+          if (Box == null || Box.IsRemoved) {
             Enabled = false;
 
             return;
