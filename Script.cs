@@ -2,146 +2,146 @@ private static readonly Random _rng = new Random();
 
 public void OnStartup() {
   Powerups.Enabled = true;
-  
+
   Events.UserMessageCallback.Start(HandleCommand);
-  
+
   Config.Update();
 }
 
 public void HandleCommand(UserMessageCallbackArgs args) {
   IUser user = args.User;
-  
+
   if (!args.IsCommand)
     return;
-  
-  switch(args.Command) {
+
+  switch (args.Command) {
     case "PD_HELP": {
-      int uid = user.UserIdentifier;
-      
-      Game.ShowChatMessage("Available commands:", 
-      Color.Green, uid);
-      Game.ShowChatMessage("PD_HELP - Shows command help.", 
-      Color.Green, uid);
-      Game.ShowChatMessage("PD_POWERUPS - Displays all the power-ups with their codenames.", 
-      Color.Green, uid);
-      Game.ShowChatMessage("PD_CRATE_CHANCE [chance] - Sets or gets the spawn chance of a power-up crate.",
-      Color.Green, uid);
-      Game.ShowChatMessage("PD_SYRINGE [player] - Gives a player a power-up syringe.", 
-      Color.Green, uid);
-      Game.ShowChatMessage("PD_POWERUP <powerup> [player] - Gives a player a power-up.", 
-      Color.Green, uid);
-      Game.ShowChatMessage("Required options are shown with <>, optional parameters are shown with [].", 
-      Color.Yellow, uid);
-    }
-    break;
-    
-    case "PD_POWERUPS": {
-      int uid = user.UserIdentifier;
-      
-      Game.ShowChatMessage("Available power-ups:", 
-      Color.Green, uid);
-      
-      foreach(string powerUpName in typeof(Powerups.AvailablePowerups)
-      .GetNestedTypes()
-      .Select(t => t.Name)
-      .OrderBy(n => n))
-        Game.ShowChatMessage(powerUpName, 
+        int uid = user.UserIdentifier;
+
+        Game.ShowChatMessage("Available commands:",
         Color.Green, uid);
-    }
-    break;
-    
+        Game.ShowChatMessage("PD_HELP - Shows command help.",
+        Color.Green, uid);
+        Game.ShowChatMessage("PD_POWERUPS - Displays all the power-ups with their codenames.",
+        Color.Green, uid);
+        Game.ShowChatMessage("PD_CRATE_CHANCE [chance] - Sets or gets the spawn chance of a power-up crate.",
+        Color.Green, uid);
+        Game.ShowChatMessage("PD_SYRINGE [player] - Gives a player a power-up syringe.",
+        Color.Green, uid);
+        Game.ShowChatMessage("PD_POWERUP <powerup> [player] - Gives a player a power-up.",
+        Color.Green, uid);
+        Game.ShowChatMessage("Required options are shown with <>, optional parameters are shown with [].",
+        Color.Yellow, uid);
+      }
+      break;
+
+    case "PD_POWERUPS": {
+        int uid = user.UserIdentifier;
+
+        Game.ShowChatMessage("Available power-ups:",
+        Color.Green, uid);
+
+        foreach (string powerUpName in typeof(Powerups.AvailablePowerups)
+        .GetNestedTypes()
+        .Select(t => t.Name)
+        .OrderBy(n => n))
+          Game.ShowChatMessage(powerUpName,
+          Color.Green, uid);
+      }
+      break;
+
     case "PD_CRATE_CHANCE": {
-      if (!user.IsModerator && !user.IsHost) {
-        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
-        Color.Red, user.UserIdentifier);
-    
-        break;
-      }
-      
-      string arg = args.CommandArguments.Trim();
+        if (!user.IsModerator && !user.IsHost) {
+          Game.ShowChatMessage("You don't have enough perms to execute this command.",
+          Color.Red, user.UserIdentifier);
 
-      if (string.IsNullOrEmpty(arg)) {
-        Game.ShowChatMessage(string.Format("Special crate chance is set to {0}.", Config.SpecialCrateChance),
-        Color.Green, user.UserIdentifier);
+          break;
+        }
 
-        break;
-      }
-      
-      float crateChance;
-      
-      if (float.TryParse(args.CommandArguments.Trim(), out crateChance)) {
-        Config.SpecialCrateChance = crateChance;
-        
-        Game.ShowChatMessage(string.Format("Set special crate chance to {0}.", Config.SpecialCrateChance), 
-        Color.Green, user.UserIdentifier);
-      } else {
-        Game.ShowChatMessage("Specify a valid number.", 
-        Color.Red, user.UserIdentifier);
-      }
-    }
-    break;
-    
-    case "PD_SYRINGE": {
-      if (!user.IsModerator && !user.IsHost) {
-        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
-        Color.Red, user.UserIdentifier);
-    
-        break;
-      }
-      
-      IUser target = GetUser(args.CommandArguments.Trim());
-      IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
-      
-      if (targetPlayer != null) {
-        OnPowerupSyringe(new TriggerArgs(null, targetPlayer, false));
-      } else {
-        Game.ShowChatMessage("Invalid player.", 
-        Color.Red, user.UserIdentifier);
-      }
-    }
-    break;
-    
-    case "PD_POWERUP": {
-      if (!user.IsModerator && !user.IsHost) {
-        Game.ShowChatMessage("You don't have enough perms to execute this command.", 
-        Color.Red, user.UserIdentifier);
-    
-        break;
-      }
-      
-      string[] arg = args.CommandArguments.Split(' ');
-      
-      Type powerUpType = GetPowerup(arg[0]);
-      
-      if (powerUpType != null) {
-        IUser target = GetUser(arg.ElementAtOrDefault(1));
-        IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
-      
-        if (targetPlayer != null) {
-          Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, targetPlayer); 
-          
-          Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), 
-          Color.Yellow, targetPlayer.UserIdentifier);
-          
-          PlayPowerupEffect(targetPlayer.GetWorldPosition());
+        string arg = args.CommandArguments.Trim();
+
+        if (string.IsNullOrEmpty(arg)) {
+          Game.ShowChatMessage(string.Format("Special crate chance is set to {0}.", Config.SpecialCrateChance),
+          Color.Green, user.UserIdentifier);
+
+          break;
+        }
+
+        float crateChance;
+
+        if (float.TryParse(arg, out crateChance)) {
+          Config.SpecialCrateChance = crateChance;
+
+          Game.ShowChatMessage(string.Format("Set special crate chance to {0}.", Config.SpecialCrateChance),
+          Color.Green, user.UserIdentifier);
         } else {
-          Game.ShowChatMessage("Invalid player.", 
+          Game.ShowChatMessage("Specify a valid number.",
           Color.Red, user.UserIdentifier);
         }
-      } else {
-        Game.ShowChatMessage("Invalid power-up.", 
-        Color.Red, user.UserIdentifier);
-    
-        break;
       }
-    }
-    break;
+      break;
+
+    case "PD_SYRINGE": {
+        if (!user.IsModerator && !user.IsHost) {
+          Game.ShowChatMessage("You don't have enough perms to execute this command.",
+          Color.Red, user.UserIdentifier);
+
+          break;
+        }
+
+        IUser target = GetUser(args.CommandArguments.Trim());
+        IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
+
+        if (targetPlayer != null) {
+          OnPowerupSyringe(new TriggerArgs(null, targetPlayer, false));
+        } else {
+          Game.ShowChatMessage("Invalid player.",
+          Color.Red, user.UserIdentifier);
+        }
+      }
+      break;
+
+    case "PD_POWERUP": {
+        if (!user.IsModerator && !user.IsHost) {
+          Game.ShowChatMessage("You don't have enough perms to execute this command.",
+          Color.Red, user.UserIdentifier);
+
+          break;
+        }
+
+        string[] arg = args.CommandArguments.Split(' ');
+
+        Type powerUpType = GetPowerup(arg[0]);
+
+        if (powerUpType != null) {
+          IUser target = GetUser(arg.ElementAtOrDefault(1));
+          IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
+
+          if (targetPlayer != null) {
+            Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, targetPlayer);
+
+            Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author),
+            Color.Yellow, targetPlayer.UserIdentifier);
+
+            PlayPowerupEffect(targetPlayer.GetWorldPosition());
+          } else {
+            Game.ShowChatMessage("Invalid player.",
+            Color.Red, user.UserIdentifier);
+          }
+        } else {
+          Game.ShowChatMessage("Invalid power-up.",
+          Color.Red, user.UserIdentifier);
+
+          break;
+        }
+      }
+      break;
   }
 }
 
 public static class Config {
   private const string SPECIAL_CRATE_KEY = "SpecialCrateChance";
-  
+
   public static float SpecialCrateChance {
     get {
       return Powerups.SpawnChance;
@@ -149,14 +149,14 @@ public static class Config {
     set {
       float val = MathHelper.Clamp(value, 0, 100);
       Powerups.SpawnChance = val;
-      
+
       Game.LocalStorage.SetItem(SPECIAL_CRATE_KEY, val);
     }
   }
-  
+
   public static void Update() {
     float specialCrateChance;
-    
+
     if (Game.LocalStorage.TryGetItemFloat(SPECIAL_CRATE_KEY, out specialCrateChance)) {
       Powerups.SpawnChance = specialCrateChance;
     }
@@ -166,14 +166,14 @@ public static class Config {
 public IUser GetUser(string arg) {
   return string.IsNullOrEmpty(arg) ? null :
   Game.GetActiveUsers()
-  .FirstOrDefault(u => u.AccountName == arg || u.Name == arg || 
+  .FirstOrDefault(u => u.AccountName == arg || u.Name == arg ||
   (arg.All(char.IsDigit) ? u.GameSlotIndex == int.Parse(arg) : false));
 }
 
 public Type GetPowerup(string arg) {
   string nest = "SFDScript.GameScript+Powerups+AvailablePowerups+" + arg;
   System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-  
+
   return assembly.GetTypes()
   .FirstOrDefault(t => t.FullName.Equals(nest, StringComparison.OrdinalIgnoreCase));
 }
@@ -194,7 +194,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
   IPlayer sender = args.Sender as IPlayer;
 
   if (sender == null) { // Get
-    sender = Game.GetObjectsByArea < IPlayer > (caller.GetAABB())
+    sender = Game.GetObjectsByArea<IPlayer>(caller.GetAABB())
     .FirstOrDefault(p => !p.IsDead && p.IsInputEnabled && p.IsBot);
   }
 
@@ -242,7 +242,7 @@ public static void OnPowerupSyringe(TriggerArgs args) {
           sender.SetStrengthBoostTime(0);
           sender.SetSpeedBoostTime(0);
 
-          Type powerUpType = Powerups.GetRandomPowerupType();
+          Type powerUpType = Powerups.GetRandomPowerupType(_rng);
 
           Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
 
@@ -359,24 +359,14 @@ public static class Powerups {
     return syringe;
   }
 
-  public static Type GetRandomPowerupType(Random random = null) {
-    if (random == null)
-      random = _rng;
+  public static Type GetRandomPowerupType(Random random) {
+    Type[] nestedPowerups = typeof(AvailablePowerups).GetNestedTypes()
+      .ToArray();
 
-    Type[] nestedPowerups = typeof (AvailablePowerups).GetNestedTypes();
-
-    Type[] instantiableTypes = nestedPowerups.Where(t =>
-      //t.BaseType == typeof(Powerup) &&
-      t.GetConstructors().Any(c =>
-        c.GetParameters().Length == 1 &&
-        c.GetParameters()[0].ParameterType == typeof (IPlayer)
-      )
-    ).ToArray();
-
-    if (instantiableTypes.Length == 0)
+    if (nestedPowerups.Length == 0)
       throw new InvalidOperationException("No instantiable types found.");
 
-    Type randomType = instantiableTypes[random.Next(instantiableTypes.Length)];
+    Type randomType = nestedPowerups[random.Next(nestedPowerups.Length)];
 
     return randomType;
   }
@@ -389,8 +379,10 @@ public static class Powerups {
 
   private static void OnObjectCreated(IObject[] objs) {
     // Get random supply crates
-    foreach(IObject supplyCrate in objs
-      .Where(o => o.Name == "SupplyCrate00" && _rng.Next(101) < SpawnChance)) {
+    foreach (IObject supplyCrate in objs) {
+      if (supplyCrate.Name != "SupplyCrate00" || _rng.Next(101) >= SpawnChance)
+        continue;
+
       CreatePowerupBox(supplyCrate.GetWorldPosition());
 
       supplyCrate.Remove();
@@ -451,13 +443,7 @@ public static class Powerups {
     }
 
     private void Update(float dlt) {
-      if (Box == null) {
-        Enabled = false;
-
-        return;
-      }
-
-      if (Box.IsRemoved) {
+      if (Box == null || Box.IsRemoved) {
         Enabled = false;
 
         return;
@@ -491,8 +477,8 @@ public static class Powerups {
           RayCastResult result = Game.RayCast(rayCastStart, rayCastEnd, _collision)[0];
 
           _slowFall = !result.Hit;
-          
-          if(!_slowFall)
+
+          if (!_slowFall)
             Box.SetLinearVelocity(Vector2.Zero);
         }
       }
@@ -511,12 +497,12 @@ public static class Powerups {
   public class ActivateTriggerBot {
     private const uint UPDATE_DELAY = 50;
 
-    private readonly List < IPlayer > _activators = new List < IPlayer > ();
+    private readonly List<IPlayer> _activators = new List<IPlayer>();
     private Events.UpdateCallback _updateCallback = null;
 
     private IPlayer Activator {
       get {
-        return Game.GetObjectsByArea < IPlayer > (Trigger.GetAABB())
+        return Game.GetObjectsByArea<IPlayer>(Trigger.GetAABB())
           .FirstOrDefault(p => p.IsBot && !p.IsDead && p.IsInputEnabled &&
             !_activators.Contains(p) && (Trigger.GetUseType() == ActivateTriggerUseType.Individual || !_activators.Any()));
       }
@@ -593,7 +579,7 @@ public static class Powerups {
         }
       }
 
-      public Flame(IPlayer player): base(player) {
+      public Flame(IPlayer player) : base(player) {
         Time = 20000; // Set duration of powerup (20 seconds)
       }
 
@@ -712,7 +698,8 @@ public static class Powerups {
           Game.PlayEffect(EffectName.ImpactDefault, Player.GetWorldPosition());
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         // Play effects indicating expiration of powerup
@@ -746,7 +733,7 @@ public static class Powerups {
 
       private IPlayer[] PlayersInVortex {
         get {
-          return Game.GetObjectsByArea < IPlayer > (VortexArea)
+          return Game.GetObjectsByArea<IPlayer>(VortexArea)
           .Where(p => (p.GetTeam() == PlayerTeam.Independent || p.GetTeam() != Player.GetTeam())
           && !p.IsDisabled && p != Player)
           .ToArray();
@@ -755,7 +742,7 @@ public static class Powerups {
 
       private IObject[] ObjectsInVortex {
         get {
-          return Game.GetObjectsByArea (VortexArea)
+          return Game.GetObjectsByArea(VortexArea)
           .Where(o => _objTypes.Any(t => t.IsAssignableFrom(o.GetType())))
           .ToArray();
         }
@@ -773,7 +760,7 @@ public static class Powerups {
         }
       }
 
-      public Vortex(IPlayer player) : base (player) {
+      public Vortex(IPlayer player) : base(player) {
         Time = 17000; // 17 s
       }
 
@@ -784,7 +771,7 @@ public static class Powerups {
         if (Time % VORTEX_COOLDOWN == 0) { // every 250ms
           Game.DrawArea(VortexArea, Color.Red);
 
-          foreach(IPlayer pulled in PlayersInVortex) {
+          foreach (IPlayer pulled in PlayersInVortex) {
             pulled.SetInputEnabled(false);
             pulled.AddCommand(_playerCommand);
 
@@ -804,7 +791,7 @@ public static class Powerups {
             Game.PlaySound("PlayerDive", Vector2.Zero);
           }
 
-          foreach(IObject pulled in ObjectsInVortex) {
+          foreach (IObject pulled in ObjectsInVortex) {
             pulled.SetLinearVelocity(Vector2Helper.DirectionTo(pulled.GetWorldPosition(),
             Player.GetWorldPosition()) * VORTEX_FORCE);
 
@@ -813,7 +800,8 @@ public static class Powerups {
         }
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         // Play sound effect indicating expiration of powerup
@@ -825,7 +813,7 @@ public static class Powerups {
         PointShape.Swirl(
           (v => Game.PlayEffect(EffectName.ItemGleam,
                Vector2Helper.Rotated(v - pos,
-                   (float)(Time % 1500 * (MathHelper.TwoPI / 1500)))
+                   (float) (Time % 1500 * (MathHelper.TwoPI / 1500)))
                    + pos)),
           pos, // Center Position
           5, // Initial Radius
@@ -888,7 +876,7 @@ public static class Powerups {
           Game.DrawArea(SphereArea, Color.Red);
         }
 
-        foreach(IProjectile projs in ProjectilesInSphere) {
+        foreach (IProjectile projs in ProjectilesInSphere) {
           projs.Direction *= -1;
           projs.CritChanceDealtModifier = 100;
           projs.PowerupBounceActive = true;
@@ -904,12 +892,13 @@ public static class Powerups {
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       private void Draw(Vector2 pos) {
         PointShape.Circle(v => {
           Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
-              (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+              (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
             pos);
         }, pos, SPHERE_RADIUS, EFFECT_SEPARATION);
       }
@@ -987,7 +976,7 @@ public static class Powerups {
       public override void Update(float dlt, float dltSecs) {
         Vector2 playerPos = Player.GetWorldPosition();
 
-        foreach(IObject obj in _feet) {
+        foreach (IObject obj in _feet) {
           obj.SetLinearVelocity(Player.GetLinearVelocity());
 
           obj.SetAngle(
@@ -1030,7 +1019,7 @@ public static class Powerups {
     // CLONE-O-MATIC - Ebomb09
     public class Clone : Powerup {
       private readonly float _healthPerMilSec;
-      
+
       private IPlayer _clonePlayer;
       private float _accumulatedDamage = 0;
 
@@ -1064,14 +1053,14 @@ public static class Powerups {
 
         // If no team try to find the first available team
         if (_clonePlayer.GetTeam() == PlayerTeam.Independent) {
-          List < PlayerTeam > AvailableTeams = new List < PlayerTeam > {
+          List<PlayerTeam> AvailableTeams = new List<PlayerTeam> {
             PlayerTeam.Team1,
             PlayerTeam.Team2,
             PlayerTeam.Team3,
             PlayerTeam.Team4
           };
 
-          foreach(IPlayer player in Game.GetPlayers()) {
+          foreach (IPlayer player in Game.GetPlayers()) {
             if (!player.IsDead)
               AvailableTeams.Remove(player.GetTeam());
           }
@@ -1149,8 +1138,8 @@ public static class Powerups {
 
       private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
         FilterOnMaskBits = true,
-          AbsorbProjectile = RayCastFilterMode.True,
-          MaskBits = ushort.MaxValue
+        AbsorbProjectile = RayCastFilterMode.True,
+        MaskBits = ushort.MaxValue
       };
 
       private static readonly Vector2 _offset = new Vector2(0, 24);
@@ -1176,9 +1165,9 @@ public static class Powerups {
       protected override void Activate() {
         _wisp = new Wisp(Player) {
           Offset = _offset,
-            Effect = EffectName.Blood,
-            Cooldown = 750,
-            OnShoot = Shoot
+          Effect = EffectName.Blood,
+          Cooldown = 750,
+          OnShoot = Shoot
         };
 
         Game.PlaySound("Flamethrower", Vector2.Zero);
@@ -1192,10 +1181,10 @@ public static class Powerups {
         new CustomProjectile(_wisp.Position,
           Vector2Helper.DirectionTo(_wisp.Position, target), _raycastInput) {
           Effect = EffectName.BloodTrail,
-            Speed = SPEED,
-            Piercing = PIERCING,
-            OnPlayerHit = _OnPlayerHit,
-            OnObjectHit = _OnObjectHit
+          Speed = SPEED,
+          Piercing = PIERCING,
+          OnPlayerHit = _OnPlayerHit,
+          OnObjectHit = _OnObjectHit
         };
       }
 
@@ -1230,19 +1219,20 @@ public static class Powerups {
       }
 
       private class Wisp {
-        private const uint EFFECT_COOLDOWN = 50;
+        private
+        const uint EFFECT_COOLDOWN = 50;
 
         private static readonly RayCastInput _raycastInput = new RayCastInput(true) {
           IncludeOverlap = true,
-            FilterOnMaskBits = true,
-            MaskBits = ushort.MaxValue,
-            ProjectileHit = RayCastFilterMode.True,
-            AbsorbProjectile = RayCastFilterMode.True
+          FilterOnMaskBits = true,
+          MaskBits = ushort.MaxValue,
+          ProjectileHit = RayCastFilterMode.True,
+          AbsorbProjectile = RayCastFilterMode.True
         };
 
         private IPlayer ClosestEnemy {
           get {
-            List < IPlayer > enemies = Game.GetPlayers()
+            List<IPlayer> enemies = Game.GetPlayers()
               .Where(p => (p.GetTeam() != Player.GetTeam() ||
                   p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
                 p != Player)
@@ -1347,7 +1337,7 @@ public static class Powerups {
 
       private IPlayer ClosestEnemy {
         get {
-          List < IPlayer > enemies = Game.GetPlayers()
+          List<IPlayer> enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
                 p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
               p != Player)
@@ -1386,7 +1376,7 @@ public static class Powerups {
         }
       }
 
-      private readonly List < IObject > _eggs = new List < IObject > ();
+      private readonly List<IObject> _eggs = new List<IObject>();
       private IDialogue _dialog;
 
       public IObject Dove {
@@ -1504,8 +1494,8 @@ public static class Powerups {
           Player.SetCameraSecondaryFocusMode(CameraFocusMode.Focus);
 
           // Clean
-          foreach(IObject egg in Eggs)
-          egg.Destroy();
+          foreach (IObject egg in Eggs)
+            egg.Destroy();
         }
       }
 
@@ -1556,16 +1546,16 @@ public static class Powerups {
 
       private static Color GetTeamColor(PlayerTeam team) {
         switch (team) {
-        case PlayerTeam.Team1:
-          return Color.Blue;
-        case PlayerTeam.Team2:
-          return Color.Red;
-        case PlayerTeam.Team3:
-          return Color.Green;
-        case PlayerTeam.Team4:
-          return Color.Yellow;
-        default:
-          return Color.White;
+          case PlayerTeam.Team1:
+            return Color.Blue;
+          case PlayerTeam.Team2:
+            return Color.Red;
+          case PlayerTeam.Team3:
+            return Color.Green;
+          case PlayerTeam.Team4:
+            return Color.Yellow;
+          default:
+            return Color.White;
         }
       }
     }
@@ -1577,12 +1567,12 @@ public static class Powerups {
 
       private static readonly PlayerModifiers _stoneMod = new PlayerModifiers() {
         ImpactDamageTakenModifier = 0,
-          ExplosionDamageTakenModifier = 0.25f,
-          ProjectileDamageTakenModifier = 0.25f,
-          ProjectileCritChanceTakenModifier = 0,
-          MeleeStunImmunity = 1,
-          MeleeDamageTakenModifier = 0.25f,
-          SprintSpeedModifier = 0.75f
+        ExplosionDamageTakenModifier = 0.25f,
+        ProjectileDamageTakenModifier = 0.25f,
+        ProjectileCritChanceTakenModifier = 0,
+        MeleeStunImmunity = 1,
+        MeleeDamageTakenModifier = 0.25f,
+        SprintSpeedModifier = 0.75f
       };
 
       private IProfile _profile;
@@ -1698,7 +1688,7 @@ public static class Powerups {
       private const FireNodeType FIRE_TYPE = FireNodeType.Flamethrower;
 
       private static readonly Vector2 _effectOffset = new Vector2(0, 8);
-      private static readonly Vector2 _fireOffset = new Vector2(8, 0);
+      private static readonly Vector2 _fireOffset = new Vector2(8);
 
       private static readonly Vector2 _rayCastEndOffset = new Vector2(48, 8);
       private static readonly Vector2 _rayCastStartOffset = new Vector2(0, 4);
@@ -1773,7 +1763,8 @@ public static class Powerups {
         Time = 25000; // 25 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Player.IsBurning) // Fire resistance
@@ -1807,14 +1798,13 @@ public static class Powerups {
       }
 
       private Vector2 GetRandomFireVelocity(Random random) {
-        float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
-        float y = _rayCastEndOffset.Y * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+        float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float) (RANDOM_SPEED_EXP * random.NextDouble());
+        float y = _rayCastEndOffset.Y * (float) (RANDOM_SPEED_EXP * random.NextDouble());
 
         return new Vector2(x, y);
       }
     }
 
-    // MANA SHIELD - Danger Ross
     public class ManaShield : Powerup {
       private const string centerobj = "InvisibleBlockNoCollision";
 
@@ -1827,8 +1817,10 @@ public static class Powerups {
       private const byte COLOR_G = 244;
       private const byte COLOR_B = 244;
 
-      private readonly List < IObject > allItems = new List < IObject > ();
+      private readonly List<IObject> allItems = new List<IObject>();
+
       private readonly IObjectText[] effects = new IObjectText[8];
+
       private readonly Events.CallbackDelegate[] handlers = new Events.CallbackDelegate[2];
 
       private IObject bird;
@@ -1943,10 +1935,11 @@ public static class Powerups {
           effects[i + 4] = obj;
         }
 
-        CollisionFilter filter = new CollisionFilter();
-        filter.ProjectileHit = true;
-        filter.AbsorbProjectile = false;
-        filter.BlockFire = true;
+        CollisionFilter filter = new CollisionFilter {
+          ProjectileHit = true,
+          AbsorbProjectile = false,
+          BlockFire = true
+        };
 
         IObject deflector = Game.CreateObject("InvisibleBlockNoCollision", Player.GetWorldPosition() + new Vector2(-17, 2.3f));
 
@@ -2023,7 +2016,7 @@ public static class Powerups {
               projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
               projectile.Position += normal * 2;
 
-              health -= (projectile.GetProperties().ObjectDamage * (float)(angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
+              health -= (projectile.GetProperties().ObjectDamage * (float) (angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
 
               if (health > 50 && health < 75) {
                 crack1.SetText("X");
@@ -2051,7 +2044,8 @@ public static class Powerups {
         onDamage = Events.PlayerDamageCallback.Start((IPlayer hitPlayer, PlayerDamageArgs args) => {
           if (args.DamageType == PlayerDamageEventType.Fire) {
             preservedHealth = Player.GetModifiers().CurrentHealth;
-            if (preservedHealth > 0) return;
+            if (preservedHealth > 0)
+              return;
           }
 
           if (hitPlayer.UniqueID == Player.UniqueID) {
@@ -2102,7 +2096,7 @@ public static class Powerups {
         Player.SetModifiers(modify);
 
         if (!enabled) {
-          foreach(IObject obj in allItems) {
+          foreach (IObject obj in allItems) {
             obj.Remove();
           }
 
@@ -2133,7 +2127,7 @@ public static class Powerups {
       }
 
       private void BreakShield() {
-        List < IObject > toFade = new List < IObject > ();
+        List<IObject> toFade = new List<IObject>();
 
         Game.PlaySound("BreakGlass", Player.GetWorldPosition(), 5);
         Game.PlaySound("BreakGlass", Player.GetWorldPosition(), 5);
@@ -2146,7 +2140,7 @@ public static class Powerups {
             IObject debris = Game.CreateObject("GlassShard00A", Player.GetWorldPosition() + new Vector2(X_OFFSET, Y_OFFSET) + dir);
             debris.SetHealth(1);
             debris.SetLinearVelocity(dir * 0.3f + new Vector2(0, 4));
-            debris.SetAngle((float)(_rng.NextDouble() * MathHelper.TwoPI));
+            debris.SetAngle((float) (_rng.NextDouble() * MathHelper.TwoPI));
             debris.SetAngularVelocity(((float) _rng.NextDouble() - 0.5f) * 20);
             toFade.Add(debris);
           } else {
@@ -2170,7 +2164,7 @@ public static class Powerups {
       private Vector2 RandomPoint(float radius) {
         float distance = (float) Math.Pow(_rng.NextDouble(), 0.25) * radius;
 
-        return Vector2Helper.Rotated(new Vector2(distance, 0), (float)(_rng.NextDouble() * MathHelper.TwoPI));
+        return Vector2Helper.Rotated(new Vector2(distance, 0), (float) (_rng.NextDouble() * MathHelper.TwoPI));
       }
     }
 
@@ -2209,7 +2203,8 @@ public static class Powerups {
         Dashing = false;
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         EmptyUppercutCheck(0);
@@ -2304,8 +2299,10 @@ public static class Powerups {
       }
 
       private void OnPlayerMeleeAction(IPlayer attacker, PlayerMeleeHitArg[] args) {
-        foreach(PlayerMeleeHitArg arg in args
-          .Where(a => a.HitObject == Player)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (arg.HitObject != Player)
+            continue;
+
           attacker.DealDamage(arg.HitDamage * DMG_MULT); // Damage attacker
 
           // Effect
@@ -2325,13 +2322,13 @@ public static class Powerups {
 
       private WeaponItemType[] EmptyWeaponItemTypes {
         get {
-          List < WeaponItemType > weaponItemTypes = new List < WeaponItemType > {
-            WeaponItemType.Melee,
-            WeaponItemType.Rifle,
-            WeaponItemType.Handgun,
-            WeaponItemType.Powerup,
-            WeaponItemType.Thrown
-          };
+          List<WeaponItemType> weaponItemTypes = new List<WeaponItemType> {
+                WeaponItemType.Melee,
+                WeaponItemType.Rifle,
+                WeaponItemType.Handgun,
+                WeaponItemType.Powerup,
+                WeaponItemType.Thrown
+              };
 
           weaponItemTypes.Remove(Player.CurrentMeleeWeapon.WeaponItemType);
           weaponItemTypes.Remove(Player.CurrentPrimaryWeapon.WeaponItemType);
@@ -2340,22 +2337,6 @@ public static class Powerups {
           weaponItemTypes.Remove(Player.CurrentThrownItem.WeaponItemType);
 
           return weaponItemTypes.ToArray();
-        }
-      }
-
-      private IPlayer ClosestEnemy {
-        get {
-          List < IPlayer > enemies = Game.GetPlayers()
-            .Where(p => (p.GetTeam() != Player.GetTeam() ||
-              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead)
-            .ToList();
-
-          Vector2 playerPos = Player.GetWorldPosition();
-
-          enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
-            .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
-
-          return enemies.FirstOrDefault();
         }
       }
 
@@ -2385,14 +2366,15 @@ public static class Powerups {
         Time = 14000; // 14 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         WeaponItemType[] emptyWeaponItemTypes = EmptyWeaponItemTypes;
         IPlayer[] enemies = ActiveEnemies;
 
         if (emptyWeaponItemTypes.Any() && enemies.Any())
-          foreach(IPlayer enemy in enemies) {
+          foreach (IPlayer enemy in enemies) {
             WeaponItemType toGrab = emptyWeaponItemTypes
               .FirstOrDefault(s => enemy.CurrentWeaponDrawn == s);
 
@@ -2435,7 +2417,7 @@ public static class Powerups {
       private static readonly Vector2 _offset = new Vector2(0, 24);
       private static readonly PlayerModifiers _setMod = new PlayerModifiers() {
         ExplosionDamageTakenModifier = 0,
-          ImpactDamageTakenModifier = 0.25f
+        ImpactDamageTakenModifier = 0.25f
       };
       private static readonly string[] _throwableIDs = {
         "WpnGrenadesThrown",
@@ -2444,7 +2426,7 @@ public static class Powerups {
         "WpnMineThrown"
       };
 
-      private readonly List < IObject > _explosives = new List < IObject > ();
+      private readonly List<IObject> _explosives = new List<IObject>();
       private PlayerModifiers _modifiers;
 
       private static string RandomThrowableID {
@@ -2455,7 +2437,7 @@ public static class Powerups {
 
       private IPlayer ClosestEnemy {
         get {
-          List < IPlayer > enemies = Game.GetPlayers()
+          List<IPlayer> enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
                 p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
               p != Player)
@@ -2520,7 +2502,7 @@ public static class Powerups {
         if (!enabled) {
           Player.SetModifiers(_modifiers);
 
-          foreach(IObject exp in Explosives) {
+          foreach (IObject exp in Explosives) {
             Game.PlayEffect(EffectName.DestroyDefault, exp.GetWorldPosition());
             Game.PlaySound("DestroyDefault", Vector2.Zero);
 
@@ -2563,15 +2545,15 @@ public static class Powerups {
       private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
       private static readonly PlayerModifiers _starMod = new PlayerModifiers() {
         EnergyConsumptionModifier = 0,
-          ProjectileCritChanceTakenModifier = 0,
-          ExplosionDamageTakenModifier = 0,
-          ProjectileDamageTakenModifier = 0,
-          MeleeDamageTakenModifier = 0,
-          ImpactDamageTakenModifier = 0,
-          MeleeStunImmunity = 1,
-          CanBurn = 0,
-          RunSpeedModifier = 2,
-          SprintSpeedModifier = 2
+        ProjectileCritChanceTakenModifier = 0,
+        ExplosionDamageTakenModifier = 0,
+        ProjectileDamageTakenModifier = 0,
+        MeleeDamageTakenModifier = 0,
+        ImpactDamageTakenModifier = 0,
+        MeleeStunImmunity = 1,
+        CanBurn = 0,
+        RunSpeedModifier = 2,
+        SprintSpeedModifier = 2
       };
 
       private static readonly string[] _colors = {
@@ -2607,7 +2589,7 @@ public static class Powerups {
 
       private IPlayer[] PlayersToPush {
         get {
-          return Game.GetObjectsByArea < IPlayer > (Player.GetAABB())
+          return Game.GetObjectsByArea<IPlayer>(Player.GetAABB())
             .Where(p => !p.IsDead && p != Player &&
               (p.GetTeam() != Player.GetTeam() || p.GetTeam() == PlayerTeam.Independent))
             .ToArray();
@@ -2650,7 +2632,7 @@ public static class Powerups {
         }
 
         if (Time % THROW_COOLDOWN == 0)
-          foreach(IPlayer toPush in PlayersToPush) {
+          foreach (IPlayer toPush in PlayersToPush) {
             toPush.SetInputEnabled(false);
             toPush.AddCommand(_playerCommand);
 
@@ -2749,7 +2731,8 @@ public static class Powerups {
         Time = 40000; // 40 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % REGEN_COOLDOWN == 0) {
@@ -2818,12 +2801,12 @@ public static class Powerups {
 
       private static readonly PlayerModifiers _berserkMod = new PlayerModifiers() {
         CurrentHealth = 1,
-          ProjectileCritChanceTakenModifier = 0,
-          ExplosionDamageTakenModifier = 0,
-          ProjectileDamageTakenModifier = 0,
-          MeleeDamageTakenModifier = 0,
-          ImpactDamageTakenModifier = 0,
-          CanBurn = 0
+        ProjectileCritChanceTakenModifier = 0,
+        ExplosionDamageTakenModifier = 0,
+        ProjectileDamageTakenModifier = 0,
+        MeleeDamageTakenModifier = 0,
+        ImpactDamageTakenModifier = 0,
+        CanBurn = 0
       };
 
       private static readonly Vector2 _jumpVel = new Vector2(0, 12);
@@ -2920,7 +2903,7 @@ public static class Powerups {
         }
       }
 
-      public Kamikaze(IPlayer player): base(player) {
+      public Kamikaze(IPlayer player) : base(player) {
         Time = 7000; // 7 s
       }
 
@@ -2934,7 +2917,7 @@ public static class Powerups {
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
           Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
-            string.Format(TXT_EFFECT, (int)(Time / 1000)));
+            string.Format(TXT_EFFECT, (int) (Time / 1000)));
 
           Game.PlaySound("TimerTick", Vector2.Zero);
         }
@@ -2947,7 +2930,7 @@ public static class Powerups {
 
         Vector2 playerPos = Player.GetWorldPosition();
 
-        foreach(Vector2 offset in _explosionsOffset) {
+        foreach (Vector2 offset in _explosionsOffset) {
           Vector2 pos = playerPos + offset;
 
           Game.TriggerExplosion(pos);
@@ -2985,7 +2968,7 @@ public static class Powerups {
 
       private IPlayer ClosestEnemy {
         get {
-          List < IPlayer > enemies = Game.GetPlayers()
+          List<IPlayer> enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
                 p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
               p != Player)
@@ -3016,7 +2999,8 @@ public static class Powerups {
         Time = 25000; // 25 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
@@ -3069,7 +3053,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // MAGNETIC FIELD - Tomo
     public class Magnet : Powerup {
       private const float EFFECT_COOLDOWN = 100;
@@ -3122,7 +3106,7 @@ public static class Powerups {
 
       private IObjectStreetsweeper[] TargetStreetsweepersInMagnet {
         get {
-          return Game.GetObjectsByArea < IObjectStreetsweeper > (MagnetArea)
+          return Game.GetObjectsByArea<IObjectStreetsweeper>(MagnetArea)
             .Where(s => s.GetAttackTarget() == Player)
             .ToArray();
         }
@@ -3144,12 +3128,13 @@ public static class Powerups {
         Time = 31000; // 31 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         bool effect = Time % EFFECT_COOLDOWN == 0;
 
-        foreach(IObject affected in ObjectsInMagnet) {
+        foreach (IObject affected in ObjectsInMagnet) {
           affected.SetLinearVelocity(Vector2Helper.DirectionTo(affected.GetWorldPosition(),
             Player.GetWorldPosition()) * MAGNET_FORCE);
 
@@ -3159,7 +3144,7 @@ public static class Powerups {
             Game.PlayEffect(EffectName.ItemGleam, affected.GetWorldPosition());
         }
 
-        foreach(IObject explosives in ExplosivesInMagnet) {
+        foreach (IObject explosives in ExplosivesInMagnet) {
           explosives.SetLinearVelocity(Vector2Helper.DirectionTo(Player.GetWorldPosition(),
             explosives.GetWorldPosition()) * MAGNET_FORCE);
 
@@ -3169,7 +3154,7 @@ public static class Powerups {
             Game.PlayEffect(EffectName.ItemGleam, explosives.GetWorldPosition());
         }
 
-        foreach(IObjectStreetsweeper sweepers in TargetStreetsweepersInMagnet) {
+        foreach (IObjectStreetsweeper sweepers in TargetStreetsweepersInMagnet) {
           Game.PlayEffect(EffectName.Electric, sweepers.GetWorldPosition());
           Game.PlaySound("ElectricSparks", Vector2.Zero);
 
@@ -3191,7 +3176,7 @@ public static class Powerups {
         Game.PlayEffect(EffectName.Electric, v);
       }
     }
-    
+
     // TELEKINESIS - dsafxP
     public class Telekinesis : Powerup {
       private const float EFFECT_COOLDOWN = 50;
@@ -3207,10 +3192,10 @@ public static class Powerups {
 
       private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
         AbsorbProjectile = RayCastFilterMode.Any,
-          ProjectileHit = RayCastFilterMode.True
+        ProjectileHit = RayCastFilterMode.True
       };
 
-      private readonly List < IObject > _thrown = new List < IObject > ();
+      private readonly List<IObject> _thrown = new List<IObject>();
 
       private Events.PlayerKeyInputCallback _keyCallback = null;
       private Events.ObjectCreatedCallback _objectCreatedCallback = null;
@@ -3289,9 +3274,9 @@ public static class Powerups {
 
       private IPlayer ClosestEnemy {
         get {
-          List < IPlayer > enemies = Game.GetPlayers()
+          List<IPlayer> enemies = Game.GetPlayers()
             .Where(p => (p.GetTeam() != Player.GetTeam() ||
-              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead && 
+              p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
               p != _sticky && p != Player)
             .ToList();
 
@@ -3339,7 +3324,8 @@ public static class Powerups {
         Time = 27000; // 27 s
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (_sticky != null) {
@@ -3356,13 +3342,15 @@ public static class Powerups {
 
         Vector2 inputDirection = InputDirection;
 
-        foreach(IObject thrown in Thrown) {
+        foreach (IObject thrown in Thrown) {
           thrown.SetLinearVelocity(inputDirection * THROW_FORCE);
           thrown.SetAngularVelocity(THROW_FORCE);
         }
 
-        foreach(IProjectile fired in Game.GetProjectiles()
-          .Where(p => p.OwnerPlayerID == Player.UniqueID)) {
+        foreach (IProjectile fired in Game.GetProjectiles()) {
+          if (fired.OwnerPlayerID != Player.UniqueID)
+            continue;
+
           fired.Direction = inputDirection;
           fired.Velocity = inputDirection != Vector2.Zero ? inputDirection * BULLET_FORCE :
             fired.Direction * BULLET_FORCE;
@@ -3390,8 +3378,10 @@ public static class Powerups {
         if (player != Player)
           return;
 
-        foreach(VirtualKeyInfo pressed in keyEvents
-          .Where(k => k.Event == VirtualKeyEvent.Pressed && k.Key == VirtualKey.ACTIVATE)) {
+        foreach (VirtualKeyInfo pressed in keyEvents) {
+          if (pressed.Event != VirtualKeyEvent.Pressed && pressed.Key != VirtualKey.ACTIVATE)
+            continue;
+
           if (_sticky != null) {
             _sticky.TrackAsMissile(true);
 
@@ -3425,9 +3415,9 @@ public static class Powerups {
             .Intersects(o.GetAABB())));
       }
     }
-    
+
     // ARSENAL - dsafxP
-    public class Arsenal: Powerup {
+    public class Arsenal : Powerup {
       private static readonly PlayerModifiers _arsenalMod = new PlayerModifiers() {
         ItemDropMode = 1
       };
@@ -3437,10 +3427,10 @@ public static class Powerups {
 
       private static readonly RayCastInput _rayCastInput = new RayCastInput(true) {
         AbsorbProjectile = RayCastFilterMode.True,
-          ProjectileHit = RayCastFilterMode.True,
-          BlockFire = RayCastFilterMode.True,
-          BlockMelee = RayCastFilterMode.True,
-          BlockExplosions = RayCastFilterMode.True
+        ProjectileHit = RayCastFilterMode.True,
+        BlockFire = RayCastFilterMode.True,
+        BlockMelee = RayCastFilterMode.True,
+        BlockExplosions = RayCastFilterMode.True
       };
 
       private static WeaponItem RandomWeapon {
@@ -3497,13 +3487,13 @@ public static class Powerups {
 
       private WeaponItemType[] EmptyWeaponItemTypes {
         get {
-          List < WeaponItemType > weaponItemTypes = new List < WeaponItemType > {
-            WeaponItemType.Melee,
-            WeaponItemType.Rifle,
-            WeaponItemType.Handgun,
-            //WeaponItemType.Powerup,
-            WeaponItemType.Thrown
-          };
+          List<WeaponItemType> weaponItemTypes = new List<WeaponItemType> {
+                WeaponItemType.Melee,
+                WeaponItemType.Rifle,
+                WeaponItemType.Handgun,
+                //WeaponItemType.Powerup,
+                WeaponItemType.Thrown
+              };
 
           weaponItemTypes.Remove(Player.CurrentMeleeWeapon.WeaponItemType);
           weaponItemTypes.Remove(Player.CurrentPrimaryWeapon.WeaponItemType);
@@ -3527,7 +3517,7 @@ public static class Powerups {
         }
       }
 
-      public Arsenal(IPlayer player): base(player) {
+      public Arsenal(IPlayer player) : base(player) {
         Time = 7000; // 7 s
       }
 
@@ -3560,8 +3550,8 @@ public static class Powerups {
 
       public override void Update(float dlt, float dltSecs) {
         // Give weapons for each empty slot
-        foreach(WeaponItemType empty in EmptyWeaponItemTypes)
-        Player.GiveWeaponItem(GetRandomWeaponFromType(empty));
+        foreach (WeaponItemType empty in EmptyWeaponItemTypes)
+          Player.GiveWeaponItem(GetRandomWeaponFromType(empty));
       }
 
       public override void OnEnabled(bool enabled) {
@@ -3590,7 +3580,7 @@ public static class Powerups {
         return w;
       }
     }
-    
+
     // GIANT - Tomo
     public class Giant : Powerup {
       private const float TIME = 17000;
@@ -3605,13 +3595,13 @@ public static class Powerups {
 
       private static readonly PlayerModifiers _giantMod = new PlayerModifiers() {
         ImpactDamageTakenModifier = 0.44f,
-          ExplosionDamageTakenModifier = 0.66f,
-          ProjectileDamageTakenModifier = 0.55f,
-          ProjectileCritChanceTakenModifier = 0,
-          MeleeStunImmunity = 1,
-          MeleeDamageTakenModifier = 0.66f,
-          SprintSpeedModifier = 0.88f,
-          SizeModifier = 2
+        ExplosionDamageTakenModifier = 0.66f,
+        ProjectileDamageTakenModifier = 0.55f,
+        ProjectileCritChanceTakenModifier = 0,
+        MeleeStunImmunity = 1,
+        MeleeDamageTakenModifier = 0.66f,
+        SprintSpeedModifier = 0.88f,
+        SizeModifier = 2
       };
 
       private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
@@ -3649,13 +3639,13 @@ public static class Powerups {
 
       private IPlayer[] PlayersShaking {
         get {
-          return Game.GetObjectsByArea < IPlayer > (ShakeArea)
+          return Game.GetObjectsByArea<IPlayer>(ShakeArea)
             .Where(p => (p.GetTeam() == PlayerTeam.Independent || p.GetTeam() != Player.GetTeam()) &&
               !p.IsDisabled && p != Player)
             .ToArray();
         }
       }
-      
+
       public bool CanShake {
         get {
           return _elapsed <= 0;
@@ -3712,7 +3702,7 @@ public static class Powerups {
 
             Vector2 shakeVect = new Vector2(0, shake);
 
-            foreach(IPlayer shaking in PlayersShaking) {
+            foreach (IPlayer shaking in PlayersShaking) {
               shaking.SetInputEnabled(false);
               shaking.AddCommand(_playerCommand);
 
@@ -3729,7 +3719,7 @@ public static class Powerups {
               shaking.Disarm(shaking.CurrentWeaponDrawn);
             }
 
-            foreach(IObject shaking in ObjectsShaking) {
+            foreach (IObject shaking in ObjectsShaking) {
               shaking.SetLinearVelocity(shaking.GetLinearVelocity() + shakeVect);
 
               shaking.SetAngularVelocity(shake);
@@ -3759,8 +3749,10 @@ public static class Powerups {
         if (player != Player)
           return;
 
-        foreach(PlayerMeleeHitArg arg in args
-          .Where(a => !a.IsPlayer)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (arg.IsPlayer)
+            continue;
+
           IObject hit = arg.HitObject;
           float dmg = arg.HitDamage;
 
@@ -3770,7 +3762,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // DRONE - dsafxP
     public class Drone : Powerup {
       private const float SPEED = 6;
@@ -3846,7 +3838,7 @@ public static class Powerups {
       }
 
       protected override void Activate() {
-        Streetsweeper = (IObjectStreetsweeper)Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
+        Streetsweeper = (IObjectStreetsweeper) Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
 
         Streetsweeper.SetOwnerPlayer(Player);
         Streetsweeper.SetMovementType(StreetsweeperMovementType.Stationary);
@@ -3888,7 +3880,7 @@ public static class Powerups {
         Streetsweeper.SetHealth(Streetsweeper.GetMaxHealth()); // Immortality
       }
     }
-    
+
     // OVERCHARGE - dsafxP - Danila015 - Eiga
     public class Overcharge : Powerup {
       private const float CHARGE_INTENSITY = 0.33f; // Charges * Value
@@ -3912,7 +3904,7 @@ public static class Powerups {
           float charge = _charges * CHARGE_INTENSITY;
 
           if (_charges > 0) {
-            _elapsed = CHARGE_DELAY;
+            _elapsed += CHARGE_DELAY;
 
             Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
               string.Format(CHARGE_TEXT, _charges));
@@ -3987,7 +3979,7 @@ public static class Powerups {
         if (player != Player)
           return;
 
-        IEnumerable < IPlayer > stunned = args
+        IEnumerable<IPlayer> stunned = args
           .Where(a => a.IsPlayer)
           .Select(p => (IPlayer) p.HitObject)
           .Where(p => (p.IsFalling || p.IsStaggering) && !p.IsDead);
@@ -3996,7 +3988,7 @@ public static class Powerups {
           Charges += stunned.Count();
       }
     }
-    
+
     // VAMPIRISM - Danila015
     public class Vampirism : Powerup {
       private const float EFFECT_COOLDOWN = 50;
@@ -4036,7 +4028,8 @@ public static class Powerups {
         Time = 21000; // 21 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0)
@@ -4050,7 +4043,7 @@ public static class Powerups {
             Game.PlaySound("ImpactFlesh", Vector2.Zero, 0.5f);
           }
       }
-      
+
       public override void TimeOut() {
         Game.PlaySound("StrengthBoostStop", Vector2.Zero);
       }
@@ -4071,15 +4064,17 @@ public static class Powerups {
         if (player != Player)
           return;
 
-        foreach (PlayerMeleeHitArg arg in args
-          .Where(a => a.IsPlayer)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (!arg.IsPlayer)
+            continue;
+
           float dmg = arg.HitDamage;
 
           Player.SetHealth(Player.GetHealth() + dmg * HEAL_MULT);
 
-          IPlayer hit = (IPlayer)arg.HitObject;
+          IPlayer hit = (IPlayer) arg.HitObject;
 
-          if(hit.IsDead) {
+          if (hit.IsDead) {
             hit.SetHealth(hit.GetHealth() + dmg); // Null dmg so it isn't dealt twice
 
             hit.DealDamage(dmg * CORPSE_DMG_MULT);
@@ -4095,7 +4090,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // TRI-STRIKE - dsafxP - Eiga
     public class Strike : Powerup {
       private const float EFFECT_COOLDOWN = 50;
@@ -4106,10 +4101,10 @@ public static class Powerups {
       private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
 
       private static readonly Vector2[] _offsets = {
-        new Vector2(-10, 0),
-        new Vector2(10, 0),
-        new Vector2(0, 20)
-      };
+            new Vector2(-10, 0),
+            new Vector2(10, 0),
+            new Vector2(0, 20)
+          };
 
       private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
 
@@ -4137,7 +4132,8 @@ public static class Powerups {
         Time = 17000;
       }
 
-      protected override void Activate() {}
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
@@ -4163,7 +4159,7 @@ public static class Powerups {
         if (player != Player)
           return;
 
-        foreach(PlayerMeleeHitArg arg in args) {
+        foreach (PlayerMeleeHitArg arg in args) {
           if (!arg.IsPlayer)
             continue;
 
@@ -4202,7 +4198,7 @@ public static class Powerups {
         Game.PlayEffect(EffectName.Smack, pos);
       }
     }
-    
+
     // ACE PITCHER - dsafxP
     public class Pitcher : Powerup {
       private const float AMMO_REGEN_COOLDOWN = 1000;
@@ -4275,11 +4271,11 @@ public static class Powerups {
         if (Time % AMMO_REGEN_COOLDOWN == 0 && HasRangedWeapon) {
           RifleWeaponItem rifleWeaponItem = Player.CurrentPrimaryWeapon;
 
-          Player.SetCurrentPrimaryWeaponAmmo((int)(rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+          Player.SetCurrentPrimaryWeaponAmmo((int) (rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
           HandgunWeaponItem handgunWeaponItem = Player.CurrentSecondaryWeapon;
 
-          Player.SetCurrentSecondaryWeaponAmmo((int)(handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+          Player.SetCurrentSecondaryWeaponAmmo((int) (handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
           Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(), "+AMMO");
 
@@ -4370,7 +4366,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // LAGGER - dsafxP
     public class Lagger : Powerup {
       private const float TP_COOLDOWN = 500;
@@ -4378,25 +4374,25 @@ public static class Powerups {
       private const float PING_INTENSITY = 0.01f; // Ping * Value = 1
 
       private static readonly string[] _effectNames = {
-        "0",
-        "null",
-        "NaN",
-        "N/A",
-        "undefined",
-        "nullReference",
-        "exception",
-        "error",
-        "unknown",
-        "none",
-        "missing",
-        "invalid",
-        "failure",
-        "0x0",
-        "false",
-        "empty",
-        "nil",
-        "void"
-      };
+            "0",
+            "null",
+            "NaN",
+            "N/A",
+            "undefined",
+            "nullReference",
+            "exception",
+            "error",
+            "unknown",
+            "none",
+            "missing",
+            "invalid",
+            "failure",
+            "0x0",
+            "false",
+            "empty",
+            "nil",
+            "void"
+          };
 
       private PlayerModifiers _modifiers;
       private Vector2 _lastPos = Vector2.Zero;
@@ -4473,7 +4469,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // RECONSTRUCTOR - Danila015
     public class Reconstructor : Powerup {
       private const float EFFECT_COOLDOWN = 250;
@@ -4572,12 +4568,12 @@ public static class Powerups {
         foreach (IObject deb in EatDebris) {
           float heal = deb.GetHealth() * HEAL_MULT;
           float healed = Player.GetHealth() + heal;
-          
+
           if (healed > Player.GetMaxHealth()) {
             PlayerModifiers mod = Player.GetModifiers();
 
             mod.CurrentHealth += heal;
-            mod.MaxHealth += (int)heal;
+            mod.MaxHealth += (int) heal;
 
             Player.SetModifiers(mod);
           } else {
@@ -4672,7 +4668,7 @@ public static class Powerups {
         }
       }
     }
-    
+
     // ONE-TAP - Danila015
     public class Onetap : Powerup {
       private const float EFFECT_COOLDOWN = 50;
@@ -4702,7 +4698,8 @@ public static class Powerups {
         Time = 10000;
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
@@ -4734,7 +4731,7 @@ public static class Powerups {
           if (!arg.IsPlayer)
             continue;
 
-          IPlayer hit = (IPlayer)arg.HitObject;
+          IPlayer hit = (IPlayer) arg.HitObject;
 
           if (hit.IsBlocking) {
             Time -= BLOCK_TIME_PENALTY;
@@ -4754,12 +4751,12 @@ public static class Powerups {
       private void Draw(Vector2 pos) {
         PointShape.Circle(v => {
           Game.PlayEffect(EffectName.BloodTrail, Vector2Helper.Rotated(v - pos,
-              (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+              (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
             pos);
         }, pos, EFFECT_RADIUS, EFFECT_SEPARATION);
       }
     }
-    
+
     // BURST - Danger Ross
     public class Burst : Powerup {
       private const int BATCH_SIZE = 8;
@@ -4792,18 +4789,17 @@ public static class Powerups {
       }
 
       public Burst(IPlayer player) : base(player) {
-        Time = 20000; // 20 s
+        Time = 16000;
       }
 
       protected override void Activate() {
         _nextParticleTime = _rng.Next(30) * 50;
 
         _playerKeyInputEvent = Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
-        Game.RunCommand("/msg template power activated on " + Player.Name);
       }
 
       public void OnPlayerKeyInput(IPlayer player, VirtualKeyInfo[] keyEvents) {
-        if (player.UserIdentifier == Player.UserIdentifier && keyEvents[0].Key == VirtualKey.ATTACK && 
+        if (player.UserIdentifier == Player.UserIdentifier && keyEvents[0].Key == VirtualKey.ATTACK &&
           (player.IsMeleeAttacking || player.IsKicking) && CanBurst) {
           PlayerModifiers mods = player.GetModifiers();
           PlayerModifiers original = player.GetModifiers();
@@ -4814,12 +4810,12 @@ public static class Powerups {
           mods.MeleeStunImmunity = 1;
           mods.MeleeForceModifier *= 1 + damageMult;
 
-          Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int)(damageMult * 100) / 100f));
+          Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int) (damageMult * 100) / 100f));
 
           Area effectArea = new Area(14, -12, -10, 12);
           effectArea.Move(Player.GetWorldPosition());
 
-          for (int i = 0; i < 5 + _rng.Next(5) * (int)damageMult; i++)
+          for (int i = 0; i < 5 + _rng.Next(5) * (int) damageMult; i++)
             PointShape.Random(v => Game.PlayEffect("S_P", v), effectArea, _rng);
 
           Game.PlayEffect("CAM_S", Player.GetWorldPosition(), 2f, 500f, false);
@@ -4837,7 +4833,7 @@ public static class Powerups {
             if (attacker.UniqueID == Player.UniqueID) {
               foreach (PlayerMeleeHitArg arg in args) {
                 if (arg.HitObject is IPlayer) {
-                  IPlayer vic = (IPlayer)arg.HitObject;
+                  IPlayer vic = (IPlayer) arg.HitObject;
                   vic.SetWorldPosition(vic.GetWorldPosition() + Vector2Helper.Up);
                   vic.SetLinearVelocity(vic.GetLinearVelocity() + new Vector2(5 * Player.FacingDirection * damageMult, 6));
                   if (arg.HitDamage <= 0) {
@@ -4877,10 +4873,10 @@ public static class Powerups {
 
         if (_nextParticleTime <= 0) { //replace with while
           _followingParticles.Add(BParticle.GetBParticle(Player, Player.GetWorldPosition() +
-            Vector2Helper.Rotated(Vector2Helper.Right, (float)(_rng.NextDouble() * 2 * Math.PI)) *
-            ((float)(_rng.NextDouble() * 30f) + 10f), ((float)_rng.NextDouble() * 4f + 2)));
+            Vector2Helper.Rotated(Vector2Helper.Right, (float) (_rng.NextDouble() * 2 * Math.PI)) *
+            ((float) (_rng.NextDouble() * 30f) + 10f), ((float) _rng.NextDouble() * 4f + 2)));
 
-          _nextParticleTime += _rng.Next((int)(5 / (powerMult))) * 50 - 50;
+          _nextParticleTime += _rng.Next((int) (5 / (powerMult))) * 50 - 50;
         }
 
         //updating particles
@@ -4959,17 +4955,17 @@ public static class Powerups {
         }
         private BParticle() {
           //the text particle
-          graphic = (IObjectText)Game.CreateObject("Text");
+          graphic = (IObjectText) Game.CreateObject("Text");
 
           //the rails
-          path2 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+          path2 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
 
-          path1 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+          path1 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
           path1.SetNextPathJoint(path2);
           //path1.SetLineVisual(LineVisual.DJRope);
 
           //the rail attachment
-          elevatorAttachment = (IObjectElevatorAttachmentJoint)Game.CreateObject("ElevatorAttachmentJoint");
+          elevatorAttachment = (IObjectElevatorAttachmentJoint) Game.CreateObject("ElevatorAttachmentJoint");
           elevatorAttachment.SetTargetObject(graphic);
           elevatorAttachment.SetElevatorPathJoint(path1);
           elevatorAttachment.SetMaxMotorTorque(200);
@@ -4979,7 +4975,8 @@ public static class Powerups {
         }
 
         public void Update() {
-          if (!GetActive()) return;
+          if (!GetActive())
+            return;
           //UpdatePath2();
 
           float distanceToTarget = Vector2.Distance(path1.GetWorldPosition(), path2.GetWorldPosition()) - 3f;
@@ -5022,7 +5019,8 @@ public static class Powerups {
 
             for (int i = 0; i < particleCount; i++) {
               int length = particles.Length;
-              if (length == 0) length = 1;
+              if (length == 0)
+                length = 1;
 
               //iterating backwards
               int index = (particleCount + particleIndex - i) % particleCount;
@@ -5040,11 +5038,12 @@ public static class Powerups {
             }
             particles = newParticlesList;
 
-          } else return;
+          } else
+            return;
         }
       }
     }
-    
+
     // SENTRY - dsafxP
     public class Sentry : Powerup {
       private const float SPAWN_OFFSET = 16;
@@ -5111,7 +5110,7 @@ public static class Powerups {
         Game.PlayEffect(EffectName.PlayerLandFull, spawnOffset);
 
         _sentryObjs = SpawnTurret(spawnOffset);
-        _revoluteJoint = (IObjectRevoluteJoint)_sentryObjs
+        _revoluteJoint = (IObjectRevoluteJoint) _sentryObjs
           .First(o => o.Name == "RevoluteJoint");
 
         _revoluteJoint.SetMotorEnabled(true);
@@ -5139,7 +5138,7 @@ public static class Powerups {
           RayCastResult rayCastResult = Game.RayCast(revoluteJointPos, end, _raycastInput)[0];
 
           if (rayCastResult.IsPlayer) {
-            IPlayer hit = (IPlayer)rayCastResult.HitObject;
+            IPlayer hit = (IPlayer) rayCastResult.HitObject;
 
             if ((hit.GetTeam() != Player.GetTeam() ||
               hit.GetTeam() == PlayerTeam.Independent) && !hit.IsDead && hit != Player) {
@@ -5157,11 +5156,11 @@ public static class Powerups {
 
       public override void OnEnabled(bool enabled) {
         if (!enabled) {
-          Vector2 explosionPos = _sentryObjs
+          /*Vector2 explosionPos = _sentryObjs
             .First(s => s != null && !s.IsRemoved)
             .GetWorldPosition();
 
-          Game.TriggerExplosion(explosionPos);
+          Game.TriggerExplosion(explosionPos);*/
 
           foreach (IObject obj in _sentryObjs)
             obj.Destroy();
@@ -5207,11 +5206,11 @@ public static class Powerups {
       private static IObject[] SpawnTurret(Vector2 pos) {
         const float MASS_MULT = 0.02f;
 
-        IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
         alt1.SetDisableCollisionTargetObjects(true);
 
-        IObjectWeldJoint weld1 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weld1 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
         IObject metal = Game.CreateObject("Metal02E", pos);
 
@@ -5241,11 +5240,11 @@ public static class Powerups {
 
         alt1.AddTargetObject(pulley);
 
-        IObjectWeldJoint weld2 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weld2 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
-        IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint)Game.CreateObject("RevoluteJoint", pos);
+        IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", pos);
 
-        IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
         alt2.SetDisablePlayerMelee(true);
         alt2.SetDisableProjectileHit(true);
@@ -5293,7 +5292,7 @@ public static class Powerups {
         };
       }
     }
-    
+
     // FLESH SPIRIT - Danger Ross
     public class Flesh : Powerup {
       private const float FORCE_DISTANCE = 62;
@@ -5407,11 +5406,11 @@ public static class Powerups {
         _allItems.Add(wall2);
         _allItems.Add(ceiling);
 
-        _collisionGroup = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        _collisionGroup = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
         _collisionGroup.SetDisableCollisionTargetObjects(true);
         _allItems.Add(_collisionGroup);
 
-        _cellCollision = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        _cellCollision = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
         _cellCollision.SetDisabledCategoryBits(65535);
         //_cellCollision.SetDisabledMaskBits(2);//2
         _cellCollision.SetDisabledAboveBits(65535);
@@ -5425,7 +5424,7 @@ public static class Powerups {
         _collisionGroup.AddTargetObject(_body);
         _allItems.Add(_body);
 
-        _cellTarget = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos);
+        _cellTarget = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos);
         _cellTarget.SetTargetObject(_body);
         _allItems.Add(_cellTarget);
 
@@ -5434,12 +5433,12 @@ public static class Powerups {
         AddNoProjectileFilter(_forcePoint);
         _allItems.Add(_forcePoint);
 
-        IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
+        IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
         connection.SetTargetObject(_body);
         connection.SetMass(JOINT_MASS);
         _allItems.Add(connection);
 
-        _force = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
+        _force = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
         _force.SetForce(0f);
         _force.SetForcePerDistance(0.03f); //0.8 for 20
                                            //_force.SetLineVisual(LineVisual.DJRope);
@@ -5454,19 +5453,19 @@ public static class Powerups {
         _collisionGroup.AddTargetObject(_skull);
         _allItems.Add(_skull);
 
-        IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
+        IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
         sConnection.SetTargetObject(_skull); //SKULL CONNECTOR
         _allItems.Add(sConnection);
 
 
-        IObjectDistanceJoint sRope = (IObjectDistanceJoint)Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
+        IObjectDistanceJoint sRope = (IObjectDistanceJoint) Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
         sRope.SetLengthType(DistanceJointLengthType.Elastic);
         sRope.SetTargetObject(_forcePoint);// ROPE GOES FROM POINT TO SKULL
                                            //sRope.SetLineVisual(LineVisual.DJRope);
         sRope.SetTargetObjectJoint(sConnection);
         _allItems.Add(sRope);
 
-        IObjectPullJoint sForce = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos);
+        IObjectPullJoint sForce = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos);
         sForce.SetForce(0f);
         sForce.SetForcePerDistance(0.0008f);
         sForce.SetLineVisual(LineVisual.DJRope);
@@ -5558,13 +5557,14 @@ public static class Powerups {
       private void Bite(IPlayer victim, PlayerModifiers hpmod) {
 
         for (int i = (MAX_CELLS / 2); i < MAX_CELLS; i++) {
-          if (_cells[i] == null || _cells[i].IsRemoved) continue;
+          if (_cells[i] == null || _cells[i].IsRemoved)
+            continue;
           if (i > (MAX_CELLS / 4)) {
-            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, 24f));
-            _cells[i].SetAngle((float)(Math.PI * (7 / 4)));
+            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, 24f));
+            _cells[i].SetAngle((float) (Math.PI * (7 / 4)));
           } else {
-            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, -12f));
-            _cells[i].SetAngle((float)(Math.PI * (3 / 4)));
+            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, -12f));
+            _cells[i].SetAngle((float) (Math.PI * (3 / 4)));
           }
         }
 
@@ -5585,12 +5585,12 @@ public static class Powerups {
       private void SpawnCell() {
         for (int i = 0; i < MAX_CELLS; i++) {
           if (_cells[i] == null || _cells[i].IsRemoved) {
-            Vector2 randPos = new Vector2((float)((_rng.NextDouble() - 0.5f) * 14f), (float)((_rng.NextDouble() - 0.5f) * 16f - 8f));
+            Vector2 randPos = new Vector2((float) ((_rng.NextDouble() - 0.5f) * 14f), (float) ((_rng.NextDouble() - 0.5f) * 16f - 8f));
             Vector2 pos = _body.GetWorldPosition() + randPos - new Vector2(0, -8);
-            if (i < (int)(MAX_CELLS / 2)) {
-              _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+            if (i < (int) (MAX_CELLS / 2)) {
+              _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float) (Math.PI * 2 * _rng.NextDouble()));
             } else {
-              _cells[i] = Game.CreateObject("Giblet02", pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+              _cells[i] = Game.CreateObject("Giblet02", pos, (float) (Math.PI * 2 * _rng.NextDouble()));
             }
             _cells[i].CustomID = "__cell__";
             _cells[i].SetMass(0.00001f);
@@ -5608,7 +5608,7 @@ public static class Powerups {
             //_allItems.Add(targetObject);
 
 
-            IObjectPullJoint pullJoint = (IObjectPullJoint)Game.CreateObject("PullJoint", pos);
+            IObjectPullJoint pullJoint = (IObjectPullJoint) Game.CreateObject("PullJoint", pos);
             //pullJoint.SetForce(0.02f);
             pullJoint.SetForcePerDistance(0.001f);
             pullJoint.SetTargetObject(_cells[i]);
@@ -5666,7 +5666,8 @@ public static class Powerups {
         };
 
         RayCastResult result = Game.RayCast(starting, starting + new Vector2(0, -17), input)[0];
-        if (result.Hit) return true;
+        if (result.Hit)
+          return true;
 
         return false;
       }
@@ -5676,16 +5677,16 @@ public static class Powerups {
         Vector2 newPos = _body.GetWorldPosition() + new Vector2(0, FORCE_DISTANCE);
 
         if (_jumpCooldown > 0) {
-          float eq = ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
+          float eq = ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
           //if (eq < 0) eq = 0;
           //Game.RunCommand("/msg " + eq);
           newPos += new Vector2(0, eq);
-          _jumpCooldown -= (int)dlt;
+          _jumpCooldown -= (int) dlt;
         } else if (Player.KeyPressed(VirtualKey.JUMP)) {
           if (TouchingGround()) {
             _jumpCooldown = JUMP_COOLDOWN;
 
-            newPos += new Vector2(0, ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
+            newPos += new Vector2(0, ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
           }
         }
 
@@ -5810,7 +5811,9 @@ public static class Powerups {
         private readonly IObjectPullJoint _arm;
         private readonly IObjectWeldJoint _weld;
 
-        public bool Removed { get; private set; }
+        public bool Removed {
+          get; private set;
+        }
 
         public Tendril(Vector2 velocity, IObject body) {
           _expiration = Game.TotalElapsedGameTime + DURATION;
@@ -5826,14 +5829,14 @@ public static class Powerups {
           _grabber.SetHealth(10f);
           _grabber.CustomID = "__tendril__";
 
-          _toGrabber = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
+          _toGrabber = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
           _toGrabber.SetTargetObject(_grabber);
 
           Vector2 forcePos = body.GetWorldPosition() + velocity * 5f + new Vector2(0, 20f);
 
           _forceSolid = Game.CreateObject("InvisibleBlockNoCollision", forcePos);
 
-          _force = (IObjectPullJoint)Game.CreateObject("PullJoint", forcePos);
+          _force = (IObjectPullJoint) Game.CreateObject("PullJoint", forcePos);
           _force.SetTargetObject(_forceSolid);
           _force.SetTargetObjectJoint(_toGrabber);
           _force.SetForcePerDistance(0.02f);
@@ -5841,14 +5844,14 @@ public static class Powerups {
 
           //_force.SetLineVisual(LineVisual.DJRope); //TEMPORARY
 
-          _arm = (IObjectPullJoint)Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
+          _arm = (IObjectPullJoint) Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
           _arm.SetLineVisual(LineVisual.DJRope);
           _arm.SetTargetObject(body);
           _arm.SetTargetObjectJoint(_toGrabber);
           _arm.SetForce(0f);
           _arm.SetForcePerDistance(0f);
 
-          _weld = (IObjectWeldJoint)Game.CreateObject("WeldJoint");
+          _weld = (IObjectWeldJoint) Game.CreateObject("WeldJoint");
           _weld.AddTargetObject(_grabber);
 
         }
@@ -5876,7 +5879,7 @@ public static class Powerups {
             Vector2 pos = _grabber.GetWorldPosition();
             RayCastResult result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero, Vector2.Zero);
             for (int i = 0; i < 4; i++) {
-              result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float)Math.PI / 2 * i), input)[0];
+              result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float) Math.PI / 2 * i), input)[0];
 
               if (result.Hit) {
                 if (result.HitObject.Name.Substring(0, 3) == "Gib") {
@@ -5888,7 +5891,8 @@ public static class Powerups {
             }
             if (result.Hit && result.ObjectID != _arm.GetTargetObject().UniqueID) {
               Grab(result.HitObject);
-            } else Destroy();
+            } else
+              Destroy();
 
           }
         }
@@ -6058,160 +6062,6 @@ public abstract class Powerup {
 }
 
 /// <summary>
-/// Contains methods for creating various point shapes.
-/// </summary>
-public static class PointShape {
-  /// <summary>
-  /// Creates a trail of points between two points.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="start">The starting point of the trail.</param>
-  /// <param name="end">The ending point of the trail.</param>
-  /// <param name="pointDistance">The distance between each point on the
-  /// trail.</param>
-  public static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end,
-    float pointDistance = 0.1f) {
-    int count
-      = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
-
-    for (int i = 0; i < count; i++) {
-      Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
-      func(pos);
-    }
-  }
-
-  /// <summary>
-  /// Creates a circle of points around a center point.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="centerPoint">The center point of the circle.</param>
-  /// <param name="radius">The radius of the circle.</param>
-  /// <param name="separationAngle">The angle between each point on the
-  /// circle.</param>
-  public static void Circle(Action < Vector2 > func, Vector2 centerPoint,
-    float radius, float separationAngle = 1) {
-    int pointCount = (int) Math.Ceiling(360f / separationAngle);
-
-    for (int i = 0; i < pointCount; i++) {
-      float angle = DegreesToRadians(i * separationAngle);
-      Vector2 pos
-        = new Vector2(centerPoint.X + radius * (float) Math.Cos(angle),
-          centerPoint.Y + radius * (float) Math.Sin(angle));
-      func(pos);
-    }
-  }
-
-  /// <summary>
-  /// Creates a square of points within a specified area.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="area">The area defining the square.</param>
-  /// <param name="pointDistance">The distance between each point on the
-  /// square.</param>
-  public static void Square(
-    Action < Vector2 > func, Area area, float pointDistance = 0.1f) {
-    Vector2[] vertices = new Vector2[] {
-      area.BottomLeft, area.BottomRight,
-        area.TopRight, area.TopLeft
-    };
-
-    Polygon(func, vertices, pointDistance);
-  }
-
-  /// <summary>
-  /// Creates a polygon of points using the provided vertices.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="points">The vertices of the polygon.</param>
-  /// <param name="pointDistance">The distance between each point on the
-  /// polygon.</param>
-  public static void Polygon(
-    Action < Vector2 > func, Vector2[] points, float pointDistance = 0.1f) {
-    for (int i = 0; i < points.Length - 1; i++) {
-      Trail(func, points[i], points[i + 1], pointDistance);
-    }
-
-    Trail(func, points[points.Length - 1], points[0], pointDistance);
-  }
-
-  /// <summary>
-  /// Creates a swirl of points around a center point.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="centerPoint">The center point of the swirl.</param>
-  /// <param name="startRadius">The starting radius of the swirl.</param>
-  /// <param name="endRadius">The ending radius of the swirl.</param>
-  /// <param name="revolutions">The number of revolutions for the swirl.</param>
-  /// <param name="pointsPerRevolution">The number of points per
-  /// revolution.</param>
-  public static void Swirl(Action < Vector2 > func, Vector2 centerPoint,
-    float startRadius, float endRadius, int revolutions = 1,
-    int pointsPerRevolution = 360) {
-    int totalPoints = revolutions * pointsPerRevolution;
-
-    float angleIncrement = 360f / pointsPerRevolution;
-    float radiusIncrement = (endRadius - startRadius) / totalPoints;
-
-    for (int i = 0; i < totalPoints; i++) {
-      float angle = DegreesToRadians(i * angleIncrement);
-      float radius = startRadius + i * radiusIncrement;
-      Vector2 pos
-        = new Vector2(centerPoint.X + radius * (float) Math.Cos(angle),
-          centerPoint.Y + radius * (float) Math.Sin(angle));
-      func(pos);
-    }
-  }
-
-  /// <summary>
-  /// Creates a wave of points between two points.
-  /// </summary>
-  /// <param name="func">The action to perform on each point.</param>
-  /// <param name="start">The starting point of the wave.</param>
-  /// <param name="end">The ending point of the wave.</param>
-  /// <param name="amplitude">The amplitude of the wave.</param>
-  /// <param name="frequency">The frequency of the wave.</param>
-  /// <param name="pointDistance">The distance between each point on the
-  /// wave.</param>
-  public static void Wave(Action < Vector2 > func, Vector2 start, Vector2 end,
-    float amplitude = 1, float frequency = 1, float pointDistance = 0.1f) {
-    float totalDistance = Vector2.Distance(start, end);
-    int count = (int) Math.Ceiling(totalDistance / pointDistance);
-    float adjustedFrequency = frequency * (totalDistance / count);
-
-    for (int i = 0; i < count; i++) {
-      Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
-      float offsetY = amplitude * ((float) Math.Sin(adjustedFrequency * pos.X));
-      func(pos + new Vector2(0, offsetY));
-    }
-  }
-
-  /// <summary>
-  /// Generates a random Vector2 point inside the specified Area.
-  /// </summary>
-  /// <param name="func">Function to be called with the generated random Vector2
-  /// point.</param> <param name="area">The Area in which to generate the random
-  /// point.</param> <param name="random">A Random instance for generating
-  /// random numbers.</param> <returns>The generated random Vector2
-  /// point.</returns>
-  public static Vector2 Random(Action < Vector2 > func, Area area, Random random) {
-    // Generate random coordinates within the bounds of the area
-    float randomX = (float) random.NextDouble() * area.Width + area.Left;
-    float randomY = (float) random.NextDouble() * area.Height + area.Bottom;
-
-    Vector2 randomV = new Vector2(randomX, randomY);
-
-    // Return the random point as a tuple
-    func(randomV);
-
-    return randomV;
-  }
-
-  private static float DegreesToRadians(float degrees) {
-    return degrees * MathHelper.PI / 180f;
-  }
-}
-
-/// <summary>
 /// A helper class for performing various operations on Vector2 objects.
 /// </summary>
 public static class Vector2Helper {
@@ -6274,7 +6124,7 @@ public static class Vector2Helper {
   /// </summary>
   public static Vector2 Clamp(Vector2 v, Vector2 min, Vector2 max) {
     return new Vector2(MathHelper.Clamp(v.X, min.X, max.X),
-      MathHelper.Clamp(v.Y, min.Y, min.Y));
+        MathHelper.Clamp(v.Y, min.Y, min.Y));
   }
 
   /// <summary>
@@ -6404,6 +6254,148 @@ public static class Vector2Helper {
     float cos = (float) Math.Cos(angle);
 
     return new Vector2(cos, sin);
+  }
+}
+
+/// <summary>
+/// Contains methods for creating various point shapes.
+/// </summary>
+public static class PointShape {
+  /// <summary>
+  /// Creates a trail of points between two points.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="start">The starting point of the trail.</param>
+  /// <param name="end">The ending point of the trail.</param>
+  /// <param name="pointDistance">The distance between each point on the trail.</param>
+  public static void Trail(Action<Vector2> func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
+    int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
+
+    for (int i = 0; i < count; i++) {
+      Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
+      func(pos);
+    }
+  }
+
+  /// <summary>
+  /// Creates a circle of points around a center point.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="centerPoint">The center point of the circle.</param>
+  /// <param name="radius">The radius of the circle.</param>
+  /// <param name="separationAngle">The angle between each point on the circle.</param>
+  public static void Circle(Action<Vector2> func, Vector2 centerPoint, float radius, float separationAngle = 1) {
+    int pointCount = (int) Math.Ceiling(360f / separationAngle);
+
+    for (int i = 0; i < pointCount; i++) {
+      float angle = DegreesToRadians(i * separationAngle);
+      Vector2 pos = new Vector2(centerPoint.X + radius * (float) Math.Cos(angle),
+                                centerPoint.Y + radius * (float) Math.Sin(angle));
+      func(pos);
+    }
+  }
+
+  /// <summary>
+  /// Creates a square of points within a specified area.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="area">The area defining the square.</param>
+  /// <param name="pointDistance">The distance between each point on the square.</param>
+  public static void Square(Action<Vector2> func, Area area, float pointDistance = 0.1f) {
+    Vector2[] vertices = new Vector2[]
+    {
+            area.BottomLeft,
+            area.BottomRight,
+            area.TopRight,
+            area.TopLeft
+    };
+
+    Polygon(func, vertices, pointDistance);
+  }
+
+  /// <summary>
+  /// Creates a polygon of points using the provided vertices.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="points">The vertices of the polygon.</param>
+  /// <param name="pointDistance">The distance between each point on the polygon.</param>
+  public static void Polygon(Action<Vector2> func, Vector2[] points, float pointDistance = 0.1f) {
+    for (int i = 0; i < points.Length - 1; i++) {
+      Trail(func, points[i], points[i + 1], pointDistance);
+    }
+
+    Trail(func, points[points.Length - 1], points[0], pointDistance);
+  }
+
+  /// <summary>
+  /// Creates a swirl of points around a center point.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="centerPoint">The center point of the swirl.</param>
+  /// <param name="startRadius">The starting radius of the swirl.</param>
+  /// <param name="endRadius">The ending radius of the swirl.</param>
+  /// <param name="revolutions">The number of revolutions for the swirl.</param>
+  /// <param name="pointsPerRevolution">The number of points per revolution.</param>
+  public static void Swirl(Action<Vector2> func, Vector2 centerPoint, float startRadius,
+      float endRadius, int revolutions = 1, int pointsPerRevolution = 360) {
+    int totalPoints = revolutions * pointsPerRevolution;
+
+    float angleIncrement = 360f / pointsPerRevolution;
+    float radiusIncrement = (endRadius - startRadius) / totalPoints;
+
+    for (int i = 0; i < totalPoints; i++) {
+      float angle = DegreesToRadians(i * angleIncrement);
+      float radius = startRadius + i * radiusIncrement;
+      Vector2 pos = new Vector2(centerPoint.X + radius * (float) Math.Cos(angle),
+                                centerPoint.Y + radius * (float) Math.Sin(angle));
+      func(pos);
+    }
+  }
+
+  /// <summary>
+  /// Creates a wave of points between two points.
+  /// </summary>
+  /// <param name="func">The action to perform on each point.</param>
+  /// <param name="start">The starting point of the wave.</param>
+  /// <param name="end">The ending point of the wave.</param>
+  /// <param name="amplitude">The amplitude of the wave.</param>
+  /// <param name="frequency">The frequency of the wave.</param>
+  /// <param name="pointDistance">The distance between each point on the wave.</param>
+  public static void Wave(Action<Vector2> func, Vector2 start, Vector2 end,
+      float amplitude = 1, float frequency = 1, float pointDistance = 0.1f) {
+    float totalDistance = Vector2.Distance(start, end);
+    int count = (int) Math.Ceiling(totalDistance / pointDistance);
+    float adjustedFrequency = frequency * (totalDistance / count);
+
+    for (int i = 0; i < count; i++) {
+      Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
+      float offsetY = amplitude * ((float) Math.Sin(adjustedFrequency * pos.X));
+      func(pos + new Vector2(0, offsetY));
+    }
+  }
+
+  /// <summary>
+  /// Generates a random Vector2 point inside the specified Area.
+  /// </summary>
+  /// <param name="func">Function to be called with the generated random Vector2 point.</param>
+  /// <param name="area">The Area in which to generate the random point.</param>
+  /// <param name="random">A Random instance for generating random numbers.</param>
+  /// <returns>The generated random Vector2 point.</returns>
+  public static Vector2 Random(Action<Vector2> func, Area area, Random random) {
+    // Generate random coordinates within the bounds of the area
+    float randomX = (float) random.NextDouble() * area.Width + area.Left;
+    float randomY = (float) random.NextDouble() * area.Height + area.Bottom;
+
+    Vector2 randomV = new Vector2(randomX, randomY);
+
+    // Return the random point as a tuple
+    func(randomV);
+
+    return randomV;
+  }
+
+  private static float DegreesToRadians(float degrees) {
+    return degrees * MathHelper.PI / 180f;
   }
 }
 
@@ -6603,7 +6595,7 @@ public class CustomProjectile {
     Game.PlayEffect(Effect, pos);
   }
 
-  private static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
+  private static void Trail(Action<Vector2> func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
     int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
 
     for (int i = 0; i < count; i++) {

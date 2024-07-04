@@ -45,13 +45,13 @@ public static class Template {
     /// <param name="dltSecs">The time delta in seconds since the last update.</param>
     public override void Update(float dlt, float dltSecs) {
       //7: ADD CODE FOR THE EFFECT DURING ITS INFLUENCE
-      
+
       // Implement in derived classes
 
       //EXAMPLE EFFECT
       if (Time % 50 == 0)
-        PointShape.Swirl((v => Game.PlayEffect("GLM", Vector2Helper.Rotated(v - Player.GetWorldPosition(), 
-        (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) + Player.GetWorldPosition() + new Vector2(0, 4))),
+        PointShape.Swirl((v => Game.PlayEffect("GLM", Vector2Helper.Rotated(v - Player.GetWorldPosition(),
+        (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) + Player.GetWorldPosition() + new Vector2(0, 4))),
           Player.GetWorldPosition(), //Center Position
           5f, //Initial Radius
           50f, //End Radius
@@ -131,7 +131,7 @@ public static class PointShape {
   /// <param name="end">The ending point of the trail.</param>
   /// <param name="pointDistance">The distance between each point on the
   /// trail.</param>
-  public static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end,
+  public static void Trail(Action<Vector2> func, Vector2 start, Vector2 end,
     float pointDistance = 0.1f) {
     int count
       = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
@@ -150,7 +150,7 @@ public static class PointShape {
   /// <param name="radius">The radius of the circle.</param>
   /// <param name="separationAngle">The angle between each point on the
   /// circle.</param>
-  public static void Circle(Action < Vector2 > func, Vector2 centerPoint,
+  public static void Circle(Action<Vector2> func, Vector2 centerPoint,
     float radius, float separationAngle = 1) {
     int pointCount = (int) Math.Ceiling(360f / separationAngle);
 
@@ -171,7 +171,7 @@ public static class PointShape {
   /// <param name="pointDistance">The distance between each point on the
   /// square.</param>
   public static void Square(
-    Action < Vector2 > func, Area area, float pointDistance = 0.1f) {
+    Action<Vector2> func, Area area, float pointDistance = 0.1f) {
     Vector2[] vertices = new Vector2[] {
       area.BottomLeft, area.BottomRight,
         area.TopRight, area.TopLeft
@@ -188,7 +188,7 @@ public static class PointShape {
   /// <param name="pointDistance">The distance between each point on the
   /// polygon.</param>
   public static void Polygon(
-    Action < Vector2 > func, Vector2[] points, float pointDistance = 0.1f) {
+    Action<Vector2> func, Vector2[] points, float pointDistance = 0.1f) {
     for (int i = 0; i < points.Length - 1; i++) {
       Trail(func, points[i], points[i + 1], pointDistance);
     }
@@ -206,7 +206,7 @@ public static class PointShape {
   /// <param name="revolutions">The number of revolutions for the swirl.</param>
   /// <param name="pointsPerRevolution">The number of points per
   /// revolution.</param>
-  public static void Swirl(Action < Vector2 > func, Vector2 centerPoint,
+  public static void Swirl(Action<Vector2> func, Vector2 centerPoint,
     float startRadius, float endRadius, int revolutions = 1,
     int pointsPerRevolution = 360) {
     int totalPoints = revolutions * pointsPerRevolution;
@@ -234,7 +234,7 @@ public static class PointShape {
   /// <param name="frequency">The frequency of the wave.</param>
   /// <param name="pointDistance">The distance between each point on the
   /// wave.</param>
-  public static void Wave(Action < Vector2 > func, Vector2 start, Vector2 end,
+  public static void Wave(Action<Vector2> func, Vector2 start, Vector2 end,
     float amplitude = 1, float frequency = 1, float pointDistance = 0.1f) {
     float totalDistance = Vector2.Distance(start, end);
     int count = (int) Math.Ceiling(totalDistance / pointDistance);
@@ -255,7 +255,7 @@ public static class PointShape {
   /// point.</param> <param name="random">A Random instance for generating
   /// random numbers.</param> <returns>The generated random Vector2
   /// point.</returns>
-  public static Vector2 Random(Action < Vector2 > func, Area area, Random random) {
+  public static Vector2 Random(Action<Vector2> func, Area area, Random random) {
     // Generate random coordinates within the bounds of the area
     float randomX = (float) random.NextDouble() * area.Width + area.Left;
     float randomY = (float) random.NextDouble() * area.Height + area.Bottom;
@@ -665,7 +665,7 @@ public class CustomProjectile {
     Game.PlayEffect(Effect, pos);
   }
 
-  private static void Trail(Action < Vector2 > func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
+  private static void Trail(Action<Vector2> func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
     int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
 
     for (int i = 0; i < count; i++) {
@@ -684,14 +684,14 @@ public IUser GetUser(string arg) {
 
 public static Type GetPowerup() {
 
-  Type[] nestedPowerups = typeof (Template).GetNestedTypes();
+  Type[] nestedPowerups = typeof(Template).GetNestedTypes();
 
   Type[] instantiableTypes = nestedPowerups
     .Where(t =>
       // t.BaseType == typeof(Powerup) &&
       t.GetConstructors().Any(c => c.GetParameters().Length == 1 &&
         c.GetParameters()[0].ParameterType ==
-        typeof (IPlayer)))
+        typeof(IPlayer)))
     .ToArray();
 
   if (instantiableTypes.Length == 0)
@@ -710,7 +710,7 @@ public static Type GetPowerup() {
 public abstract class Powerup {
   // Interval for the main update callback event
   private const uint COOLDOWN = 0;
-  
+
   // Main update callback event
   private Events.UpdateCallback _updateCallback = null;
 
