@@ -124,7 +124,7 @@ namespace PowerupsDeluxe {
               IPlayer targetPlayer = target != null ? target.GetPlayer() : user.GetPlayer();
 
               if (targetPlayer != null) {
-                Powerup powerUp = (Powerup)Activator.CreateInstance(powerUpType, targetPlayer);
+                Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, targetPlayer);
 
                 Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author),
                 Color.Yellow, targetPlayer.UserIdentifier);
@@ -250,7 +250,7 @@ namespace PowerupsDeluxe {
 
               Type powerUpType = Powerups.GetRandomPowerupType(_rng);
 
-              Powerup powerUp = (Powerup)Activator.CreateInstance(powerUpType, sender); // Activate random powerup
+              Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
 
               Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), Color.Yellow, sender.UserIdentifier);
 
@@ -299,14 +299,14 @@ namespace PowerupsDeluxe {
         IObject helm = Game.CreateObject("Helmet00", pos + helmOffset);
 
         // Create weld joint
-        IObjectWeldJoint weldJoint = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weldJoint = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
         // Set weld joint targets
         weldJoint.AddTargetObject(box);
         weldJoint.AddTargetObject(helm);
 
         // Create destroy targets
-        IObjectDestroyTargets destroyTargets = (IObjectDestroyTargets)Game.CreateObject("DestroyTargets", pos);
+        IObjectDestroyTargets destroyTargets = (IObjectDestroyTargets) Game.CreateObject("DestroyTargets", pos);
 
         // Set destroy targets
         destroyTargets.AddTriggerDestroyObject(box);
@@ -333,7 +333,7 @@ namespace PowerupsDeluxe {
         IObject syringe = Game.CreateObject("ItemStrengthBoostEmpty", pos);
 
         // Create ActivateTrigger
-        IObjectActivateTrigger activateTrigger = (IObjectActivateTrigger)Game.CreateObject("ActivateTrigger", pos);
+        IObjectActivateTrigger activateTrigger = (IObjectActivateTrigger) Game.CreateObject("ActivateTrigger", pos);
 
         // Set ActivateTrigger
         activateTrigger.SetBodyType(BodyType.Dynamic);
@@ -341,14 +341,14 @@ namespace PowerupsDeluxe {
         activateTrigger.SetScriptMethod("OnPowerupSyringe");
 
         // Create weld joint
-        IObjectWeldJoint weldJoint = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weldJoint = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
         // Set weld joint targets
         weldJoint.AddTargetObject(syringe);
         weldJoint.AddTargetObject(activateTrigger);
 
         // Create destroy targets
-        IObjectDestroyTargets destroyTargets = (IObjectDestroyTargets)Game.CreateObject("DestroyTargets", pos);
+        IObjectDestroyTargets destroyTargets = (IObjectDestroyTargets) Game.CreateObject("DestroyTargets", pos);
 
         // Set destroy targets
         destroyTargets.AddTriggerDestroyObject(syringe);
@@ -557,7 +557,7 @@ namespace PowerupsDeluxe {
 
             Events.UpdateCallback.Start(activatorRemovalElapsed => {
               _activators.Remove(activator);
-            }, (uint)Trigger.GetCooldown(), 1);
+            }, (uint) Trigger.GetCooldown(), 1);
           }
         }
       }
@@ -704,7 +704,8 @@ namespace PowerupsDeluxe {
               Game.PlayEffect(EffectName.ImpactDefault, Player.GetWorldPosition());
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void TimeOut() {
             // Play effects indicating expiration of powerup
@@ -805,7 +806,8 @@ namespace PowerupsDeluxe {
             }
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void TimeOut() {
             // Play sound effect indicating expiration of powerup
@@ -817,7 +819,7 @@ namespace PowerupsDeluxe {
             PointShape.Swirl(
               (v => Game.PlayEffect(EffectName.ItemGleam,
                    Vector2Helper.Rotated(v - pos,
-                       (float)(Time % 1500 * (MathHelper.TwoPI / 1500)))
+                       (float) (Time % 1500 * (MathHelper.TwoPI / 1500)))
                        + pos)),
               pos, // Center Position
               5, // Initial Radius
@@ -896,12 +898,13 @@ namespace PowerupsDeluxe {
             Game.PlaySound("StrengthBoostStop", Vector2.Zero);
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           private void Draw(Vector2 pos) {
             PointShape.Circle(v => {
               Game.PlayEffect(EffectName.ItemGleam, Vector2Helper.Rotated(v - pos,
-                  (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+                  (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
                 pos);
             }, pos, SPHERE_RADIUS, EFFECT_SEPARATION);
           }
@@ -1433,7 +1436,7 @@ namespace PowerupsDeluxe {
             Vector2 vel = inputDirection * SPEED;
 
             Dove.SetLinearVelocity(vel);
-            Dove.SetFaceDirection((int)inputDirection.X);
+            Dove.SetFaceDirection((int) inputDirection.X);
           }
 
           protected override void Activate() {
@@ -1740,7 +1743,7 @@ namespace PowerupsDeluxe {
               RayCastResult result = RayCast;
 
               if (result.IsPlayer) {
-                IPlayer hit = (IPlayer)result.HitObject;
+                IPlayer hit = (IPlayer) result.HitObject;
 
                 return (hit.GetTeam() == PlayerTeam.Independent || hit.GetTeam() != Player.GetTeam()) &&
                   !hit.IsDead;
@@ -1766,7 +1769,8 @@ namespace PowerupsDeluxe {
             Time = 25000; // 25 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (Player.IsBurning) // Fire resistance
@@ -1800,8 +1804,8 @@ namespace PowerupsDeluxe {
           }
 
           private Vector2 GetRandomFireVelocity(Random random) {
-            float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
-            float y = _rayCastEndOffset.Y * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+            float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float) (RANDOM_SPEED_EXP * random.NextDouble());
+            float y = _rayCastEndOffset.Y * (float) (RANDOM_SPEED_EXP * random.NextDouble());
 
             return new Vector2(x, y);
           }
@@ -1864,21 +1868,21 @@ namespace PowerupsDeluxe {
 
             Player.SetModifiers(modify);
 
-            IObjectWeldJoint weld1 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Direct attachment to player by center1
-            IObjectWeldJoint weld2 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Rotating attachments around center1, by center2
-            IObjectWeldJoint weld3 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //attached to player by proxy through center1
+            IObjectWeldJoint weld1 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Direct attachment to player by center1
+            IObjectWeldJoint weld2 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Rotating attachments around center1, by center2
+            IObjectWeldJoint weld3 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //attached to player by proxy through center1
 
             allItems.Add(weld1);
             allItems.Add(weld2);
             allItems.Add(weld3);
 
-            IObject center1 = (IObject)Game.CreateObject(centerobj, Player.GetWorldPosition() + offset); //HINGE FOR ROTATING PART TO ATTACH TO, WELDED ONTO PLAYER
+            IObject center1 = (IObject) Game.CreateObject(centerobj, Player.GetWorldPosition() + offset); //HINGE FOR ROTATING PART TO ATTACH TO, WELDED ONTO PLAYER
             center1.SetBodyType(BodyType.Dynamic);
             center1.SetMass(0.0001f);
             weld1.AddTargetObject(center1);
             allItems.Add(center1);
 
-            IObjectPullJoint force = (IObjectPullJoint)Game.CreateObject("PullJoint", center1.GetWorldPosition() + new Vector2(0, 200));
+            IObjectPullJoint force = (IObjectPullJoint) Game.CreateObject("PullJoint", center1.GetWorldPosition() + new Vector2(0, 200));
             //force.SetLineVisual(LineVisual.DJRope);
             force.SetForcePerDistance(0.01f);
             allItems.Add(force);
@@ -1887,19 +1891,19 @@ namespace PowerupsDeluxe {
             force.SetTargetObject(bird);
             allItems.Add(bird);
 
-            IObjectTargetObjectJoint target = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", center1.GetWorldPosition());
+            IObjectTargetObjectJoint target = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", center1.GetWorldPosition());
             target.SetTargetObject(center1);
             force.SetTargetObjectJoint(target);
             allItems.Add(target);
 
-            IObject center2 = (IObject)Game.CreateObject(centerobj, Player.GetWorldPosition() + offset);
+            IObject center2 = (IObject) Game.CreateObject(centerobj, Player.GetWorldPosition() + offset);
             center2.SetBodyType(BodyType.Dynamic);
             center2.SetMass(0.001f);
             weld2.AddTargetObject(center2);
             weld2.AddTargetObject(Player);
             allItems.Add(center2);
 
-            IObjectRevoluteJoint revolute = (IObjectRevoluteJoint)Game.CreateObject("RevoluteJoint", Player.GetWorldPosition() + offset);
+            IObjectRevoluteJoint revolute = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", Player.GetWorldPosition() + offset);
             revolute.SetTargetObjectA(center2);
             revolute.SetTargetObjectB(center1);
             revolute.SetMotorEnabled(true);
@@ -1910,7 +1914,7 @@ namespace PowerupsDeluxe {
             //revolute.SetMass(0.0001f);
 
             for (int i = 0; i < 4; i++) {
-              IObjectText obj = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
+              IObjectText obj = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
               obj.SetTextColor(new Color(COLOR_R, COLOR_G, COLOR_B));
               obj.SetTextScale(4);
               obj.SetText("(");
@@ -1924,7 +1928,7 @@ namespace PowerupsDeluxe {
             }
 
             for (int i = 0; i < 4; i++) {
-              IObjectText obj = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
+              IObjectText obj = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
               obj.SetTextColor(Color.White);
               obj.SetTextScale(4);
               obj.SetText("{");
@@ -1954,7 +1958,7 @@ namespace PowerupsDeluxe {
             weld2.AddTargetObject(deflector);
             allItems.Add(deflector);
 
-            IObjectText shine = (IObjectText)Game.CreateObject("Text", new Vector2(-5, -1) + center1.GetWorldPosition());
+            IObjectText shine = (IObjectText) Game.CreateObject("Text", new Vector2(-5, -1) + center1.GetWorldPosition());
             shine.SetTextColor(Color.White);
             shine.SetTextScale(3);
             shine.SetText(",");
@@ -1964,7 +1968,7 @@ namespace PowerupsDeluxe {
             weld2.AddTargetObject(shine);
             allItems.Add(shine);
 
-            IObjectText crack1 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(-8.6f, 14.5f));
+            IObjectText crack1 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(-8.6f, 14.5f));
             crack1.SetTextColor(Color.White);
             crack1.SetTextScale(3);
             crack1.SetText("");
@@ -1974,7 +1978,7 @@ namespace PowerupsDeluxe {
             weld2.AddTargetObject(crack1);
             allItems.Add(crack1);
 
-            IObjectText crack2 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(12.8f, 6.9f));
+            IObjectText crack2 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(12.8f, 6.9f));
             crack2.SetTextColor(Color.White);
             crack2.SetTextScale(3);
             crack2.SetText("");
@@ -1984,7 +1988,7 @@ namespace PowerupsDeluxe {
             weld2.AddTargetObject(crack2);
             allItems.Add(crack2);
 
-            IObjectText crack3 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(6f, -5.3f));
+            IObjectText crack3 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(6f, -5.3f));
             crack3.SetTextColor(Color.White);
             crack3.SetTextScale(3);
             crack3.SetText("");
@@ -2018,7 +2022,7 @@ namespace PowerupsDeluxe {
                   projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
                   projectile.Position += normal * 2;
 
-                  health -= (projectile.GetProperties().ObjectDamage * (float)(angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
+                  health -= (projectile.GetProperties().ObjectDamage * (float) (angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
 
                   if (health > 50 && health < 75) {
                     crack1.SetText("X");
@@ -2046,7 +2050,8 @@ namespace PowerupsDeluxe {
             onDamage = Events.PlayerDamageCallback.Start((IPlayer hitPlayer, PlayerDamageArgs args) => {
               if (args.DamageType == PlayerDamageEventType.Fire) {
                 preservedHealth = Player.GetModifiers().CurrentHealth;
-                if (preservedHealth > 0) return;
+                if (preservedHealth > 0)
+                  return;
               }
 
               if (hitPlayer.UniqueID == Player.UniqueID) {
@@ -2141,8 +2146,8 @@ namespace PowerupsDeluxe {
                 IObject debris = Game.CreateObject("GlassShard00A", Player.GetWorldPosition() + new Vector2(X_OFFSET, Y_OFFSET) + dir);
                 debris.SetHealth(1);
                 debris.SetLinearVelocity(dir * 0.3f + new Vector2(0, 4));
-                debris.SetAngle((float)(_rng.NextDouble() * MathHelper.TwoPI));
-                debris.SetAngularVelocity(((float)_rng.NextDouble() - 0.5f) * 20);
+                debris.SetAngle((float) (_rng.NextDouble() * MathHelper.TwoPI));
+                debris.SetAngularVelocity(((float) _rng.NextDouble() - 0.5f) * 20);
                 toFade.Add(debris);
               } else {
                 Game.PlayEffect(EffectName.DestroyGlass, dir + Player.GetWorldPosition());
@@ -2163,9 +2168,9 @@ namespace PowerupsDeluxe {
           }
 
           private Vector2 RandomPoint(float radius) {
-            float distance = (float)Math.Pow(_rng.NextDouble(), 0.25) * radius;
+            float distance = (float) Math.Pow(_rng.NextDouble(), 0.25) * radius;
 
-            return Vector2Helper.Rotated(new Vector2(distance, 0), (float)(_rng.NextDouble() * MathHelper.TwoPI));
+            return Vector2Helper.Rotated(new Vector2(distance, 0), (float) (_rng.NextDouble() * MathHelper.TwoPI));
           }
         }
 
@@ -2204,7 +2209,8 @@ namespace PowerupsDeluxe {
             Dashing = false;
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             EmptyUppercutCheck(0);
@@ -2366,7 +2372,8 @@ namespace PowerupsDeluxe {
             Time = 14000; // 14 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             WeaponItemType[] emptyWeaponItemTypes = EmptyWeaponItemTypes;
@@ -2730,7 +2737,8 @@ namespace PowerupsDeluxe {
             Time = 40000; // 40 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (Time % REGEN_COOLDOWN == 0) {
@@ -2915,7 +2923,7 @@ namespace PowerupsDeluxe {
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0) {
               Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
-                string.Format(TXT_EFFECT, (int)(Time / 1000)));
+                string.Format(TXT_EFFECT, (int) (Time / 1000)));
 
               Game.PlaySound("TimerTick", Vector2.Zero);
             }
@@ -2997,7 +3005,8 @@ namespace PowerupsDeluxe {
             Time = 25000; // 25 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void TimeOut() {
             Game.PlaySound("DestroyMetal", Vector2.Zero, 1);
@@ -3125,7 +3134,8 @@ namespace PowerupsDeluxe {
             Time = 31000; // 31 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             bool effect = Time % EFFECT_COOLDOWN == 0;
@@ -3320,7 +3330,8 @@ namespace PowerupsDeluxe {
             Time = 27000; // 27 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (_sticky != null) {
@@ -3534,7 +3545,7 @@ namespace PowerupsDeluxe {
             if (ground != Vector2.Zero) {
               Game.PlayEffect(EffectName.Dig, ground);
 
-              _stash = (IObjectAmmoStashTrigger)Game.CreateObject("AmmoStash00", ground);
+              _stash = (IObjectAmmoStashTrigger) Game.CreateObject("AmmoStash00", ground);
             }
           }
 
@@ -3833,7 +3844,7 @@ namespace PowerupsDeluxe {
           }
 
           protected override void Activate() {
-            Streetsweeper = (IObjectStreetsweeper)Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
+            Streetsweeper = (IObjectStreetsweeper) Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
 
             Streetsweeper.SetOwnerPlayer(Player);
             Streetsweeper.SetMovementType(StreetsweeperMovementType.Stationary);
@@ -3976,7 +3987,7 @@ namespace PowerupsDeluxe {
 
             IEnumerable<IPlayer> stunned = args
               .Where(a => a.IsPlayer)
-              .Select(p => (IPlayer)p.HitObject)
+              .Select(p => (IPlayer) p.HitObject)
               .Where(p => (p.IsFalling || p.IsStaggering) && !p.IsDead);
 
             if (stunned.Any())
@@ -4023,7 +4034,8 @@ namespace PowerupsDeluxe {
             Time = 21000; // 21 s
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0)
@@ -4066,7 +4078,7 @@ namespace PowerupsDeluxe {
 
               Player.SetHealth(Player.GetHealth() + dmg * HEAL_MULT);
 
-              IPlayer hit = (IPlayer)arg.HitObject;
+              IPlayer hit = (IPlayer) arg.HitObject;
 
               if (hit.IsDead) {
                 hit.SetHealth(hit.GetHealth() + dmg); // Null dmg so it isn't dealt twice
@@ -4126,7 +4138,8 @@ namespace PowerupsDeluxe {
             Time = 17000;
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0) {
@@ -4156,7 +4169,7 @@ namespace PowerupsDeluxe {
               if (!arg.IsPlayer)
                 continue;
 
-              IPlayer hit = (IPlayer)arg.HitObject;
+              IPlayer hit = (IPlayer) arg.HitObject;
 
               hit.SetInputEnabled(false);
               hit.AddCommand(_playerCommand);
@@ -4264,11 +4277,11 @@ namespace PowerupsDeluxe {
             if (Time % AMMO_REGEN_COOLDOWN == 0 && HasRangedWeapon) {
               RifleWeaponItem rifleWeaponItem = Player.CurrentPrimaryWeapon;
 
-              Player.SetCurrentPrimaryWeaponAmmo((int)(rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+              Player.SetCurrentPrimaryWeaponAmmo((int) (rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
               HandgunWeaponItem handgunWeaponItem = Player.CurrentSecondaryWeapon;
 
-              Player.SetCurrentSecondaryWeaponAmmo((int)(handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+              Player.SetCurrentSecondaryWeaponAmmo((int) (handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
               Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(), "+AMMO");
 
@@ -4566,7 +4579,7 @@ namespace PowerupsDeluxe {
                 PlayerModifiers mod = Player.GetModifiers();
 
                 mod.CurrentHealth += heal;
-                mod.MaxHealth += (int)heal;
+                mod.MaxHealth += (int) heal;
 
                 Player.SetModifiers(mod);
               } else {
@@ -4691,7 +4704,8 @@ namespace PowerupsDeluxe {
             Time = 10000;
           }
 
-          protected override void Activate() { }
+          protected override void Activate() {
+          }
 
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0) {
@@ -4723,7 +4737,7 @@ namespace PowerupsDeluxe {
               if (!arg.IsPlayer)
                 continue;
 
-              IPlayer hit = (IPlayer)arg.HitObject;
+              IPlayer hit = (IPlayer) arg.HitObject;
 
               if (hit.IsBlocking) {
                 Time -= BLOCK_TIME_PENALTY;
@@ -4743,7 +4757,7 @@ namespace PowerupsDeluxe {
           private void Draw(Vector2 pos) {
             PointShape.Circle(v => {
               Game.PlayEffect(EffectName.BloodTrail, Vector2Helper.Rotated(v - pos,
-                  (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+                  (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
                 pos);
             }, pos, EFFECT_RADIUS, EFFECT_SEPARATION);
           }
@@ -4802,12 +4816,12 @@ namespace PowerupsDeluxe {
               mods.MeleeStunImmunity = 1;
               mods.MeleeForceModifier *= 1 + damageMult;
 
-              Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int)(damageMult * 100) / 100f));
+              Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int) (damageMult * 100) / 100f));
 
               Area effectArea = new Area(14, -12, -10, 12);
               effectArea.Move(Player.GetWorldPosition());
 
-              for (int i = 0; i < 5 + _rng.Next(5) * (int)damageMult; i++)
+              for (int i = 0; i < 5 + _rng.Next(5) * (int) damageMult; i++)
                 PointShape.Random(v => Game.PlayEffect("S_P", v), effectArea, _rng);
 
               Game.PlayEffect("CAM_S", Player.GetWorldPosition(), 2f, 500f, false);
@@ -4825,7 +4839,7 @@ namespace PowerupsDeluxe {
                 if (attacker.UniqueID == Player.UniqueID) {
                   foreach (PlayerMeleeHitArg arg in args) {
                     if (arg.HitObject is IPlayer) {
-                      IPlayer vic = (IPlayer)arg.HitObject;
+                      IPlayer vic = (IPlayer) arg.HitObject;
                       vic.SetWorldPosition(vic.GetWorldPosition() + Vector2Helper.Up);
                       vic.SetLinearVelocity(vic.GetLinearVelocity() + new Vector2(5 * Player.FacingDirection * damageMult, 6));
                       if (arg.HitDamage <= 0) {
@@ -4865,10 +4879,10 @@ namespace PowerupsDeluxe {
 
             if (_nextParticleTime <= 0) { //replace with while
               _followingParticles.Add(BParticle.GetBParticle(Player, Player.GetWorldPosition() +
-                Vector2Helper.Rotated(Vector2Helper.Right, (float)(_rng.NextDouble() * 2 * Math.PI)) *
-                ((float)(_rng.NextDouble() * 30f) + 10f), ((float)_rng.NextDouble() * 4f + 2)));
+                Vector2Helper.Rotated(Vector2Helper.Right, (float) (_rng.NextDouble() * 2 * Math.PI)) *
+                ((float) (_rng.NextDouble() * 30f) + 10f), ((float) _rng.NextDouble() * 4f + 2)));
 
-              _nextParticleTime += _rng.Next((int)(5 / (powerMult))) * 50 - 50;
+              _nextParticleTime += _rng.Next((int) (5 / (powerMult))) * 50 - 50;
             }
 
             //updating particles
@@ -4947,17 +4961,17 @@ namespace PowerupsDeluxe {
             }
             private BParticle() {
               //the text particle
-              graphic = (IObjectText)Game.CreateObject("Text");
+              graphic = (IObjectText) Game.CreateObject("Text");
 
               //the rails
-              path2 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+              path2 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
 
-              path1 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+              path1 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
               path1.SetNextPathJoint(path2);
               //path1.SetLineVisual(LineVisual.DJRope);
 
               //the rail attachment
-              elevatorAttachment = (IObjectElevatorAttachmentJoint)Game.CreateObject("ElevatorAttachmentJoint");
+              elevatorAttachment = (IObjectElevatorAttachmentJoint) Game.CreateObject("ElevatorAttachmentJoint");
               elevatorAttachment.SetTargetObject(graphic);
               elevatorAttachment.SetElevatorPathJoint(path1);
               elevatorAttachment.SetMaxMotorTorque(200);
@@ -4967,7 +4981,8 @@ namespace PowerupsDeluxe {
             }
 
             public void Update() {
-              if (!GetActive()) return;
+              if (!GetActive())
+                return;
               //UpdatePath2();
 
               float distanceToTarget = Vector2.Distance(path1.GetWorldPosition(), path2.GetWorldPosition()) - 3f;
@@ -5010,7 +5025,8 @@ namespace PowerupsDeluxe {
 
                 for (int i = 0; i < particleCount; i++) {
                   int length = particles.Length;
-                  if (length == 0) length = 1;
+                  if (length == 0)
+                    length = 1;
 
                   //iterating backwards
                   int index = (particleCount + particleIndex - i) % particleCount;
@@ -5028,7 +5044,8 @@ namespace PowerupsDeluxe {
                 }
                 particles = newParticlesList;
 
-              } else return;
+              } else
+                return;
             }
           }
         }
@@ -5099,7 +5116,7 @@ namespace PowerupsDeluxe {
             Game.PlayEffect(EffectName.PlayerLandFull, spawnOffset);
 
             _sentryObjs = SpawnTurret(spawnOffset);
-            _revoluteJoint = (IObjectRevoluteJoint)_sentryObjs
+            _revoluteJoint = (IObjectRevoluteJoint) _sentryObjs
               .First(o => o.Name == "RevoluteJoint");
 
             _revoluteJoint.SetMotorEnabled(true);
@@ -5127,7 +5144,7 @@ namespace PowerupsDeluxe {
               RayCastResult rayCastResult = Game.RayCast(revoluteJointPos, end, _raycastInput)[0];
 
               if (rayCastResult.IsPlayer) {
-                IPlayer hit = (IPlayer)rayCastResult.HitObject;
+                IPlayer hit = (IPlayer) rayCastResult.HitObject;
 
                 if ((hit.GetTeam() != Player.GetTeam() ||
                   hit.GetTeam() == PlayerTeam.Independent) && !hit.IsDead && hit != Player) {
@@ -5195,11 +5212,11 @@ namespace PowerupsDeluxe {
           private static IObject[] SpawnTurret(Vector2 pos) {
             const float MASS_MULT = 0.02f;
 
-            IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+            IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
             alt1.SetDisableCollisionTargetObjects(true);
 
-            IObjectWeldJoint weld1 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+            IObjectWeldJoint weld1 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
             IObject metal = Game.CreateObject("Metal02E", pos);
 
@@ -5229,11 +5246,11 @@ namespace PowerupsDeluxe {
 
             alt1.AddTargetObject(pulley);
 
-            IObjectWeldJoint weld2 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+            IObjectWeldJoint weld2 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
-            IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint)Game.CreateObject("RevoluteJoint", pos);
+            IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", pos);
 
-            IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+            IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
             alt2.SetDisablePlayerMelee(true);
             alt2.SetDisableProjectileHit(true);
@@ -5395,11 +5412,11 @@ namespace PowerupsDeluxe {
             _allItems.Add(wall2);
             _allItems.Add(ceiling);
 
-            _collisionGroup = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+            _collisionGroup = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
             _collisionGroup.SetDisableCollisionTargetObjects(true);
             _allItems.Add(_collisionGroup);
 
-            _cellCollision = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+            _cellCollision = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
             _cellCollision.SetDisabledCategoryBits(65535);
             //_cellCollision.SetDisabledMaskBits(2);//2
             _cellCollision.SetDisabledAboveBits(65535);
@@ -5413,7 +5430,7 @@ namespace PowerupsDeluxe {
             _collisionGroup.AddTargetObject(_body);
             _allItems.Add(_body);
 
-            _cellTarget = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos);
+            _cellTarget = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos);
             _cellTarget.SetTargetObject(_body);
             _allItems.Add(_cellTarget);
 
@@ -5422,12 +5439,12 @@ namespace PowerupsDeluxe {
             AddNoProjectileFilter(_forcePoint);
             _allItems.Add(_forcePoint);
 
-            IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
+            IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
             connection.SetTargetObject(_body);
             connection.SetMass(JOINT_MASS);
             _allItems.Add(connection);
 
-            _force = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
+            _force = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
             _force.SetForce(0f);
             _force.SetForcePerDistance(0.03f); //0.8 for 20
                                                //_force.SetLineVisual(LineVisual.DJRope);
@@ -5442,19 +5459,19 @@ namespace PowerupsDeluxe {
             _collisionGroup.AddTargetObject(_skull);
             _allItems.Add(_skull);
 
-            IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
+            IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
             sConnection.SetTargetObject(_skull); //SKULL CONNECTOR
             _allItems.Add(sConnection);
 
 
-            IObjectDistanceJoint sRope = (IObjectDistanceJoint)Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
+            IObjectDistanceJoint sRope = (IObjectDistanceJoint) Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
             sRope.SetLengthType(DistanceJointLengthType.Elastic);
             sRope.SetTargetObject(_forcePoint);// ROPE GOES FROM POINT TO SKULL
                                                //sRope.SetLineVisual(LineVisual.DJRope);
             sRope.SetTargetObjectJoint(sConnection);
             _allItems.Add(sRope);
 
-            IObjectPullJoint sForce = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos);
+            IObjectPullJoint sForce = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos);
             sForce.SetForce(0f);
             sForce.SetForcePerDistance(0.0008f);
             sForce.SetLineVisual(LineVisual.DJRope);
@@ -5546,13 +5563,14 @@ namespace PowerupsDeluxe {
           private void Bite(IPlayer victim, PlayerModifiers hpmod) {
 
             for (int i = (MAX_CELLS / 2); i < MAX_CELLS; i++) {
-              if (_cells[i] == null || _cells[i].IsRemoved) continue;
+              if (_cells[i] == null || _cells[i].IsRemoved)
+                continue;
               if (i > (MAX_CELLS / 4)) {
-                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, 24f));
-                _cells[i].SetAngle((float)(Math.PI * (7 / 4)));
+                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, 24f));
+                _cells[i].SetAngle((float) (Math.PI * (7 / 4)));
               } else {
-                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, -12f));
-                _cells[i].SetAngle((float)(Math.PI * (3 / 4)));
+                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, -12f));
+                _cells[i].SetAngle((float) (Math.PI * (3 / 4)));
               }
             }
 
@@ -5573,12 +5591,12 @@ namespace PowerupsDeluxe {
           private void SpawnCell() {
             for (int i = 0; i < MAX_CELLS; i++) {
               if (_cells[i] == null || _cells[i].IsRemoved) {
-                Vector2 randPos = new Vector2((float)((_rng.NextDouble() - 0.5f) * 14f), (float)((_rng.NextDouble() - 0.5f) * 16f - 8f));
+                Vector2 randPos = new Vector2((float) ((_rng.NextDouble() - 0.5f) * 14f), (float) ((_rng.NextDouble() - 0.5f) * 16f - 8f));
                 Vector2 pos = _body.GetWorldPosition() + randPos - new Vector2(0, -8);
-                if (i < (int)(MAX_CELLS / 2)) {
-                  _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+                if (i < (int) (MAX_CELLS / 2)) {
+                  _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float) (Math.PI * 2 * _rng.NextDouble()));
                 } else {
-                  _cells[i] = Game.CreateObject("Giblet02", pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+                  _cells[i] = Game.CreateObject("Giblet02", pos, (float) (Math.PI * 2 * _rng.NextDouble()));
                 }
                 _cells[i].CustomID = "__cell__";
                 _cells[i].SetMass(0.00001f);
@@ -5596,7 +5614,7 @@ namespace PowerupsDeluxe {
                 //_allItems.Add(targetObject);
 
 
-                IObjectPullJoint pullJoint = (IObjectPullJoint)Game.CreateObject("PullJoint", pos);
+                IObjectPullJoint pullJoint = (IObjectPullJoint) Game.CreateObject("PullJoint", pos);
                 //pullJoint.SetForce(0.02f);
                 pullJoint.SetForcePerDistance(0.001f);
                 pullJoint.SetTargetObject(_cells[i]);
@@ -5654,7 +5672,8 @@ namespace PowerupsDeluxe {
             };
 
             RayCastResult result = Game.RayCast(starting, starting + new Vector2(0, -17), input)[0];
-            if (result.Hit) return true;
+            if (result.Hit)
+              return true;
 
             return false;
           }
@@ -5664,16 +5683,16 @@ namespace PowerupsDeluxe {
             Vector2 newPos = _body.GetWorldPosition() + new Vector2(0, FORCE_DISTANCE);
 
             if (_jumpCooldown > 0) {
-              float eq = ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
+              float eq = ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
               //if (eq < 0) eq = 0;
               //Game.RunCommand("/msg " + eq);
               newPos += new Vector2(0, eq);
-              _jumpCooldown -= (int)dlt;
+              _jumpCooldown -= (int) dlt;
             } else if (Player.KeyPressed(VirtualKey.JUMP)) {
               if (TouchingGround()) {
                 _jumpCooldown = JUMP_COOLDOWN;
 
-                newPos += new Vector2(0, ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
+                newPos += new Vector2(0, ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
               }
             }
 
@@ -5798,7 +5817,9 @@ namespace PowerupsDeluxe {
             private readonly IObjectPullJoint _arm;
             private readonly IObjectWeldJoint _weld;
 
-            public bool Removed { get; private set; }
+            public bool Removed {
+              get; private set;
+            }
 
             public Tendril(Vector2 velocity, IObject body) {
               _expiration = Game.TotalElapsedGameTime + DURATION;
@@ -5814,14 +5835,14 @@ namespace PowerupsDeluxe {
               _grabber.SetHealth(10f);
               _grabber.CustomID = "__tendril__";
 
-              _toGrabber = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
+              _toGrabber = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
               _toGrabber.SetTargetObject(_grabber);
 
               Vector2 forcePos = body.GetWorldPosition() + velocity * 5f + new Vector2(0, 20f);
 
               _forceSolid = Game.CreateObject("InvisibleBlockNoCollision", forcePos);
 
-              _force = (IObjectPullJoint)Game.CreateObject("PullJoint", forcePos);
+              _force = (IObjectPullJoint) Game.CreateObject("PullJoint", forcePos);
               _force.SetTargetObject(_forceSolid);
               _force.SetTargetObjectJoint(_toGrabber);
               _force.SetForcePerDistance(0.02f);
@@ -5829,14 +5850,14 @@ namespace PowerupsDeluxe {
 
               //_force.SetLineVisual(LineVisual.DJRope); //TEMPORARY
 
-              _arm = (IObjectPullJoint)Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
+              _arm = (IObjectPullJoint) Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
               _arm.SetLineVisual(LineVisual.DJRope);
               _arm.SetTargetObject(body);
               _arm.SetTargetObjectJoint(_toGrabber);
               _arm.SetForce(0f);
               _arm.SetForcePerDistance(0f);
 
-              _weld = (IObjectWeldJoint)Game.CreateObject("WeldJoint");
+              _weld = (IObjectWeldJoint) Game.CreateObject("WeldJoint");
               _weld.AddTargetObject(_grabber);
 
             }
@@ -5864,7 +5885,7 @@ namespace PowerupsDeluxe {
                 Vector2 pos = _grabber.GetWorldPosition();
                 RayCastResult result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero, Vector2.Zero);
                 for (int i = 0; i < 4; i++) {
-                  result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float)Math.PI / 2 * i), input)[0];
+                  result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float) Math.PI / 2 * i), input)[0];
 
                   if (result.Hit) {
                     if (result.HitObject.Name.Substring(0, 3) == "Gib") {
@@ -5876,7 +5897,8 @@ namespace PowerupsDeluxe {
                 }
                 if (result.Hit && result.ObjectID != _arm.GetTargetObject().UniqueID) {
                   Grab(result.HitObject);
-                } else Destroy();
+                } else
+                  Destroy();
 
               }
             }
