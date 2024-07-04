@@ -170,8 +170,10 @@ namespace PowerupsDeluxe {
         if (player != Player)
           return;
 
-        foreach (PlayerMeleeHitArg arg in args
-          .Where(a => !a.IsPlayer)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (arg.IsPlayer)
+            continue;
+
           IObject hit = arg.HitObject;
           float dmg = arg.HitDamage;
 
