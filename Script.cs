@@ -5149,11 +5149,11 @@ namespace PowerupsDeluxe {
 
           public override void OnEnabled(bool enabled) {
             if (!enabled) {
-              Vector2 explosionPos = _sentryObjs
+              /*Vector2 explosionPos = _sentryObjs
                 .First(s => s != null && !s.IsRemoved)
                 .GetWorldPosition();
 
-              Game.TriggerExplosion(explosionPos);
+              Game.TriggerExplosion(explosionPos);*/
 
               foreach (IObject obj in _sentryObjs)
                 obj.Destroy();
