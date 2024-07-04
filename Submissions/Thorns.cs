@@ -48,8 +48,10 @@ namespace PowerupsDeluxe {
       }
 
       private void OnPlayerMeleeAction(IPlayer attacker, PlayerMeleeHitArg[] args) {
-        foreach (PlayerMeleeHitArg arg in args
-        .Where(a => a.HitObject == Player)) {
+        foreach (PlayerMeleeHitArg arg in args) {
+          if (arg.HitObject != Player)
+            continue;
+
           attacker.DealDamage(arg.HitDamage * DMG_MULT); // Damage attacker
 
           // Effect
