@@ -264,7 +264,6 @@
                         if (item != null) {  // Powerup item dropped
 
                             if (initiatedTime + 100 > Game.TotalElapsedRealTime) {
-                                Game.RunCommand("/msg tried to stop" + powerUp.Name);
                                 return;
                             }
 
@@ -282,7 +281,6 @@
 
                             item.Remove();  // Remove original item
 
-                            Game.RunCommand("/msg stopped " + powerUp.Name);
                             weaponRemovedActionCallback.Stop();
 
                             weaponRemovedActionCallback = null;
