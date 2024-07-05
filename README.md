@@ -113,7 +113,7 @@ Below is a list of the available power-ups.
 
 ![Flame](img/gif/Flame.gif)
 
-### [Flesh spirit](Submissions/Flesh.cs)
+### [HUNGRY](Submissions/HUNGRY.cs)
 
 - **Author:** [Danger Ross](https://steamcommunity.com/profiles/76561198086215978)
 - **Duration:** 19 seconds
