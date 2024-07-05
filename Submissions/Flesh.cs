@@ -2,8 +2,8 @@ using SFDGameScriptInterface;
 
 namespace PowerupsDeluxe {
   public partial class GameScript : GameScriptInterface {
-    // FLESH SPIRIT - Danger Ross
-    public class Flesh : Powerup {
+    // HUNGRY - Danger Ross
+    public class HUNGRY : Powerup {
       private const float FORCE_DISTANCE = 62;
       private const float JOINT_MASS = 0.0001f;
       private const float DMG = 22;
@@ -12,29 +12,24 @@ namespace PowerupsDeluxe {
       private const int JUMP_COOLDOWN = 1200;
       private const int MAX_CELLS = 14;
       private const int TIME = 19000;
-
-      private static readonly VirtualKey[] _inputKeys = {
-        VirtualKey.AIM_RUN_LEFT,
-        VirtualKey.AIM_RUN_RIGHT
-      };
-
+    
+      private static readonly VirtualKey[] _inputKeys = {VirtualKey.AIM_RUN_LEFT,
+                                                         VirtualKey.AIM_RUN_RIGHT};
+    
       private static int _cradleSlot = 0;
-
+    
       private readonly List<IObject> _allItems = new List<IObject>();
       private readonly List<Tendril> tendrils = new List<Tendril>();
-
+    
       private readonly IObject[] _walls = new IObject[4];
       private readonly IObject[] _cells = new IObject[MAX_CELLS];
-      private readonly float[] _cradlePos = {
-        -200,
-        260
-      };
-
+      private readonly float[] _cradlePos = {-200, 260};
+    
       private int _cellCount = 2;
       private int _jumpCooldown = 0;
       private float slowUpdateTime = 0;
       private bool _screamed = false;
-
+    
       private IObject _forcePoint;
       private IObject _body;
       private IObject _skull;
@@ -42,22 +37,18 @@ namespace PowerupsDeluxe {
       private IObjectAlterCollisionTile _collisionGroup;
       private IObjectPullJoint _force;
       private IObjectTargetObjectJoint _cellTarget;
-
+    
       public override string Name {
-        get {
-          return "FLESH SPIRIT";
-        }
+        get { return "HUNGRY"; }
       }
-
+    
       public override string Author {
-        get {
-          return "Danger Ross";
-        }
+        get { return "Danger Ross"; }
       }
-
-      public Flesh(IPlayer player) : base(player) {
+    
+      public HUNGRY(IPlayer player) : base(player) {
         Time = TIME;
-
+    
         _cradlePos[0] = _cradlePos[0] + Game.GetCameraMaxArea().Left;
         _cradlePos[0] = _cradlePos[0] + (-40 * _cradleSlot);
         _cradleSlot += 1;
