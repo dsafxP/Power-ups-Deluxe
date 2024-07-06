@@ -3,7 +3,7 @@ using SFDGameScriptInterface;
 namespace PowerupsDeluxe {
   public partial class GameScript : GameScriptInterface {
     // HUNGRY - Danger Ross
-    public class HUNGRY : Powerup {
+    public class Hungry : Powerup {
       private const float FORCE_DISTANCE = 62;
       private const float JOINT_MASS = 0.0001f;
       private const float DMG = 22;
@@ -12,24 +12,24 @@ namespace PowerupsDeluxe {
       private const int JUMP_COOLDOWN = 1200;
       private const int MAX_CELLS = 14;
       private const int TIME = 19000;
-    
+
       private static readonly VirtualKey[] _inputKeys = {VirtualKey.AIM_RUN_LEFT,
                                                          VirtualKey.AIM_RUN_RIGHT};
-    
+
       private static int _cradleSlot = 0;
-    
+
       private readonly List<IObject> _allItems = new List<IObject>();
       private readonly List<Tendril> tendrils = new List<Tendril>();
-    
+
       private readonly IObject[] _walls = new IObject[4];
       private readonly IObject[] _cells = new IObject[MAX_CELLS];
-      private readonly float[] _cradlePos = {-200, 260};
-    
+      private readonly float[] _cradlePos = { -200, 260 };
+
       private int _cellCount = 2;
       private int _jumpCooldown = 0;
       private float slowUpdateTime = 0;
       private bool _screamed = false;
-    
+
       private IObject _forcePoint;
       private IObject _body;
       private IObject _skull;
@@ -37,18 +37,22 @@ namespace PowerupsDeluxe {
       private IObjectAlterCollisionTile _collisionGroup;
       private IObjectPullJoint _force;
       private IObjectTargetObjectJoint _cellTarget;
-    
+
       public override string Name {
-        get { return "HUNGRY"; }
+        get {
+          return "HUNGRY";
+        }
       }
-    
+
       public override string Author {
-        get { return "Danger Ross"; }
+        get {
+          return "Danger Ross";
+        }
       }
-    
-      public HUNGRY(IPlayer player) : base(player) {
+
+      public Hungry(IPlayer player) : base(player) {
         Time = TIME;
-    
+
         _cradlePos[0] = _cradlePos[0] + Game.GetCameraMaxArea().Left;
         _cradlePos[0] = _cradlePos[0] + (-40 * _cradleSlot);
         _cradleSlot += 1;
@@ -106,11 +110,11 @@ namespace PowerupsDeluxe {
         _allItems.Add(wall2);
         _allItems.Add(ceiling);
 
-        _collisionGroup = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        _collisionGroup = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
         _collisionGroup.SetDisableCollisionTargetObjects(true);
         _allItems.Add(_collisionGroup);
 
-        _cellCollision = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        _cellCollision = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
         _cellCollision.SetDisabledCategoryBits(65535);
         //_cellCollision.SetDisabledMaskBits(2);//2
         _cellCollision.SetDisabledAboveBits(65535);
@@ -124,7 +128,7 @@ namespace PowerupsDeluxe {
         _collisionGroup.AddTargetObject(_body);
         _allItems.Add(_body);
 
-        _cellTarget = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos);
+        _cellTarget = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos);
         _cellTarget.SetTargetObject(_body);
         _allItems.Add(_cellTarget);
 
@@ -133,12 +137,12 @@ namespace PowerupsDeluxe {
         AddNoProjectileFilter(_forcePoint);
         _allItems.Add(_forcePoint);
 
-        IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
+        IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
         connection.SetTargetObject(_body);
         connection.SetMass(JOINT_MASS);
         _allItems.Add(connection);
 
-        _force = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
+        _force = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
         _force.SetForce(0f);
         _force.SetForcePerDistance(0.03f); //0.8 for 20
                                            //_force.SetLineVisual(LineVisual.DJRope);
@@ -153,19 +157,19 @@ namespace PowerupsDeluxe {
         _collisionGroup.AddTargetObject(_skull);
         _allItems.Add(_skull);
 
-        IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
+        IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
         sConnection.SetTargetObject(_skull); //SKULL CONNECTOR
         _allItems.Add(sConnection);
 
 
-        IObjectDistanceJoint sRope = (IObjectDistanceJoint)Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
+        IObjectDistanceJoint sRope = (IObjectDistanceJoint) Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
         sRope.SetLengthType(DistanceJointLengthType.Elastic);
         sRope.SetTargetObject(_forcePoint);// ROPE GOES FROM POINT TO SKULL
                                            //sRope.SetLineVisual(LineVisual.DJRope);
         sRope.SetTargetObjectJoint(sConnection);
         _allItems.Add(sRope);
 
-        IObjectPullJoint sForce = (IObjectPullJoint)Game.CreateObject("PullJoint", centerPos);
+        IObjectPullJoint sForce = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos);
         sForce.SetForce(0f);
         sForce.SetForcePerDistance(0.0008f);
         sForce.SetLineVisual(LineVisual.DJRope);
@@ -257,13 +261,14 @@ namespace PowerupsDeluxe {
       private void Bite(IPlayer victim, PlayerModifiers hpmod) {
 
         for (int i = (MAX_CELLS / 2); i < MAX_CELLS; i++) {
-          if (_cells[i] == null || _cells[i].IsRemoved) continue;
+          if (_cells[i] == null || _cells[i].IsRemoved)
+            continue;
           if (i > (MAX_CELLS / 4)) {
-            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, 24f));
-            _cells[i].SetAngle((float)(Math.PI * (7 / 4)));
+            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, 24f));
+            _cells[i].SetAngle((float) (Math.PI * (7 / 4)));
           } else {
-            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, -12f));
-            _cells[i].SetAngle((float)(Math.PI * (3 / 4)));
+            _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, -12f));
+            _cells[i].SetAngle((float) (Math.PI * (3 / 4)));
           }
         }
 
@@ -284,12 +289,12 @@ namespace PowerupsDeluxe {
       private void SpawnCell() {
         for (int i = 0; i < MAX_CELLS; i++) {
           if (_cells[i] == null || _cells[i].IsRemoved) {
-            Vector2 randPos = new Vector2((float)((_rng.NextDouble() - 0.5f) * 14f), (float)((_rng.NextDouble() - 0.5f) * 16f - 8f));
+            Vector2 randPos = new Vector2((float) ((_rng.NextDouble() - 0.5f) * 14f), (float) ((_rng.NextDouble() - 0.5f) * 16f - 8f));
             Vector2 pos = _body.GetWorldPosition() + randPos - new Vector2(0, -8);
-            if (i < (int)(MAX_CELLS / 2)) {
-              _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+            if (i < (int) (MAX_CELLS / 2)) {
+              _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float) (Math.PI * 2 * _rng.NextDouble()));
             } else {
-              _cells[i] = Game.CreateObject("Giblet02", pos, (float)(Math.PI * 2 * _rng.NextDouble()));
+              _cells[i] = Game.CreateObject("Giblet02", pos, (float) (Math.PI * 2 * _rng.NextDouble()));
             }
             _cells[i].CustomID = "__cell__";
             _cells[i].SetMass(0.00001f);
@@ -307,7 +312,7 @@ namespace PowerupsDeluxe {
             //_allItems.Add(targetObject);
 
 
-            IObjectPullJoint pullJoint = (IObjectPullJoint)Game.CreateObject("PullJoint", pos);
+            IObjectPullJoint pullJoint = (IObjectPullJoint) Game.CreateObject("PullJoint", pos);
             //pullJoint.SetForce(0.02f);
             pullJoint.SetForcePerDistance(0.001f);
             pullJoint.SetTargetObject(_cells[i]);
@@ -365,7 +370,8 @@ namespace PowerupsDeluxe {
         };
 
         RayCastResult result = Game.RayCast(starting, starting + new Vector2(0, -17), input)[0];
-        if (result.Hit) return true;
+        if (result.Hit)
+          return true;
 
         return false;
       }
@@ -375,16 +381,16 @@ namespace PowerupsDeluxe {
         Vector2 newPos = _body.GetWorldPosition() + new Vector2(0, FORCE_DISTANCE);
 
         if (_jumpCooldown > 0) {
-          float eq = ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
+          float eq = ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
           //if (eq < 0) eq = 0;
           //Game.RunCommand("/msg " + eq);
           newPos += new Vector2(0, eq);
-          _jumpCooldown -= (int)dlt;
+          _jumpCooldown -= (int) dlt;
         } else if (Player.KeyPressed(VirtualKey.JUMP)) {
           if (TouchingGround()) {
             _jumpCooldown = JUMP_COOLDOWN;
 
-            newPos += new Vector2(0, ((float)Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
+            newPos += new Vector2(0, ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
           }
         }
 
@@ -509,7 +515,9 @@ namespace PowerupsDeluxe {
         private readonly IObjectPullJoint _arm;
         private readonly IObjectWeldJoint _weld;
 
-        public bool Removed { get; private set; }
+        public bool Removed {
+          get; private set;
+        }
 
         public Tendril(Vector2 velocity, IObject body) {
           _expiration = Game.TotalElapsedGameTime + DURATION;
@@ -525,14 +533,14 @@ namespace PowerupsDeluxe {
           _grabber.SetHealth(10f);
           _grabber.CustomID = "__tendril__";
 
-          _toGrabber = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
+          _toGrabber = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
           _toGrabber.SetTargetObject(_grabber);
 
           Vector2 forcePos = body.GetWorldPosition() + velocity * 5f + new Vector2(0, 20f);
 
           _forceSolid = Game.CreateObject("InvisibleBlockNoCollision", forcePos);
 
-          _force = (IObjectPullJoint)Game.CreateObject("PullJoint", forcePos);
+          _force = (IObjectPullJoint) Game.CreateObject("PullJoint", forcePos);
           _force.SetTargetObject(_forceSolid);
           _force.SetTargetObjectJoint(_toGrabber);
           _force.SetForcePerDistance(0.02f);
@@ -540,14 +548,14 @@ namespace PowerupsDeluxe {
 
           //_force.SetLineVisual(LineVisual.DJRope); //TEMPORARY
 
-          _arm = (IObjectPullJoint)Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
+          _arm = (IObjectPullJoint) Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
           _arm.SetLineVisual(LineVisual.DJRope);
           _arm.SetTargetObject(body);
           _arm.SetTargetObjectJoint(_toGrabber);
           _arm.SetForce(0f);
           _arm.SetForcePerDistance(0f);
 
-          _weld = (IObjectWeldJoint)Game.CreateObject("WeldJoint");
+          _weld = (IObjectWeldJoint) Game.CreateObject("WeldJoint");
           _weld.AddTargetObject(_grabber);
 
         }
@@ -575,7 +583,7 @@ namespace PowerupsDeluxe {
             Vector2 pos = _grabber.GetWorldPosition();
             RayCastResult result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero, Vector2.Zero);
             for (int i = 0; i < 4; i++) {
-              result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float)Math.PI / 2 * i), input)[0];
+              result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float) Math.PI / 2 * i), input)[0];
 
               if (result.Hit) {
                 if (result.HitObject.Name.Substring(0, 3) == "Gib") {
@@ -587,7 +595,8 @@ namespace PowerupsDeluxe {
             }
             if (result.Hit && result.ObjectID != _arm.GetTargetObject().UniqueID) {
               Grab(result.HitObject);
-            } else Destroy();
+            } else
+              Destroy();
 
           }
         }

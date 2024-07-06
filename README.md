@@ -113,13 +113,13 @@ Below is a list of the available power-ups.
 
 ![Flame](img/gif/Flame.gif)
 
-### [HUNGRY](Submissions/HUNGRY.cs)
+### [Hungry](Submissions/Hungry.cs)
 
 - **Author:** [Danger Ross](https://steamcommunity.com/profiles/76561198086215978)
 - **Duration:** 19 seconds
-- **Description:** The player undergoes a massive transformation, becoming a flesh spirit capable of shooting tendrils and consuming enemies.
+- **Description:** The player undergoes a massive transformation, becoming a flesh mass capable of shooting tendrils and consuming enemies.
 
-![Flesh](img/gif/Flesh.gif)
+![Hungry](img/gif/Hungry.gif)
 
 ### [Giant](Submissions/Giant.cs)
 
