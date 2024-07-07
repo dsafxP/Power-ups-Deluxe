@@ -1356,224 +1356,224 @@ namespace PowerupsDeluxe {
         public class SuperDove : Powerup {
           private const float SPEED = 5;
           private const float EGG_COOLDOWN = 400;
-          private const float EGG_DMG_MULT = 23;
-
+          private const float EGG_DMG_MULT = 13;
+        
           private static readonly Vector2 _playerPosition = new Vector2(0, 5000);
           private static readonly Vector2 _blockPosition = new Vector2(0, 4984);
-          private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
-
+          private static readonly PlayerCommand _playerCommand =
+              new PlayerCommand(PlayerCommandType.Fall);
+        
           private Events.PlayerDamageCallback _plyDamageCallback;
           private Events.ObjectDamageCallback _objDamageCallback;
-
+        
           private IPlayer ClosestEnemy {
             get {
-              List<IPlayer> enemies = Game.GetPlayers()
-                .Where(p => (p.GetTeam() != Player.GetTeam() ||
-                    p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
-                  p != Player)
-                .ToList();
-
+              List<IPlayer> enemies =
+                  Game.GetPlayers()
+                      .Where(p =>(p.GetTeam() != Player.GetTeam() ||
+                                  p.GetTeam() == PlayerTeam.Independent) &&
+                                 !p.IsDead && p != Player)
+                      .ToList();
+        
               Vector2 playerPos = Dove.GetWorldPosition();
-
-              enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
-                .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
-
+        
+              enemies.Sort((p1, p2) =>
+                               Vector2.Distance(p1.GetWorldPosition(), playerPos)
+                                   .CompareTo(Vector2.Distance(p2.GetWorldPosition(),
+                                                               playerPos)));
+        
               return enemies.FirstOrDefault();
             }
           }
-
+        
           private Vector2 InputDirection {
             get {
               Vector2 vel = Vector2.Zero;
-
+        
               if (Player.IsBot) {
                 IPlayer closestEnemy = ClosestEnemy;
-
+        
                 if (closestEnemy != null) {
                   vel = Vector2Helper.DirectionTo(Dove.GetWorldPosition(),
-                    closestEnemy.GetWorldPosition()) + Vector2Helper.Up;
+                                                  closestEnemy.GetWorldPosition()) +
+                        Vector2Helper.Up;
                 }
               } else {
                 vel.X += Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : 0;
                 vel.X -= Player.KeyPressed(VirtualKey.AIM_RUN_LEFT) ? 1 : 0;
-
+        
                 vel.Y += Player.KeyPressed(VirtualKey.AIM_CLIMB_UP) ||
-                  Player.KeyPressed(VirtualKey.JUMP) ? 1 : 0;
+                                 Player.KeyPressed(VirtualKey.JUMP)
+                             ? 1
+                             : 0;
                 vel.Y -= Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN) ? 1 : 0;
               }
-
+        
               return vel;
             }
           }
-
+        
           private readonly List<IObject> _eggs = new List<IObject>();
           private IDialogue _dialog;
-
+        
           public IObject Dove {
             get;
             private set;
           }
-
+        
           public IObject[] Eggs {
             get {
               _eggs.RemoveAll(item => item == null || item.IsRemoved);
-
+        
               return _eggs.ToArray();
             }
           }
-
+        
           public Vector2 Velocity {
-            get {
-              return InputDirection * SPEED;
-            }
+            get { return InputDirection * SPEED; }
           }
-
+        
           public override string Name {
-            get {
-              return "SUPER DOVE";
-            }
+            get { return "SUPER DOVE"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Luminous";
-            }
+            get { return "Luminous"; }
           }
-
-          public SuperDove(IPlayer player) : base(player) {
-            Time = 15000;
-          }
-
+        
+          public SuperDove(IPlayer player) : base(player) { Time = 15000; }
+        
           public override void Update(float dlt, float dltSecs) {
             if (Dove == null || Dove.IsRemoved) {
               Enabled = false;
-
+        
               return;
             }
-
+        
             // Egg
-            if (Time % EGG_COOLDOWN == 0)
-              CreateEgg();
-
+            if (Time % EGG_COOLDOWN == 0) CreateEgg();
+        
             // Apply movement
             Vector2 inputDirection = InputDirection;
             Vector2 vel = inputDirection * SPEED;
-
+        
             Dove.SetLinearVelocity(vel);
             Dove.SetFaceDirection((int) inputDirection.X);
           }
-
+        
           protected override void Activate() {
-            Game.PlaySound("Wings", Vector2.Zero); // Effect
-
-            Dove = Game.CreateObject("Dove00", Player.GetWorldPosition()); // Create dove
-
+            Game.PlaySound("Wings", Vector2.Zero);  // Effect
+        
+            Dove = Game.CreateObject("Dove00",
+                                     Player.GetWorldPosition());  // Create dove
+        
             PlayerTeam playerTeam = Player.GetTeam();
-
-            Dove.SetTargetAIData(new ObjectAITargetData(500, playerTeam)); // Targetable by bots
-
+        
+            Dove.SetTargetAIData(
+                new ObjectAITargetData(500, playerTeam));  // Targetable by bots
+        
             // Hide player
             Game.CreateObject("InvisibleBlockSmall", _blockPosition);
             Player.SetWorldPosition(_playerPosition);
-
+        
             Player.SetNametagVisible(false);
             Player.SetInputMode(PlayerInputMode.ReadOnly);
             Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
-
+        
             // Create tag
             string name = Player.Name;
-
+        
             if (name.Length > 10) {
               name = name.Substring(0, 10);
               name += "...";
             }
-
-            _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "", ushort.MaxValue, false);
-
+        
+            _dialog = Game.CreateDialogue(name, GetTeamColor(playerTeam), Dove, "",
+                                          ushort.MaxValue, false);
+        
             // Callbacks
             _plyDamageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
             _objDamageCallback = Events.ObjectDamageCallback.Start(OnObjectDamage);
           }
-
+        
           public override void OnEnabled(bool enabled) {
             if (!enabled) {
               Game.PlaySound("StrengthBoostStop", Vector2.Zero);
               Game.PlaySound("Wings", Vector2.Zero);
-
+        
               // Close dialogs
-              if (_dialog != null)
-                _dialog.Close();
-
+              if (_dialog != null) _dialog.Close();
+        
               // Stop callbacks
               _plyDamageCallback.Stop();
-
+        
               _plyDamageCallback = null;
-
+        
               _objDamageCallback.Stop();
-
+        
               _objDamageCallback = null;
-
+        
               // Remove dove
               Dove.Destroy();
-
+        
               // Recover player
               Player.SetWorldPosition(Dove.GetWorldPosition());
-              Player.SetLinearVelocity(Vector2.Zero); // Full stop
+              Player.SetLinearVelocity(Vector2.Zero);  // Full stop
               Player.SetInputEnabled(true);
               Player.SetNametagVisible(true);
               Player.SetCameraSecondaryFocusMode(CameraFocusMode.Focus);
-
+        
               // Clean
-              foreach (IObject egg in Eggs)
-                egg.Destroy();
+              foreach (IObject egg in Eggs) egg.Destroy();
             }
           }
-
+        
           private IObject CreateEgg(bool missile = true) {
             Vector2 dovePos = Dove.GetWorldPosition();
-
+        
             Game.PlayEffect(EffectName.BulletHitCloth, dovePos);
             Game.PlaySound("Baseball", Vector2.Zero);
-
+        
             Vector2 vel = Velocity;
-
-            IObject egg = Game.CreateObject("CrumpledPaper00", dovePos, 0, vel, vel.Length());
-
+        
+            IObject egg =
+                Game.CreateObject("CrumpledPaper00", dovePos, 0, vel, vel.Length());
+        
             egg.TrackAsMissile(missile);
-
+        
             _eggs.Add(egg);
-
+        
             return egg;
           }
-
+        
           private void OnPlayerDamage(IPlayer player, PlayerDamageArgs args) {
             if (args.DamageType == PlayerDamageEventType.Missile) {
               IObject attacker = Game.GetObject(args.SourceID);
-
+        
               if (Eggs.Contains(attacker)) {
                 player.DealDamage(args.Damage * EGG_DMG_MULT);
-
+        
                 player.SetInputEnabled(false);
                 player.AddCommand(_playerCommand);
-
-                Events.UpdateCallback.Start((float _dlt) => {
-                  player.SetInputEnabled(true);
-                }, 1, 1);
-
-                Game.PlayEffect(EffectName.CustomFloatText, attacker.GetWorldPosition(), "*BAM*");
-
+        
+                Events.UpdateCallback.Start(
+                    (float _dlt) => { player.SetInputEnabled(true); }, 1, 1);
+        
+                Game.PlayEffect(EffectName.CustomFloatText, attacker.GetWorldPosition(),
+                                "*BAM*");
+        
                 attacker.Destroy();
               }
             }
           }
-
+        
           private void OnObjectDamage(IObject obj, ObjectDamageArgs args) {
             if (obj == Dove) {
               Dove.SetHealth(Dove.GetMaxHealth());
               Player.DealDamage(args.Damage);
             }
           }
-
+        
           private static Color GetTeamColor(PlayerTeam team) {
             switch (team) {
               case PlayerTeam.Team1:
@@ -1587,122 +1587,6 @@ namespace PowerupsDeluxe {
               default:
                 return Color.White;
             }
-          }
-        }
-
-        // STONE SKIN - Danila015
-        public class StoneSkin : Powerup {
-          private
-          const float HEAVY_EXP = 1.034f;
-
-          private static readonly PlayerModifiers _stoneMod = new PlayerModifiers() {
-            ImpactDamageTakenModifier = 0,
-            ExplosionDamageTakenModifier = 0.25f,
-            ProjectileDamageTakenModifier = 0.25f,
-            ProjectileCritChanceTakenModifier = 0,
-            MeleeStunImmunity = 1,
-            MeleeDamageTakenModifier = 0.25f,
-            SprintSpeedModifier = 0.75f
-          };
-
-          private IProfile _profile;
-          private PlayerModifiers _modifiers;
-
-          private IProfile StoneProfile {
-            get {
-              IProfile playerProfile = Player.GetProfile();
-
-              playerProfile.Skin = new IProfileClothingItem(string.Format("Normal{0}",
-              playerProfile.Gender == Gender.Male ? string.Empty : "_fem"), "Skin5");
-
-              return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
-            }
-          }
-
-          public override string Name {
-            get {
-              return "STONE SKIN";
-            }
-          }
-
-          public override string Author {
-            get {
-              return "Danila015";
-            }
-          }
-
-          public StoneSkin(IPlayer player) : base(player) {
-            Time = 13000; // 13 s
-          }
-
-          protected override void Activate() {
-            _profile = Player.GetProfile(); // Store profile
-
-            _modifiers = Player.GetModifiers(); // Store original player modifiers
-
-            _modifiers.CurrentHealth = -1;
-            _modifiers.CurrentEnergy = -1;
-
-            Player.SetProfile(StoneProfile);
-
-            Player.SetModifiers(_stoneMod);
-          }
-
-          public override void Update(float dlt, float dltSecs) {
-            if (Player.IsBurning)
-              Player.ClearFire();
-
-            if (!Player.IsOnGround) {
-              Vector2 playerLinearVelocity = Player.GetLinearVelocity();
-
-              if (playerLinearVelocity.Y < 0) {
-                playerLinearVelocity.Y *= HEAVY_EXP;
-
-                playerLinearVelocity.X /= dlt; // Normalize X
-
-                Player.SetLinearVelocity(playerLinearVelocity);
-              }
-            }
-          }
-
-          public override void TimeOut() {
-            Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
-            Game.PlaySound("DestroyStone", Vector2.Zero);
-          }
-
-          public override void OnEnabled(bool enabled) {
-            if (!enabled) { // Restore player
-              Player.SetModifiers(_modifiers);
-              Player.SetProfile(_profile);
-            }
-          }
-
-          private static IProfile ColorProfile(IProfile pr, string col, string colI) {
-            if (pr.Accesory != null)
-              pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
-
-            if (pr.ChestOver != null)
-              pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
-
-            if (pr.ChestUnder != null)
-              pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
-
-            if (pr.Feet != null)
-              pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
-
-            if (pr.Hands != null)
-              pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
-
-            if (pr.Head != null)
-              pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
-
-            if (pr.Legs != null)
-              pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
-
-            if (pr.Waist != null)
-              pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
-
-            return pr;
           }
         }
 
@@ -2197,7 +2081,117 @@ namespace PowerupsDeluxe {
             return Vector2Helper.Rotated(new Vector2(distance, 0), (float) (_rng.NextDouble() * MathHelper.TwoPI));
           }
         }
-
+        // STONE SKIN - Danila015
+        public class StoneSkin : Powerup {
+          private const float HEAVY_EXP = 1.034f;
+        
+          private static readonly PlayerModifiers _stoneMod =
+              new PlayerModifiers(){ImpactDamageTakenModifier = 0,
+                                    ExplosionDamageTakenModifier = 0.25f,
+                                    ProjectileDamageTakenModifier = 0.25f,
+                                    ProjectileCritChanceTakenModifier = 0,
+                                    MeleeStunImmunity = 1,
+                                    MeleeDamageTakenModifier = 0.25f,
+                                    SprintSpeedModifier = 0.75f};
+        
+          private IProfile _profile;
+          private PlayerModifiers _modifiers;
+        
+          private IProfile StoneProfile {
+            get {
+              IProfile playerProfile = Player.GetProfile();
+        
+              playerProfile.Skin = new IProfileClothingItem(
+                  string.Format("Normal{0}",
+                                playerProfile.Gender == Gender.Male ? string.Empty
+                                : "_fem"),
+                  "Skin5");
+        
+              return ColorProfile(playerProfile, "ClothingGray", "ClothingLightGray");
+            }
+          }
+        
+          public override string Name {
+            get { return "STONE SKIN"; }
+          }
+        
+          public override string Author {
+            get { return "Danila015"; }
+          }
+        
+          public StoneSkin(IPlayer player) : base(player) {
+            Time = 13000;  // 13 s
+          }
+        
+          protected override void Activate() {
+            _profile = Player.GetProfile();  // Store profile
+        
+            _modifiers = Player.GetModifiers();  // Store original player modifiers
+        
+            _modifiers.CurrentHealth = -1;
+            _modifiers.CurrentEnergy = -1;
+        
+            Player.SetProfile(StoneProfile);
+        
+            Player.SetModifiers(_stoneMod);
+          }
+        
+          public override void Update(float dlt, float dltSecs) {
+            if (Player.IsBurning) Player.ClearFire();
+        
+            if (!Player.IsOnGround) {
+              Vector2 playerLinearVelocity = Player.GetLinearVelocity();
+        
+              if (playerLinearVelocity.Y < 0) {
+                playerLinearVelocity.Y *= HEAVY_EXP;
+        
+                playerLinearVelocity.X /= dlt;  // Normalize X
+        
+                Player.SetLinearVelocity(playerLinearVelocity);
+              }
+            }
+          }
+        
+          public override void TimeOut() {
+            Game.PlayEffect(EffectName.DestroyCloth, Player.GetWorldPosition());
+            Game.PlaySound("DestroyStone", Vector2.Zero);
+          }
+        
+          public override void OnEnabled(bool enabled) {
+            if (!enabled) {  // Restore player
+              Player.SetModifiers(_modifiers);
+              Player.SetProfile(_profile);
+            }
+          }
+        
+          private static IProfile ColorProfile(IProfile pr, string col, string colI) {
+            if (pr.Accesory != null)
+              pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
+        
+            if (pr.ChestOver != null)
+              pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
+        
+            if (pr.ChestUnder != null)
+              pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
+        
+            if (pr.Feet != null)
+              pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
+        
+            if (pr.Hands != null)
+              pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
+        
+            if (pr.Head != null)
+              pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
+        
+            if (pr.Legs != null)
+              pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
+        
+            if (pr.Waist != null)
+              pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
+        
+            return pr;
+          }
+        }
         // AIR DASH - Danila015
         public class AirDash : Powerup {
           private static readonly Vector2 _velocity = new Vector2(17, 5);
@@ -2349,90 +2343,104 @@ namespace PowerupsDeluxe {
         // GRABBY HANDS - dsafxP - Danila015
         public class GrabbyHands : Powerup {
           private const float EFFECT_DISTANCE = 5;
-
+          private const float GRAB_DISTANCE = 80;
+        
           private WeaponItemType[] EmptyWeaponItemTypes {
             get {
-              List<WeaponItemType> weaponItemTypes = new List<WeaponItemType> {
-                WeaponItemType.Melee,
-                WeaponItemType.Rifle,
-                WeaponItemType.Handgun,
-                WeaponItemType.Powerup,
-                WeaponItemType.Thrown
-              };
-
+              List<WeaponItemType> weaponItemTypes = new List<WeaponItemType>{
+                  WeaponItemType.Melee, WeaponItemType.Rifle, WeaponItemType.Handgun,
+                  WeaponItemType.Powerup, WeaponItemType.Thrown};
+        
               weaponItemTypes.Remove(Player.CurrentMeleeWeapon.WeaponItemType);
               weaponItemTypes.Remove(Player.CurrentPrimaryWeapon.WeaponItemType);
               weaponItemTypes.Remove(Player.CurrentSecondaryWeapon.WeaponItemType);
               weaponItemTypes.Remove(Player.CurrentPowerupItem.WeaponItemType);
               weaponItemTypes.Remove(Player.CurrentThrownItem.WeaponItemType);
-
+        
               return weaponItemTypes.ToArray();
             }
           }
-
+        
+          private IPlayer ClosestEnemy {
+            get {
+              List<IPlayer> enemies =
+                  Game.GetPlayers()
+                      .Where(p =>(p.GetTeam() != Player.GetTeam() ||
+                                  p.GetTeam() == PlayerTeam.Independent) &&
+                                 !p.IsDead)
+                      .ToList();
+        
+              Vector2 playerPos = Player.GetWorldPosition();
+        
+              enemies.Sort((p1, p2) =>
+                               Vector2.Distance(p1.GetWorldPosition(), playerPos)
+                                   .CompareTo(Vector2.Distance(p2.GetWorldPosition(),
+                                                               playerPos)));
+        
+              return enemies.FirstOrDefault();
+            }
+          }
+        
           private IPlayer[] ActiveEnemies {
             get {
               return Game.GetPlayers()
-                .Where(p => (p.GetTeam() != Player.GetTeam() ||
-                    p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
-                  p.IsInputEnabled)
-                .ToArray();
+                  .Where(p =>(p.GetTeam() != Player.GetTeam() ||
+                              p.GetTeam() == PlayerTeam.Independent) &&
+                             !p.IsDead && p.IsInputEnabled)
+                  .ToArray();
             }
           }
-
+        
           public override string Name {
-            get {
-              return "GRABBY HANDS";
-            }
+            get { return "GRABBY HANDS"; }
           }
-
+        
           public override string Author {
-            get {
-              return "dsafxP - Danila015";
-            }
+            get { return "dsafxP - Danila015"; }
           }
-
+        
           public GrabbyHands(IPlayer player) : base(player) {
-            Time = 14000; // 14 s
+            Time = 14000;  // 14 s
           }
-
-          protected override void Activate() {
-          }
-
+        
+          protected override void Activate() {}
+        
           public override void Update(float dlt, float dltSecs) {
             WeaponItemType[] emptyWeaponItemTypes = EmptyWeaponItemTypes;
             IPlayer[] enemies = ActiveEnemies;
-
+        
             if (emptyWeaponItemTypes.Any() && enemies.Any())
               foreach (IPlayer enemy in enemies) {
-                WeaponItemType toGrab = emptyWeaponItemTypes
-                  .FirstOrDefault(s => enemy.CurrentWeaponDrawn == s);
-
+                WeaponItemType toGrab = emptyWeaponItemTypes.FirstOrDefault(
+                    s => enemy.CurrentWeaponDrawn == s);
+        
                 if (toGrab != null) {
                   Vector2 enemyPos = enemy.GetWorldPosition();
                   Vector2 playerPos = Player.GetWorldPosition();
-
-                  IObjectWeaponItem weapon = enemy.Disarm(toGrab,
-                    Vector2Helper.DirectionTo(playerPos, enemyPos), true);
-
-                  if (weapon != null) {
-                    weapon.SetWorldPosition(playerPos);
-
-                    Game.PlayEffect(EffectName.PlayerLandFull, playerPos);
-                    Game.PlayEffect(EffectName.PlayerLandFull, enemyPos);
-                    PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
-
-                    Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
+        
+                  if (Vector2.Distance(enemyPos, playerPos) < GRAB_DISTANCE) {
+                    IObjectWeaponItem weapon = enemy.Disarm(
+                        toGrab, Vector2Helper.DirectionTo(playerPos, enemyPos), true);
+        
+                    if (weapon != null) {
+                      weapon.SetWorldPosition(playerPos);
+        
+                      Game.PlayEffect(EffectName.PlayerLandFull, playerPos);
+                      Game.PlayEffect(EffectName.PlayerLandFull, enemyPos);
+                      PointShape.Trail(Draw, playerPos, enemyPos, EFFECT_DISTANCE);
+        
+                      Game.PlaySound("PlayerGrabCatch", Vector2.Zero);
+                    }
                   }
                 }
               }
           }
-
+        
           public override void TimeOut() {
             // Play effects indicating expiration of powerup
             Game.PlaySound("StrengthBoostStop", Vector2.Zero);
           }
-
+        
           private static void Draw(Vector2 v) {
             Game.PlayEffect(EffectName.ItemGleam, v);
           }
@@ -2443,357 +2451,329 @@ namespace PowerupsDeluxe {
           private const float ATTACK_COOLDOWN = 250;
           private const float THROW_ANGULAR_VELOCITY = 50;
           private const float THROW_SPEED = 10;
-
+        
           private static readonly Vector2 _offset = new Vector2(0, 24);
-          private static readonly PlayerModifiers _setMod = new PlayerModifiers() {
-            ExplosionDamageTakenModifier = 0,
-            ImpactDamageTakenModifier = 0.25f
-          };
-          private static readonly string[] _throwableIDs = {
-        "WpnGrenadesThrown",
-        "WpnMolotovsThrown",
-        //"WpnC4Thrown",
-        "WpnMineThrown"
-      };
-
+          private static readonly PlayerModifiers _setMod = new PlayerModifiers(){
+              ExplosionDamageTakenModifier = 0, ImpactDamageTakenModifier = 0.25f};
+          private static readonly string[] _throwableIDs = {"WpnGrenadesThrown",
+                                                            "WpnMolotovsThrown",
+                                                            //"WpnC4Thrown",
+                                                            "WpnMineThrown"};
+        
           private readonly List<IObject> _explosives = new List<IObject>();
           private PlayerModifiers _modifiers;
-
+        
           private static string RandomThrowableID {
-            get {
-              return _throwableIDs[_rng.Next(_throwableIDs.Length)];
-            }
+            get { return _throwableIDs[_rng.Next(_throwableIDs.Length)]; }
           }
-
+        
           private IPlayer ClosestEnemy {
             get {
-              List<IPlayer> enemies = Game.GetPlayers()
-                .Where(p => (p.GetTeam() != Player.GetTeam() ||
-                    p.GetTeam() == PlayerTeam.Independent) && !p.IsDead &&
-                  p != Player)
-                .ToList();
-
+              List<IPlayer> enemies =
+                  Game.GetPlayers()
+                      .Where(p =>(p.GetTeam() != Player.GetTeam() ||
+                                  p.GetTeam() == PlayerTeam.Independent) &&
+                                 !p.IsDead && p != Player)
+                      .ToList();
+        
               Vector2 playerPos = Player.GetWorldPosition();
-
-              enemies.Sort((p1, p2) => Vector2.Distance(p1.GetWorldPosition(), playerPos)
-                .CompareTo(Vector2.Distance(p2.GetWorldPosition(), playerPos)));
-
+        
+              enemies.Sort((p1, p2) =>
+                               Vector2.Distance(p1.GetWorldPosition(), playerPos)
+                                   .CompareTo(Vector2.Distance(p2.GetWorldPosition(),
+                                                               playerPos)));
+        
               return enemies.FirstOrDefault();
             }
           }
-
+        
           public override string Name {
-            get {
-              return "BLITZKRIEG";
-            }
+            get { return "BLITZKRIEG"; }
           }
-
+        
           public override string Author {
-            get {
-              return "dsafxP";
-            }
+            get { return "dsafxP"; }
           }
-
+        
           public IObject[] Explosives {
             get {
               _explosives.RemoveAll(item => item == null || item.IsRemoved);
-
+        
               return _explosives.ToArray();
             }
           }
-
+        
           public Blitzkrieg(IPlayer player) : base(player) {
-            Time = 19000; // 19 s
+            Time = 19000;  // 19 s
           }
-
+        
           protected override void Activate() {
-            _modifiers = Player.GetModifiers(); // Store original player modifiers
-
+            _modifiers = Player.GetModifiers();  // Store original player modifiers
+        
             _modifiers.CurrentHealth = -1;
             _modifiers.CurrentEnergy = -1;
-
+        
             Player.SetModifiers(_setMod);
           }
-
+        
           public override void Update(float dlt, float dltSecs) {
-            if (Player.IsBurning)
-              Player.ClearFire();
-
+            if (Player.IsBurning) Player.ClearFire();
+        
             if (Time % ATTACK_COOLDOWN == 0) {
               Throw(true);
             }
           }
-
-          public override void TimeOut() {
-            Game.PlaySound("C4Detonate", Vector2.Zero);
-          }
-
+        
+          public override void TimeOut() { Game.PlaySound("C4Detonate", Vector2.Zero); }
+        
           public override void OnEnabled(bool enabled) {
             if (!enabled) {
               Player.SetModifiers(_modifiers);
-
+        
               foreach (IObject exp in Explosives) {
                 Game.PlayEffect(EffectName.DestroyDefault, exp.GetWorldPosition());
                 Game.PlaySound("DestroyDefault", Vector2.Zero);
-
+        
                 exp.Remove();
               }
             }
           }
-
+        
           private IObject Throw(bool missile = false) {
             IPlayer closestEnemy = ClosestEnemy;
-
-            if (closestEnemy == null)
-              return null;
-
+        
+            if (closestEnemy == null) return null;
+        
             Vector2 playerPos = Player.GetWorldPosition() + _offset;
-            Vector2 throwVel = Vector2Helper.DirectionTo(playerPos, closestEnemy
-              .GetWorldPosition()) * THROW_SPEED;
-
-            IObject thrown = Game.CreateObject(RandomThrowableID, playerPos, 0,
-              throwVel, THROW_ANGULAR_VELOCITY, Player.FacingDirection);
-
+            Vector2 throwVel =
+                Vector2Helper.DirectionTo(playerPos, closestEnemy.GetWorldPosition()) *
+                THROW_SPEED;
+        
+            IObject thrown =
+                Game.CreateObject(RandomThrowableID, playerPos, 0, throwVel,
+                                  THROW_ANGULAR_VELOCITY, Player.FacingDirection);
+        
             thrown.TrackAsMissile(missile);
-
+        
             Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero, thrown.UniqueID,
-              EffectName.ItemGleam, 2f);
-
+                            EffectName.ItemGleam, 2f);
+        
             _explosives.Add(thrown);
-
+        
             return thrown;
           }
         }
-
+        
         // STARRED - Tomo
         public class Star : Powerup {
           private const float EFFECT_COOLDOWN = 50;
           private const float THROW_COOLDOWN = 100;
           private const float PUSH_FORCE = 7;
           private const float PUSH_DMG = 16;
-
-          private static readonly PlayerCommand _playerCommand = new PlayerCommand(PlayerCommandType.Fall);
-          private static readonly PlayerModifiers _starMod = new PlayerModifiers() {
-            EnergyConsumptionModifier = 0,
-            ProjectileCritChanceTakenModifier = 0,
-            ExplosionDamageTakenModifier = 0,
-            ProjectileDamageTakenModifier = 0,
-            MeleeDamageTakenModifier = 0,
-            ImpactDamageTakenModifier = 0,
-            MeleeStunImmunity = 1,
-            CanBurn = 0,
-            RunSpeedModifier = 2,
-            SprintSpeedModifier = 2
-          };
-
+        
+          private static readonly PlayerCommand _playerCommand =
+              new PlayerCommand(PlayerCommandType.Fall);
+          private static readonly PlayerModifiers _starMod =
+              new PlayerModifiers(){EnergyConsumptionModifier = 0,
+                                    ProjectileCritChanceTakenModifier = 0,
+                                    ExplosionDamageTakenModifier = 0,
+                                    ProjectileDamageTakenModifier = 0,
+                                    MeleeDamageTakenModifier = 0,
+                                    ImpactDamageTakenModifier = 0,
+                                    MeleeStunImmunity = 1,
+                                    CanBurn = 0,
+                                    RunSpeedModifier = 2,
+                                    SprintSpeedModifier = 2};
+        
           private static readonly string[] _colors = {
-        "ClothingRed",
-        "ClothingOrange",
-        "ClothingYellow",
-        "ClothingGreen",
-        "ClothingBlue",
-        "ClothingPurple"
-      };
-
+              "ClothingRed",   "ClothingOrange", "ClothingYellow",
+              "ClothingGreen", "ClothingBlue",   "ClothingPurple"};
+        
           private static readonly string[] _lightColors = {
-        "ClothingLightRed",
-        "ClothingLightOrange",
-        "ClothingLightYellow",
-        "ClothingLightGreen",
-        "ClothingLightBlue",
-        "ClothingLightPurple"
-      };
-
+              "ClothingLightRed",   "ClothingLightOrange", "ClothingLightYellow",
+              "ClothingLightGreen", "ClothingLightBlue",   "ClothingLightPurple"};
+        
           private int _rainbowIndex = 0;
-
+        
           private IProfile _profile;
           private PlayerModifiers _modifiers;
-
+        
           private int RainbowIndex {
             get {
               _rainbowIndex = (_rainbowIndex + 1) % _colors.Length;
-
+        
               return _rainbowIndex;
             }
           }
-
+        
           private IPlayer[] PlayersToPush {
             get {
               return Game.GetObjectsByArea<IPlayer>(Player.GetAABB())
-                .Where(p => !p.IsDead && p != Player &&
-                  (p.GetTeam() != Player.GetTeam() || p.GetTeam() == PlayerTeam.Independent))
-                .ToArray();
+                  .Where(p => !p.IsDead && p != Player &&
+                              (p.GetTeam() != Player.GetTeam() ||
+                               p.GetTeam() == PlayerTeam.Independent))
+                  .ToArray();
             }
           }
-
+        
           public override string Name {
-            get {
-              return "STARRED";
-            }
+            get { return "STARRED"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Tomo";
-            }
+            get { return "Tomo"; }
           }
-
+        
           public Star(IPlayer player) : base(player) {
-            Time = 9000; // 9 s
+            Time = 9000;  // 9 s
           }
-
+        
           protected override void Activate() {
-            _profile = Player.GetProfile(); // Store profile
-
-            _modifiers = Player.GetModifiers(); // Store original player modifiers
-
+            _profile = Player.GetProfile();  // Store profile
+        
+            _modifiers = Player.GetModifiers();  // Store original player modifiers
+        
             _modifiers.CurrentHealth = -1;
             _modifiers.CurrentEnergy = -1;
-
+        
             Player.SetModifiers(_starMod);
           }
-
+        
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0) {
               PointShape.Random(Draw, Player.GetAABB(), _rng);
-
-              Player.SetProfile(ColorProfile(Player.GetProfile(),
-                _colors[RainbowIndex], _lightColors[_rainbowIndex]));
+        
+              Player.SetProfile(ColorProfile(Player.GetProfile(), _colors[RainbowIndex],
+                                             _lightColors[_rainbowIndex]));
             }
-
+        
             if (Time % THROW_COOLDOWN == 0)
               foreach (IPlayer toPush in PlayersToPush) {
                 toPush.SetInputEnabled(false);
                 toPush.AddCommand(_playerCommand);
-
-                Events.UpdateCallback.Start((float _dlt) => {
-                  toPush.SetInputEnabled(true);
-                }, 1, 1);
-
+        
+                Events.UpdateCallback.Start(
+                    (float _dlt) => { toPush.SetInputEnabled(true); }, 1, 1);
+        
                 Vector2 toPushPos = toPush.GetWorldPosition();
-
-                toPush.SetWorldPosition(toPushPos + (Vector2Helper.Up * 2)); // Sticky feet
-
-                toPush.SetLinearVelocity(new Vector2(-toPush.FacingDirection * PUSH_FORCE, PUSH_FORCE));
-
+        
+                toPush.SetWorldPosition(toPushPos +
+                                        (Vector2Helper.Up * 2));  // Sticky feet
+        
+                toPush.SetLinearVelocity(
+                    new Vector2(-toPush.FacingDirection * PUSH_FORCE, PUSH_FORCE));
+        
                 toPush.DealDamage(PUSH_DMG, Player.UniqueID);
-
+        
                 Game.PlaySound("PlayerDiveCatch", Vector2.Zero);
                 Game.PlayEffect(EffectName.Smack, toPushPos);
               }
           }
-
+        
           public override void TimeOut() {
             // Play effects indicating expiration of powerup
             Game.PlaySound("StrengthBoostStop", Vector2.Zero);
             Game.PlayEffect(EffectName.PlayerLandFull, Player.GetWorldPosition());
           }
-
+        
           public override void OnEnabled(bool enabled) {
-            if (!enabled) { // Restore player
+            if (!enabled) {  // Restore player
               Player.SetModifiers(_modifiers);
               Player.SetProfile(_profile);
             }
           }
-
+        
           private static void Draw(Vector2 v) {
             Game.PlayEffect(EffectName.ItemGleam, v);
           }
-
+        
           private static IProfile ColorProfile(IProfile pr, string col, string colI) {
             if (pr.Accesory != null)
               pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
-
+        
             if (pr.ChestOver != null)
               pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
-
+        
             if (pr.ChestUnder != null)
               pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
-
+        
             if (pr.Feet != null)
               pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
-
+        
             if (pr.Hands != null)
               pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
-
+        
             if (pr.Head != null)
               pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
-
+        
             if (pr.Legs != null)
               pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
-
+        
             if (pr.Waist != null)
               pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
-
+        
             return pr;
           }
         }
-
+        
         // OVERHEAL - Danila015
         public class Overheal : Powerup {
           private const float REGEN_COOLDOWN = 100;
           private const float REGEN = 5;
           private const float CANCEL_DMG = 15;
-
+        
           private const int OVERHEAL = 1;
-
+        
           private static readonly PlayerDamageEventType[] _allowedTypes = {
-        PlayerDamageEventType.Melee,
-        PlayerDamageEventType.Projectile,
-        PlayerDamageEventType.Missile
-      };
-
+              PlayerDamageEventType.Melee, PlayerDamageEventType.Projectile,
+              PlayerDamageEventType.Missile};
+        
           private Events.PlayerDamageCallback _damageCallback = null;
-
+        
           public override string Name {
-            get {
-              return "OVERHEAL";
-            }
+            get { return "OVERHEAL"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Danila015";
-            }
+            get { return "Danila015"; }
           }
-
+        
           public Overheal(IPlayer player) : base(player) {
-            Time = 40000; // 40 s
+            Time = 40000;  // 40 s
           }
-
-          protected override void Activate() {
-          }
-
+        
+          protected override void Activate() {}
+        
           public override void Update(float dlt, float dltSecs) {
             if (Time % REGEN_COOLDOWN == 0) {
               float health = Player.GetHealth();
-
+        
               if (health < Player.GetMaxHealth()) {
                 PointShape.Random(Draw, Player.GetAABB(), _rng);
-
+        
                 Game.PlaySound("GetHealthSmall", Vector2.Zero, 0.15f);
-
+        
                 Player.SetHealth(health + REGEN);
               } else {
                 // Apply overheal
                 PlayerModifiers mod = Player.GetModifiers();
-
+        
                 mod.MaxHealth += OVERHEAL;
                 mod.CurrentHealth += OVERHEAL;
-
+        
                 Player.SetModifiers(mod);
-
+        
                 // Effect
                 Game.PlaySound("Syringe", Vector2.Zero, 0.25f);
                 PointShape.Random(DrawOverheal, Player.GetAABB(), _rng);
               }
             }
           }
-
+        
           public override void TimeOut() {
             Game.PlaySound("PlayerLeave", Player.GetWorldPosition());
           }
-
+        
           public override void OnEnabled(bool enabled) {
             if (enabled) {
               _damageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
@@ -2802,28 +2782,27 @@ namespace PowerupsDeluxe {
               _damageCallback = null;
             }
           }
-
+        
           private void OnPlayerDamage(IPlayer player, PlayerDamageArgs args) {
-            if (player != Player)
-              return;
-
+            if (player != Player) return;
+        
             if (_allowedTypes.Any(at => args.DamageType == at)) {
               Player.DealDamage(CANCEL_DMG);
-
-              Time = 0; // Player has been damaged by an opponent, stop
+        
+              Time = 0;  // Player has been damaged by an opponent, stop
             }
           }
-
+        
           private static void Draw(Vector2 v) {
             Game.PlayEffect(EffectName.BloodTrail, v);
             Game.PlayEffect(EffectName.Smack, v);
           }
-
+        
           private static void DrawOverheal(Vector2 v) {
             Game.PlayEffect(EffectName.Blood, v);
           }
         }
-
+        
         // BERSERK - Danila015
         public class Berserk : Powerup {
           private const float EFFECT_COOLDOWN = 100;
@@ -3795,7 +3774,7 @@ namespace PowerupsDeluxe {
 
         // DRONE - dsafxP
         public class Drone : Powerup {
-          private const float SPEED = 6;
+          private const float SPEED = 3;
 
           private Events.ObjectDamageCallback _objDmgCallback;
 
@@ -4706,176 +4685,171 @@ namespace PowerupsDeluxe {
           private const float EFFECT_SIZE = 40;
           private const float SHAKE_TIME = 1000;
           private const float SHAKE_INTENSITY = 4;
-          private const float BLOCK_TIME_PENALTY = 3000;
-
+          private const float BLOCK_TIME_PENALTY = 5000;
+        
           private const float EFFECT_RADIUS = EFFECT_SIZE / 2;
-
+        
           private Events.PlayerMeleeActionCallback _meleeActionCallback = null;
-
+        
           public override string Name {
-            get {
-              return "ONE-TAP";
-            }
+            get { return "ONE-TAP"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Danila015";
-            }
+            get { return "Danila015"; }
           }
-
-          public Onetap(IPlayer player) : base(player) {
-            Time = 10000;
-          }
-
-          protected override void Activate() {
-          }
-
+        
+          public Onetap(IPlayer player) : base(player) { Time = 10000; }
+        
+          protected override void Activate() {}
+        
           public override void Update(float dlt, float dltSecs) {
             if (Time % EFFECT_COOLDOWN == 0) {
               Draw(Player.GetWorldPosition());
             }
           }
-
+        
           public override void TimeOut() {
             Game.PlaySound("StrengthBoostStop", Vector2.Zero);
-
+        
             Game.PlayEffect(EffectName.Gib, Player.GetWorldPosition());
           }
-
+        
           public override void OnEnabled(bool enabled) {
             if (enabled) {
-              _meleeActionCallback = Events.PlayerMeleeActionCallback.Start(OnPlayerMeleeAction);
+              _meleeActionCallback =
+                  Events.PlayerMeleeActionCallback.Start(OnPlayerMeleeAction);
             } else {
               _meleeActionCallback.Stop();
-
+        
               _meleeActionCallback = null;
             }
           }
-
+        
           private void OnPlayerMeleeAction(IPlayer player, PlayerMeleeHitArg[] args) {
-            if (player != Player)
-              return;
-
+            if (player != Player) return;
+        
             foreach (PlayerMeleeHitArg arg in args) {
-              if (!arg.IsPlayer)
-                continue;
-
+              if (!arg.IsPlayer) continue;
+        
               IPlayer hit = (IPlayer) arg.HitObject;
-
+        
               if (hit.IsBlocking) {
                 Time -= BLOCK_TIME_PENALTY;
-
+        
                 continue;
               }
-
+        
               hit.Gib();
-
-              Game.PlayEffect(EffectName.CameraShaker, Vector2.Zero,
-                SHAKE_INTENSITY, SHAKE_TIME, true);
-
+        
+              Game.PlayEffect(EffectName.CameraShaker, Vector2.Zero, SHAKE_INTENSITY,
+                              SHAKE_TIME, true);
+        
               Time = 0;
             }
           }
-
+        
           private void Draw(Vector2 pos) {
             PointShape.Circle(v => {
-              Game.PlayEffect(EffectName.BloodTrail, Vector2Helper.Rotated(v - pos,
-                  (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
-                pos);
+              Game.PlayEffect(
+                  EffectName.BloodTrail,
+                  Vector2Helper.Rotated(
+                      v - pos, (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+                      pos);
             }, pos, EFFECT_RADIUS, EFFECT_SEPARATION);
           }
         }
-
         // BURST - Danger Ross
         public class Burst : Powerup {
           private const int BATCH_SIZE = 8;
           private const float BURST_COOLDOWN = 500;
-
+        
           private readonly List<BParticle> _followingParticles = new List<BParticle>();
-
+        
           private Events.PlayerKeyInputCallback _playerKeyInputEvent = null;
-
+        
           private float _power = 0;
           private float _elapsed = 0;
           private float _nextParticleTime;
-
+        
           public override string Name {
-            get {
-              return "BURST";
-            }
+            get { return "BURST"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Danger Ross";
-            }
+            get { return "Danger Ross"; }
           }
-
+        
           public bool CanBurst {
-            get {
-              return _elapsed <= 0;
-            }
+            get { return _elapsed <= 0; }
           }
-
+        
           public Burst(IPlayer player) : base(player) {
-            Time = 16000;
+            Time = 20000;  // 20 s
           }
-
+        
           protected override void Activate() {
             _nextParticleTime = _rng.Next(30) * 50;
-
-            _playerKeyInputEvent = Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
+        
+            _playerKeyInputEvent =
+                Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
+            // REMOVED: "template power activated on"
           }
-
+        
           public void OnPlayerKeyInput(IPlayer player, VirtualKeyInfo[] keyEvents) {
-            if (player.UserIdentifier == Player.UserIdentifier && keyEvents[0].Key == VirtualKey.ATTACK &&
-              (player.IsMeleeAttacking || player.IsKicking) && CanBurst) {
+            if (player.UserIdentifier == Player.UserIdentifier &&
+                keyEvents[0].Key == VirtualKey.ATTACK &&
+                (player.IsMeleeAttacking || player.IsKicking) && CanBurst) {
               PlayerModifiers mods = player.GetModifiers();
               PlayerModifiers original = player.GetModifiers();
-
+        
               float damageMult = 1 + (_power / 5000);
-
+        
               mods.MeleeDamageDealtModifier *= damageMult;
               mods.MeleeStunImmunity = 1;
-              mods.MeleeForceModifier *= 1 + damageMult;
-
-              Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int) (damageMult * 100) / 100f));
-
+              mods.MeleeForceModifier *= 1 + damageMult * 3;
+        
+              Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5),
+                              "x" + ((int)(damageMult * 100) / 100f));
+        
               Area effectArea = new Area(14, -12, -10, 12);
               effectArea.Move(Player.GetWorldPosition());
-
+        
               for (int i = 0; i < 5 + _rng.Next(5) * (int) damageMult; i++)
                 PointShape.Random(v => Game.PlayEffect("S_P", v), effectArea, _rng);
-
+        
               Game.PlayEffect("CAM_S", Player.GetWorldPosition(), 2f, 500f, false);
               Game.PlaySound("StrengthBoostStart", Player.GetWorldPosition());
-
+        
               player.SetModifiers(mods);
-
-              //Enabled = false;
-
+        
+              // Enabled = false;
+        
               _elapsed = BURST_COOLDOWN;
-
+        
               Events.PlayerMeleeActionCallback finder = null;
-
-              finder = Events.PlayerMeleeActionCallback.Start((IPlayer attacker, PlayerMeleeHitArg[] args) => {
-                if (attacker.UniqueID == Player.UniqueID) {
-                  foreach (PlayerMeleeHitArg arg in args) {
-                    if (arg.HitObject is IPlayer) {
-                      IPlayer vic = (IPlayer) arg.HitObject;
-                      vic.SetWorldPosition(vic.GetWorldPosition() + Vector2Helper.Up);
-                      vic.SetLinearVelocity(vic.GetLinearVelocity() + new Vector2(5 * Player.FacingDirection * damageMult, 6));
-                      if (arg.HitDamage <= 0) {
-                        vic.DealDamage(8 * damageMult);
+        
+              finder = Events.PlayerMeleeActionCallback.Start(
+                  (IPlayer attacker, PlayerMeleeHitArg[] args) => {
+                    if (attacker.UniqueID == Player.UniqueID) {
+                      foreach (PlayerMeleeHitArg arg in args) {
+                        if (arg.HitObject is IPlayer) {
+                          IPlayer vic = (IPlayer) arg.HitObject;
+                          vic.SetWorldPosition(vic.GetWorldPosition() +
+                                               Vector2Helper.Up);
+                          vic.SetLinearVelocity(
+                              vic.GetLinearVelocity() +
+                              new Vector2(5 * Player.FacingDirection * damageMult, 6));
+                          if (arg.HitDamage <= 0) {
+                            vic.DealDamage(8 * damageMult);
+                          }
+                        }
                       }
                     }
-                  }
-                }
-              });
-
+                  });
+        
               Events.UpdateCallback delay = null;
-
+        
               delay = Events.UpdateCallback.Start(e => {
                 player.SetModifiers(original);
                 delay.Stop();
@@ -4884,32 +4858,37 @@ namespace PowerupsDeluxe {
               }, 500);
             }
           }
-
+        
           public override void Update(float dlt, float dltSecs) {
             _elapsed = Math.Max(_elapsed - dlt, 0);
-
+        
             float powerMult = 1;
-
-            if (Player.IsCrouching)
-              powerMult += 0.5f;
-
-            if (Math.Abs(Player.GetLinearVelocity().X) + Math.Abs(Player.GetLinearVelocity().Y) > 4)
+        
+            if (Player.IsCrouching) powerMult += 0.5f;
+        
+            if (Math.Abs(Player.GetLinearVelocity().X) +
+                    Math.Abs(Player.GetLinearVelocity().Y) >
+                4)
               powerMult -= 0.5f;
-
+        
             _power += dlt * powerMult;
-
-            //spawning particles
+        
+            // spawning particles
             _nextParticleTime -= dlt;
-
-            if (_nextParticleTime <= 0) { //replace with while
-              _followingParticles.Add(BParticle.GetBParticle(Player, Player.GetWorldPosition() +
-                Vector2Helper.Rotated(Vector2Helper.Right, (float) (_rng.NextDouble() * 2 * Math.PI)) *
-                ((float) (_rng.NextDouble() * 30f) + 10f), ((float) _rng.NextDouble() * 4f + 2)));
-
-              _nextParticleTime += _rng.Next((int) (5 / (powerMult))) * 50 - 50;
+        
+            if (_nextParticleTime <= 0) {  // replace with while
+              _followingParticles.Add(BParticle.GetBParticle(
+                  Player,
+                  Player.GetWorldPosition() +
+                      Vector2Helper.Rotated(Vector2Helper.Right,
+                                            (float)(_rng.NextDouble() * 2 * Math.PI)) *
+                          ((float)(_rng.NextDouble() * 30f) + 10f),
+                  ((float) _rng.NextDouble() * 4f + 2)));
+        
+              _nextParticleTime += _rng.Next((int)(5 / (powerMult))) * 50 - 50;
             }
-
-            //updating particles
+        
+            // updating particles
             if (Time % 100 == 0)
               for (int i = _followingParticles.Count - 1; i >= 0; i--) {
                 BParticle particle = _followingParticles[i];
@@ -4919,13 +4898,13 @@ namespace PowerupsDeluxe {
                 }
               }
           }
-
+        
           public override void OnEnabled(bool enabled) {
             // Implement in derived classes
             if (!enabled) {
               _playerKeyInputEvent.Stop();
-
-              //free all particles
+        
+              // free all particles
               for (int i = _followingParticles.Count - 1; i >= 0; i--) {
                 BParticle particle = _followingParticles[i];
                 particle.Disable();
@@ -4933,147 +4912,155 @@ namespace PowerupsDeluxe {
               }
             }
           }
-
+        
           private class BParticle {
             private readonly IObjectText graphic;
             private readonly IObjectElevatorPathJoint path1;
             private readonly IObjectElevatorPathJoint path2;
             private readonly IObjectElevatorAttachmentJoint elevatorAttachment;
-
-            //private int index; //should match the particles position in the global list
-
+        
+            // private int index; //should match the particles position in the
+            // global list
+        
             private float size;
-
-            //the class has a list of all instantiated particles for memory management
+        
+            // the class has a list of all instantiated particles for memory
+            // management
             private static BParticle[] particles = new BParticle[0];
-            //particle index loops around the list in a circle, represents the next available particle for use
+            // particle index loops around the list in a circle, represents the next
+            // available particle for use
             private static int particleIndex = 0;
-            //the count of used particles must correspond to the last usable index. particles must be freed in the order they were consumed
+            // the count of used particles must correspond to the last usable index.
+            // particles must be freed in the order they were consumed
             private static int usedParticles = 0;
-            //equivalent to particles.Length
+            // equivalent to particles.Length
             private static int particleCount = 0;
-
-            public static BParticle GetBParticle(IPlayer following, Vector2 start, float size) {
+        
+            public static BParticle GetBParticle(IPlayer following, Vector2 start,
+                                                 float size) {
               InitializeParticles();
               BParticle particle = particles[particleIndex];
-
+        
               Vector2 offset1 = new Vector2(-8f, 8f);
               Vector2 offset2 = new Vector2(0, 6);
-
+        
               particleIndex = (particleIndex + 1) % particleCount;
               usedParticles++;
-
+        
               particle.size = size;
-
+        
               particle.path1.SetWorldPosition(start + offset1);
-
-              particle.path2.SetWorldPosition(following.GetWorldPosition() + offset2 + following.GetLinearVelocity() * 5f);
-
+        
+              particle.path2.SetWorldPosition(following.GetWorldPosition() + offset2 +
+                                              following.GetLinearVelocity() * 5f);
+        
               // particle.UpdatePath2();
-
+        
               particle.graphic.SetWorldPosition(start);
               particle.graphic.SetText(".");
               particle.graphic.SetTextScale(size);
               particle.graphic.SetBodyType(BodyType.Dynamic);
-
+        
               particle.elevatorAttachment.SetWorldPosition(start);
               particle.elevatorAttachment.SetMotorSpeed(200);
-
-
-
+        
               return particle;
             }
             private BParticle() {
-              //the text particle
+              // the text particle
               graphic = (IObjectText) Game.CreateObject("Text");
-
-              //the rails
+        
+              // the rails
               path2 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
-
+        
               path1 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
               path1.SetNextPathJoint(path2);
-              //path1.SetLineVisual(LineVisual.DJRope);
-
-              //the rail attachment
-              elevatorAttachment = (IObjectElevatorAttachmentJoint) Game.CreateObject("ElevatorAttachmentJoint");
+              // path1.SetLineVisual(LineVisual.DJRope);
+        
+              // the rail attachment
+              elevatorAttachment = (IObjectElevatorAttachmentJoint)
+                                       Game.CreateObject("ElevatorAttachmentJoint");
               elevatorAttachment.SetTargetObject(graphic);
               elevatorAttachment.SetElevatorPathJoint(path1);
               elevatorAttachment.SetMaxMotorTorque(200);
               elevatorAttachment.SetAccelerationDistance(2000);
               elevatorAttachment.SetMotorSpeed(10);
-
             }
-
+        
             public void Update() {
-              if (!GetActive())
-                return;
-              //UpdatePath2();
-
-              float distanceToTarget = Vector2.Distance(path1.GetWorldPosition(), path2.GetWorldPosition()) - 3f;
-              float distanceToTravel = Vector2.Distance(graphic.GetWorldPosition(), path2.GetWorldPosition()) - 3f;
-
+              if (!GetActive()) return;
+              // UpdatePath2();
+        
+              float distanceToTarget =
+                  Vector2.Distance(path1.GetWorldPosition(), path2.GetWorldPosition()) -
+                  3f;
+              float distanceToTravel = Vector2.Distance(graphic.GetWorldPosition(),
+                                                        path2.GetWorldPosition()) -
+                                       3f;
+        
               if (distanceToTravel < 3f) {
                 Disable();
                 return;
               }
-
+        
               float sizeFactor = (distanceToTravel / distanceToTarget);
-
+        
               if (graphic.GetTextScale() > size * sizeFactor)
                 graphic.SetTextScale(size * sizeFactor);
             }
-
+        
             public bool GetActive() {
               return graphic.GetText() != string.Empty || graphic.GetTextScale() < 0.1f;
             }
-
+        
             public void Disable() {
               graphic.SetText(string.Empty);
               elevatorAttachment.SetMotorSpeed(0);
             }
-
+        
             private static void InitializeParticles() {
               if (usedParticles > 0) {
-                int backIndex = (particleCount + particleIndex - usedParticles) % particleCount;
-                while (usedParticles > 0 && !particles[backIndex].GetActive()) {
-                  particles[backIndex].Disable();
+                int backIndex =
+                    (particleCount + particleIndex - usedParticles) % particleCount;
+                while (usedParticles > 0 && !particles [backIndex]
+                                                 .GetActive()) {
+                  particles [backIndex]
+                      .Disable();
                   usedParticles--;
                   backIndex = (backIndex + 1) % particleCount;
                 }
               }
-
+        
               if (usedParticles >= particleCount) {
                 particleCount += BATCH_SIZE;
-
+        
                 BParticle[] newParticlesList = new BParticle[particleCount];
-
+        
                 for (int i = 0; i < particleCount; i++) {
                   int length = particles.Length;
-                  if (length == 0)
-                    length = 1;
-
-                  //iterating backwards
+                  if (length == 0) length = 1;
+        
+                  // iterating backwards
                   int index = (particleCount + particleIndex - i) % particleCount;
                   int oldIndex = (length + particleIndex - i) % length;
-
-                  //inserting old items
+        
+                  // inserting old items
                   if (i < usedParticles) {
                     newParticlesList[index] = particles[oldIndex];
                   }
-
-                  //creating new (unused) particles
+        
+                  // creating new (unused) particles
                   else {
                     newParticlesList[index] = new BParticle();
                   }
                 }
                 particles = newParticlesList;
-
+        
               } else
                 return;
             }
           }
         }
-
         // SENTRY - dsafxP
         public class Sentry : Powerup {
           private const float SPAWN_OFFSET = 16;
@@ -5322,37 +5309,36 @@ namespace PowerupsDeluxe {
         };
           }
         }
-
-        // HUNGRY - Danger Ross
-        public class Hungry : Powerup {
+        // CHANGED: "Hungry" namespace and name, instant death bug, lack of healing,
+        // added animation HUNGRY - Danger Ross
+        public class HUNGRY : Powerup {
           private const float FORCE_DISTANCE = 62;
           private const float JOINT_MASS = 0.0001f;
-          private const float DMG = 22;
+          private const float DMG = 17;
           private const string SOLID = "InvisibleBlock";
           private const string NON_SOLID = "InvisibleBlockNoCollision";
           private const int JUMP_COOLDOWN = 1200;
           private const int MAX_CELLS = 14;
           private const int TIME = 19000;
-
-          private static readonly VirtualKey[] _inputKeys = {
-            VirtualKey.AIM_RUN_LEFT,
-            VirtualKey.AIM_RUN_RIGHT
-          };
-
+        
+          private static readonly VirtualKey[] _inputKeys = {VirtualKey.AIM_RUN_LEFT,
+                                                             VirtualKey.AIM_RUN_RIGHT};
+        
           private static int _cradleSlot = 0;
-
+        
           private readonly List<IObject> _allItems = new List<IObject>();
           private readonly List<Tendril> tendrils = new List<Tendril>();
-
+        
           private readonly IObject[] _walls = new IObject[4];
           private readonly IObject[] _cells = new IObject[MAX_CELLS];
-          private readonly float[] _cradlePos = { -200, 260 };
-
+          private readonly float[] _cradlePos = {-200, 260};
+        
           private int _cellCount = 2;
           private int _jumpCooldown = 0;
           private float slowUpdateTime = 0;
           private bool _screamed = false;
-
+          private bool transformed = false;
+        
           private IObject _forcePoint;
           private IObject _body;
           private IObject _skull;
@@ -5360,176 +5346,198 @@ namespace PowerupsDeluxe {
           private IObjectAlterCollisionTile _collisionGroup;
           private IObjectPullJoint _force;
           private IObjectTargetObjectJoint _cellTarget;
-
+        
           public override string Name {
-            get {
-              return "HUNGRY";
-            }
+            get { return "HUNGRY"; }
           }
-
+        
           public override string Author {
-            get {
-              return "Danger Ross";
-            }
+            get { return "Danger Ross"; }
           }
-
-          public Hungry(IPlayer player) : base(player) {
+        
+          public HUNGRY(IPlayer player) : base(player) {
             Time = TIME;
-
+        
             _cradlePos[0] = _cradlePos[0] + Game.GetCameraMaxArea().Left;
             _cradlePos[0] = _cradlePos[0] + (-40 * _cradleSlot);
             _cradleSlot += 1;
           }
-
-
+        
+          Events.UpdateCallback delay1 = null;
           protected override void Activate() {
             Player.SetInputMode(PlayerInputMode.ReadOnly);
-
+        
             Game.PlayEffect("CAM_S", Vector2.Zero, 2f, 2000f, false);
-
+        
             Game.PlaySound("Wilhelm", Vector2.Zero, 1f);
-
+        
             Game.PlaySound("Madness", Vector2.Zero, 10f);
             Game.PlaySound("Madness", Vector2.Zero, 10f);
             Game.PlaySound("Madness", Vector2.Zero, 10f);
             Game.PlaySound("Madness", Vector2.Zero, 10f);
-
-            Game.PlayEffect("GIB", Player.GetWorldPosition());
-
-            _playerKeyInputEvent = Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
-            _ObjectTerminatedEvent = Events.ObjectTerminatedCallback.Start(OnObjectDestroyed);
-
-            Player.SetNametagVisible(false);
-            Player.SetStatusBarsVisible(false);
-
-            Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
-
-            Vector2 centerPos = Player.GetWorldPosition() + new Vector2(0, 5f);
-
-            //       SETTING UP JOINTS AND CHARACTER POSITIONS
-            IObject floor = Game.CreateObject(SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] - 8));
-            floor.SetSizeFactor(new Point(4, 1));
-            floor.SetBodyType(BodyType.Static);
-            _walls[0] = floor;
-
-
-            IObject wall1 = Game.CreateObject(SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] + 16));
-            wall1.SetSizeFactor(new Point(1, 4));
-            wall1.SetBodyType(BodyType.Static);
-            _walls[1] = wall1;
-
-            IObject wall2 = Game.CreateObject(SOLID, new Vector2(_cradlePos[0] + 16, _cradlePos[1] + 16));
-            wall2.SetSizeFactor(new Point(1, 4));
-            wall2.SetBodyType(BodyType.Static);
-            _walls[2] = wall2;
-
-
-            IObject ceiling = Game.CreateObject(SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] + 24));
-            ceiling.SetSizeFactor(new Point(5, 1));
-            ceiling.SetBodyType(BodyType.Static);
-            _walls[3] = ceiling;
-
-            _allItems.Add(floor);
-            _allItems.Add(wall1);
-            _allItems.Add(wall2);
-            _allItems.Add(ceiling);
-
-            _collisionGroup = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
-            _collisionGroup.SetDisableCollisionTargetObjects(true);
-            _allItems.Add(_collisionGroup);
-
-            _cellCollision = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
-            _cellCollision.SetDisabledCategoryBits(65535);
-            //_cellCollision.SetDisabledMaskBits(2);//2
-            _cellCollision.SetDisabledAboveBits(65535);
-            _allItems.Add(_cellCollision);
-
-            _body = Game.CreateObject(SOLID, centerPos);//Game.CreateObject(SOLID, Player.GetWorldPosition());
-            _body.SetSizeFactor(new Point(1, 2));
-            _body.SetBodyType(BodyType.Dynamic);
-            _body.SetMass(0.04f);
-            SetPlayerCollision(_body);
-            _collisionGroup.AddTargetObject(_body);
-            _allItems.Add(_body);
-
-            _cellTarget = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos);
-            _cellTarget.SetTargetObject(_body);
-            _allItems.Add(_cellTarget);
-
-            _forcePoint = Game.CreateObject(NON_SOLID, centerPos + new Vector2(0, FORCE_DISTANCE));
-            SetNoCollision(_forcePoint);
-            AddNoProjectileFilter(_forcePoint);
-            _allItems.Add(_forcePoint);
-
-            IObjectTargetObjectJoint connection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", centerPos + new Vector2(0, 7));
-            connection.SetTargetObject(_body);
-            connection.SetMass(JOINT_MASS);
-            _allItems.Add(connection);
-
-            _force = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
-            _force.SetForce(0f);
-            _force.SetForcePerDistance(0.03f); //0.8 for 20
-                                               //_force.SetLineVisual(LineVisual.DJRope);
-            _force.SetTargetObject(_forcePoint);
-            _force.SetTargetObjectJoint(connection);
-            _allItems.Add(_force);
-
-
-            _skull = Game.CreateObject("Giblet04", centerPos + new Vector2(0, 25));
-            _skull.SetMass(0.00001f);
-            SetNoCollision(_skull);
-            _collisionGroup.AddTargetObject(_skull);
-            _allItems.Add(_skull);
-
-            IObjectTargetObjectJoint sConnection = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
-            sConnection.SetTargetObject(_skull); //SKULL CONNECTOR
-            _allItems.Add(sConnection);
-
-
-            IObjectDistanceJoint sRope = (IObjectDistanceJoint) Game.CreateObject("DistanceJoint", _forcePoint.GetWorldPosition());
-            sRope.SetLengthType(DistanceJointLengthType.Elastic);
-            sRope.SetTargetObject(_forcePoint);// ROPE GOES FROM POINT TO SKULL
-                                               //sRope.SetLineVisual(LineVisual.DJRope);
-            sRope.SetTargetObjectJoint(sConnection);
-            _allItems.Add(sRope);
-
-            IObjectPullJoint sForce = (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos);
-            sForce.SetForce(0f);
-            sForce.SetForcePerDistance(0.0008f);
-            sForce.SetLineVisual(LineVisual.DJRope);
-            sForce.SetTargetObject(_body); //FORCE IS FROM BODY TO SKULL
-            sForce.SetTargetObjectJoint(sConnection);
-            sForce.SetMass(JOINT_MASS);
-            _allItems.Add(sForce);
-
-            for (int i = 0; i < MAX_CELLS / 2; i++)
-              SpawnCell();
-
-            _skull.SetWorldPosition(Player.GetWorldPosition());
-
-            Player.SetWorldPosition(new Vector2(_cradlePos[0], _cradlePos[1]));
-            Player.ClearFire();
+        
+            Player.SetInputEnabled(false);
+            Player.AddCommand(new PlayerCommand(PlayerCommandType.DeathKneelInfinite));
+        
+            delay1 = Events.UpdateCallback.Start(j => {
+              Player.AddCommand(new PlayerCommand(PlayerCommandType.StopDeathKneel));
+              Player.SetInputEnabled(true);
+              Game.PlayEffect("GIB", Player.GetWorldPosition());
+              Game.PlaySound("Wilhelm", Player.GetWorldPosition(), 1f);
+        
+              _playerKeyInputEvent =
+                  Events.PlayerKeyInputCallback.Start(OnPlayerKeyInput);
+              _ObjectTerminatedEvent =
+                  Events.ObjectTerminatedCallback.Start(OnObjectDestroyed);
+        
+              Player.SetNametagVisible(false);
+              Player.SetStatusBarsVisible(false);
+        
+              Player.SetCameraSecondaryFocusMode(CameraFocusMode.Ignore);
+        
+              Vector2 centerPos = Player.GetWorldPosition() + new Vector2(0, 5f);
+        
+              //       SETTING UP JOINTS AND CHARACTER POSITIONS
+              IObject floor = Game.CreateObject(
+                  SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] - 8));
+              floor.SetSizeFactor(new Point(4, 1));
+              floor.SetBodyType(BodyType.Static);
+              _walls[0] = floor;
+        
+              IObject wall1 = Game.CreateObject(
+                  SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] + 16));
+              wall1.SetSizeFactor(new Point(1, 4));
+              wall1.SetBodyType(BodyType.Static);
+              _walls[1] = wall1;
+        
+              IObject wall2 = Game.CreateObject(
+                  SOLID, new Vector2(_cradlePos[0] + 16, _cradlePos[1] + 16));
+              wall2.SetSizeFactor(new Point(1, 4));
+              wall2.SetBodyType(BodyType.Static);
+              _walls[2] = wall2;
+        
+              IObject ceiling = Game.CreateObject(
+                  SOLID, new Vector2(_cradlePos[0] - 16, _cradlePos[1] + 24));
+              ceiling.SetSizeFactor(new Point(5, 1));
+              ceiling.SetBodyType(BodyType.Static);
+              _walls[3] = ceiling;
+        
+              _allItems.Add(floor);
+              _allItems.Add(wall1);
+              _allItems.Add(wall2);
+              _allItems.Add(ceiling);
+        
+              _collisionGroup =
+                  (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
+              _collisionGroup.SetDisableCollisionTargetObjects(true);
+              _allItems.Add(_collisionGroup);
+        
+              _cellCollision =
+                  (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
+              _cellCollision.SetDisabledCategoryBits(65535);
+              //_cellCollision.SetDisabledMaskBits(2);//2
+              _cellCollision.SetDisabledAboveBits(65535);
+              _allItems.Add(_cellCollision);
+        
+              _body = Game.CreateObject(
+                  SOLID,
+                  centerPos);  // Game.CreateObject(SOLID, Player.GetWorldPosition());
+              _body.SetSizeFactor(new Point(1, 2));
+              _body.SetBodyType(BodyType.Dynamic);
+              _body.SetMass(0.04f);
+              SetPlayerCollision(_body);
+              _collisionGroup.AddTargetObject(_body);
+              _allItems.Add(_body);
+        
+              _cellTarget = (IObjectTargetObjectJoint)
+                                Game.CreateObject("TargetObjectJoint", centerPos);
+              _cellTarget.SetTargetObject(_body);
+              _allItems.Add(_cellTarget);
+        
+              _forcePoint = Game.CreateObject(
+                  NON_SOLID, centerPos + new Vector2(0, FORCE_DISTANCE));
+              SetNoCollision(_forcePoint);
+              AddNoProjectileFilter(_forcePoint);
+              _allItems.Add(_forcePoint);
+        
+              IObjectTargetObjectJoint connection =
+                  (IObjectTargetObjectJoint) Game.CreateObject(
+                      "TargetObjectJoint", centerPos + new Vector2(0, 7));
+              connection.SetTargetObject(_body);
+              connection.SetMass(JOINT_MASS);
+              _allItems.Add(connection);
+        
+              _force = (IObjectPullJoint) Game.CreateObject(
+                  "PullJoint", centerPos + new Vector2(0, FORCE_DISTANCE));
+              _force.SetForce(0f);
+              _force.SetForcePerDistance(
+                  0.03f);  // 0.8 for 20
+                           //_force.SetLineVisual(LineVisual.DJRope);
+              _force.SetTargetObject(_forcePoint);
+              _force.SetTargetObjectJoint(connection);
+              _allItems.Add(_force);
+        
+              _skull = Game.CreateObject("Giblet04", centerPos + new Vector2(0, 25));
+              _skull.SetMass(0.00001f);
+              SetNoCollision(_skull);
+              _collisionGroup.AddTargetObject(_skull);
+              _allItems.Add(_skull);
+        
+              IObjectTargetObjectJoint sConnection =
+                  (IObjectTargetObjectJoint)
+                      Game.CreateObject("TargetObjectJoint", _skull.GetWorldPosition());
+              sConnection.SetTargetObject(_skull);  // SKULL CONNECTOR
+              _allItems.Add(sConnection);
+        
+              IObjectDistanceJoint sRope = (IObjectDistanceJoint) Game.CreateObject(
+                  "DistanceJoint", _forcePoint.GetWorldPosition());
+              sRope.SetLengthType(DistanceJointLengthType.Elastic);
+              sRope.SetTargetObject(
+                  _forcePoint);  // ROPE GOES FROM POINT TO SKULL
+                                 // sRope.SetLineVisual(LineVisual.DJRope);
+              sRope.SetTargetObjectJoint(sConnection);
+              _allItems.Add(sRope);
+        
+              IObjectPullJoint sForce =
+                  (IObjectPullJoint) Game.CreateObject("PullJoint", centerPos);
+              sForce.SetForce(0f);
+              sForce.SetForcePerDistance(0.0008f);
+              sForce.SetLineVisual(LineVisual.DJRope);
+              sForce.SetTargetObject(_body);  // FORCE IS FROM BODY TO SKULL
+              sForce.SetTargetObjectJoint(sConnection);
+              sForce.SetMass(JOINT_MASS);
+              _allItems.Add(sForce);
+        
+              for (int i = 0; i < MAX_CELLS / 2; i++) SpawnCell();
+        
+              _skull.SetWorldPosition(Player.GetWorldPosition());
+        
+              Player.SetWorldPosition(new Vector2(_cradlePos[0], _cradlePos[1]));
+              Player.ClearFire();
+              transformed = true;
+              delay1.Stop();
+            }, 1300);
           }
-
+        
           private Events.PlayerKeyInputCallback _playerKeyInputEvent = null;
-
+        
           private Events.ObjectTerminatedCallback _ObjectTerminatedEvent = null;
-
+        
           public void OnObjectDestroyed(IObject[] destroyed) {
             if (!Enabled) {
               _ObjectTerminatedEvent.Stop();
-
+        
               return;
             }
-
+        
             foreach (IObject obj in destroyed) {
               if (obj == _skull) {
-                //Game.RunCommand("/msg skull destroyed");
+                // Game.RunCommand("/msg skull destroyed");
                 Enabled = false;
                 Player.Gib();
                 return;
               }
-
+        
               if (obj.CustomID == "__cell__") {
                 Player.DealDamage(DMG);
                 if (Player.IsDead) {
@@ -5538,7 +5546,7 @@ namespace PowerupsDeluxe {
                 }
                 _cellCount--;
               }
-
+        
               if (obj.UniqueID == _body.UniqueID) {
                 Player.Gib();
                 Enabled = false;
@@ -5546,260 +5554,288 @@ namespace PowerupsDeluxe {
               }
             }
           }
-
+        
           private void OnPlayerKeyInput(IPlayer player, VirtualKeyInfo[] keyEvents) {
-            if (Player != player)
-              return;
-
+            if (Player != player) return;
+        
             // player key event registered
             for (int i = 0; i < keyEvents.Length; i++) {
               if (keyEvents[i].Event == VirtualKeyEvent.Pressed) {
                 if (keyEvents[i].Key == VirtualKey.ATTACK) {
                   if (Player.KeyPressed(VirtualKey.AIM_CLIMB_UP)) {
-                    tendrils.Add(new Tendril(new Vector2(_skull.GetFaceDirection() * 3f, 10f), _body));
+                    tendrils.Add(new Tendril(
+                        new Vector2(_skull.GetFaceDirection() * 3f, 10f), _body));
                   } else if (Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN)) {
-                    tendrils.Add(new Tendril(new Vector2(_skull.GetFaceDirection() * 5f, -5f), _body));
+                    tendrils.Add(new Tendril(
+                        new Vector2(_skull.GetFaceDirection() * 5f, -5f), _body));
                   } else {
-                    tendrils.Add(new Tendril(new Vector2(_skull.GetFaceDirection() * 10f, 3f), _body));
-                    //Game.RunCommand("/msg spawning tendril");
+                    tendrils.Add(new Tendril(
+                        new Vector2(_skull.GetFaceDirection() * 10f, 3f), _body));
+                    // Game.RunCommand("/msg spawning tendril");
                   }
                 } else if (keyEvents[i].Key == VirtualKey.AIM_CLIMB_DOWN) {
                   if (TouchingGround()) {
-                    RayCastInput input = new RayCastInput {
-                      ClosestHitOnly = true,
-                      BlockExplosions = RayCastFilterMode.True
-                    };
-
-                    RayCastResult output = Game.RayCast(_body.GetWorldPosition() + new Vector2(0, -12f),
-                      _body.GetWorldPosition() + new Vector2(0, -13f), input)[0];
-
+                    RayCastInput input =
+                        new RayCastInput{ClosestHitOnly = true,
+                                         BlockExplosions = RayCastFilterMode.True};
+        
+                    RayCastResult output = Game.RayCast(
+                        _body.GetWorldPosition() + new Vector2(0, -12f),
+                        _body.GetWorldPosition() + new Vector2(0, -13f), input)[0];
+        
                     if (!output.Hit)
-                      _body.SetWorldPosition(_body.GetWorldPosition() + new Vector2(0, -12f));
-                    //else Game.RunCommand("/msg blocked");
+                      _body.SetWorldPosition(_body.GetWorldPosition() +
+                                             new Vector2(0, -12f));
+                    // else Game.RunCommand("/msg blocked");
                   }
                 }
               }
             }
           }
-
+        
           private void Bite(IPlayer victim, PlayerModifiers hpmod) {
-
             for (int i = (MAX_CELLS / 2); i < MAX_CELLS; i++) {
-              if (_cells[i] == null || _cells[i].IsRemoved)
-                continue;
+              if (_cells[i] == null || _cells[i].IsRemoved) continue;
               if (i > (MAX_CELLS / 4)) {
-                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, 24f));
-                _cells[i].SetAngle((float) (Math.PI * (7 / 4)));
+                _cells [i]
+                    .SetWorldPosition(
+                        victim.GetWorldPosition() +
+                        new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, 24f));
+                _cells [i]
+                    .SetAngle((float)(Math.PI * (7 / 4)));
               } else {
-                _cells[i].SetWorldPosition(victim.GetWorldPosition() + new Vector2((float) (_rng.NextDouble() - 0.5f) * 24f, -12f));
-                _cells[i].SetAngle((float) (Math.PI * (3 / 4)));
+                _cells [i]
+                    .SetWorldPosition(
+                        victim.GetWorldPosition() +
+                        new Vector2((float)(_rng.NextDouble() - 0.5f) * 24f, -12f));
+                _cells [i]
+                    .SetAngle((float)(Math.PI * (3 / 4)));
               }
             }
-
-            victim.DealDamage(DMG);
-            hpmod.CurrentHealth += 1f;
-
-            Time += 200;
-
+        
             Game.PlaySound("MeleeHitSharp", victim.GetWorldPosition(), 2f);
             if (victim.IsDead) {
-              victim.DealDamage(DMG);
-              //victim.Gib();//maybe remove for feeding portion?
+              victim.DealDamage(15);
+              // victim.DealDamage(DMG);
+              // victim.Gib();//maybe remove for feeding portion?
               Time += 1500;
-              return;
+            } else {
+              victim.DealDamage(DMG);
+              hpmod.CurrentHealth += 1f;
+        
+              Time += 200;
             }
           }
-
+        
           private void SpawnCell() {
             for (int i = 0; i < MAX_CELLS; i++) {
               if (_cells[i] == null || _cells[i].IsRemoved) {
-                Vector2 randPos = new Vector2((float) ((_rng.NextDouble() - 0.5f) * 14f), (float) ((_rng.NextDouble() - 0.5f) * 16f - 8f));
+                Vector2 randPos =
+                    new Vector2((float)((_rng.NextDouble() - 0.5f) * 14f),
+                                (float)((_rng.NextDouble() - 0.5f) * 16f - 8f));
                 Vector2 pos = _body.GetWorldPosition() + randPos - new Vector2(0, -8);
-                if (i < (int) (MAX_CELLS / 2)) {
-                  _cells[i] = Game.CreateObject("Giblet0" + _rng.Next(2), pos, (float) (Math.PI * 2 * _rng.NextDouble()));
+                if (i < (int)(MAX_CELLS / 2)) {
+                  _cells[i] =
+                      Game.CreateObject("Giblet0" + _rng.Next(2), pos,
+                                        (float)(Math.PI * 2 * _rng.NextDouble()));
                 } else {
-                  _cells[i] = Game.CreateObject("Giblet02", pos, (float) (Math.PI * 2 * _rng.NextDouble()));
+                  _cells[i] = Game.CreateObject(
+                      "Giblet02", pos, (float)(Math.PI * 2 * _rng.NextDouble()));
                 }
                 _cells[i].CustomID = "__cell__";
-                _cells[i].SetMass(0.00001f);
-                CollisionFilter filter = _cells[i].GetCollisionFilter();//setPlayerCollision(_cells[i]);
-                filter.MaskBits = 73; //9 + 64
-                filter.CategoryBits = 64; //4 + 64
-                _cells[i].SetCollisionFilter(filter);
+                _cells [i]
+                    .SetMass(0.00001f);
+                CollisionFilter filter =
+                    _cells [i]
+                        .GetCollisionFilter();  // setPlayerCollision(_cells[i]);
+                filter.MaskBits = 73;           // 9 + 64
+                filter.CategoryBits = 64;       // 4 + 64
+                _cells [i]
+                    .SetCollisionFilter(filter);
                 //_cellCollision.AddTargetObject(_cells[i]);
-
+        
                 //_collisionGroup.AddTargetObject(_cells[i]);
-
-                //IObjectTargetObjectJoint targetObject = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", pos);
-                //targetObject.SetTargetObject(_body);
-                //targetObject.SetMass(JOINT_MASS);
+        
+                // IObjectTargetObjectJoint targetObject =
+                // (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint",
+                // pos); targetObject.SetTargetObject(_body);
+                // targetObject.SetMass(JOINT_MASS);
                 //_allItems.Add(targetObject);
-
-
-                IObjectPullJoint pullJoint = (IObjectPullJoint) Game.CreateObject("PullJoint", pos);
-                //pullJoint.SetForce(0.02f);
+        
+                IObjectPullJoint pullJoint =
+                    (IObjectPullJoint) Game.CreateObject("PullJoint", pos);
+                // pullJoint.SetForce(0.02f);
                 pullJoint.SetForcePerDistance(0.001f);
                 pullJoint.SetTargetObject(_cells[i]);
                 pullJoint.SetTargetObjectJoint(_cellTarget);
-                //pullJoint.SetTargetObjectJoint(targetObject);
+                // pullJoint.SetTargetObjectJoint(targetObject);
                 _allItems.Add(pullJoint);
-
-                _cells[i].SetLinearVelocity(randPos * 3f);
-
+        
+                _cells [i]
+                    .SetLinearVelocity(randPos * 3f);
+        
                 _cellCount += 1;
                 _force.SetForcePerDistance(0.06f + 0.021f * _cellCount);
                 return;
               }
             }
           }
-
+        
           public static CollisionFilter AddNoProjectileFilter(IObject obj) {
             CollisionFilter filter = obj.GetCollisionFilter();
             filter.AbsorbProjectile = false;
             filter.ProjectileHit = false;
             return filter;
           }
-
+        
           public static CollisionFilter SetPlayerCollision(IObject obj) {
-            CollisionFilter filter = new CollisionFilter {
-              CategoryBits = 4,
-              MaskBits = 11,
-              AbsorbProjectile = true,
-              ProjectileHit = true
-            };
-
+            CollisionFilter filter =
+                new CollisionFilter{CategoryBits = 4, MaskBits = 11,
+                                    AbsorbProjectile = true, ProjectileHit = true};
+        
             obj.SetCollisionFilter(filter);
             return filter;
           }
-
+        
           public static CollisionFilter SetNoCollision(IObject obj) {
-            CollisionFilter filter = new CollisionFilter {
-              CategoryBits = 0,
-              MaskBits = 0,
-              AbsorbProjectile = true,
-              ProjectileHit = true
-            };
-
+            CollisionFilter filter =
+                new CollisionFilter{CategoryBits = 0, MaskBits = 0,
+                                    AbsorbProjectile = true, ProjectileHit = true};
+        
             obj.SetCollisionFilter(filter);
             return filter;
           }
-
+        
           private bool TouchingGround() {
             Vector2 starting = _body.GetWorldPosition();
-            RayCastInput input = new RayCastInput(true) {
-              ClosestHitOnly = true,
-              ProjectileHit = RayCastFilterMode.True,
-              IncludeOverlap = false,
-              MaskBits = 1
-            };
-
-            RayCastResult result = Game.RayCast(starting, starting + new Vector2(0, -17), input)[0];
-            if (result.Hit)
-              return true;
-
+            RayCastInput input = new RayCastInput(true){
+                ClosestHitOnly = true, ProjectileHit = RayCastFilterMode.True,
+                IncludeOverlap = false, MaskBits = 1};
+        
+            RayCastResult result =
+                Game.RayCast(starting, starting + new Vector2(0, -17), input)[0];
+            if (result.Hit) return true;
+        
             return false;
           }
-
+        
           public override void Update(float dlt, float dltSecs) {
+            if (!transformed) return;
             // Implement in derived classes
             Vector2 newPos = _body.GetWorldPosition() + new Vector2(0, FORCE_DISTANCE);
-
+        
             if (_jumpCooldown > 0) {
-              float eq = ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / (JUMP_COOLDOWN / 3)) - 1500) / (-50);
-              //if (eq < 0) eq = 0;
-              //Game.RunCommand("/msg " + eq);
+              float eq =
+                  ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) /
+                                      (JUMP_COOLDOWN / 3)) -
+                   1500) /
+                  (-50);
+              // if (eq < 0) eq = 0;
+              // Game.RunCommand("/msg " + eq);
               newPos += new Vector2(0, eq);
               _jumpCooldown -= (int) dlt;
             } else if (Player.KeyPressed(VirtualKey.JUMP)) {
               if (TouchingGround()) {
                 _jumpCooldown = JUMP_COOLDOWN;
-
-                newPos += new Vector2(0, ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) / 500) - 1500f) / -50);
+        
+                newPos += new Vector2(
+                    0, ((float) Math.Floor(Math.Pow(_jumpCooldown - JUMP_COOLDOWN, 2) /
+                                           500) -
+                        1500f) /
+                           -50);
               }
             }
-
+        
             int facingDirection = Player.KeyPressed(VirtualKey.AIM_RUN_RIGHT) ? 1 : -1;
-
+        
             if (_inputKeys.Any(k => Player.KeyPressed(k))) {
               // Calculate offset
               if (TouchingGround()) {
-                newPos += new Vector2((13f * Player.GetModifiers().RunSpeedModifier) * facingDirection, FORCE_DISTANCE / 20f);
+                newPos += new Vector2(
+                    (13f * Player.GetModifiers().RunSpeedModifier) * facingDirection,
+                    FORCE_DISTANCE / 20f);
               } else {
-                newPos += new Vector2((10f * Player.GetModifiers().RunSpeedModifier) * facingDirection, 0f);
+                newPos += new Vector2(
+                    (10f * Player.GetModifiers().RunSpeedModifier) * facingDirection,
+                    0f);
               }
             }
-
+        
             if (Player.KeyPressed(VirtualKey.AIM_CLIMB_DOWN)) {
               newPos += new Vector2(0, -10);
             }
-
+        
             if (_body.GetLinearVelocity().Y < -1f) {
               newPos += new Vector2(0, -10f);
             }
-
+        
             _skull.SetFaceDirection(facingDirection);
             _skull.SetAngularVelocity(0f);
             _skull.SetAngle(0f);
-
+        
             _forcePoint.SetWorldPosition(newPos);
-
+        
             slowUpdateTime += dlt;
             PlayerModifiers hpmod = Player.GetModifiers();
-
+        
             while (slowUpdateTime > 200) {
               slowUpdateTime -= 200;
-              //SPAWN CELLS
+              // SPAWN CELLS
               if (_cellCount < MAX_CELLS) {
                 SpawnCell();
               }
-
+        
               for (int i = tendrils.Count - 1; i >= 0; i--) {
-                tendrils[i].Update();
+                tendrils [i]
+                    .Update();
                 if (tendrils[i].Removed) {
                   tendrils.RemoveAt(i);
                 }
               }
-
-              //add player damage
+        
+              // add player damage
               bool foundPlayer = false;
-
+        
               foreach (IPlayer ply in Game.GetPlayers()) {
                 Vector2 plyPos = ply.GetWorldPosition();
-                if (Math.Abs(plyPos.X - _body.GetWorldPosition().X) < 15f && Math.Abs(plyPos.Y - _body.GetWorldPosition().Y) < 30f) {
-
+                if (Math.Abs(plyPos.X - _body.GetWorldPosition().X) < 15f &&
+                    Math.Abs(plyPos.Y - _body.GetWorldPosition().Y) < 30f) {
                   PointShape.Random(e => { Game.PlayEffect("BLD", e); },
-                  new Area(plyPos.Y + 12f, plyPos.X - 8f, plyPos.Y - 4f, plyPos.X + 8f),
-                  _rng);
-
+                                    new Area(plyPos.Y + 12f, plyPos.X - 8f,
+                                             plyPos.Y - 4f, plyPos.X + 8f),
+                                    _rng);
+        
                   Bite(ply, hpmod);
-
+        
                   if (ply.IsRemoved) {
                     hpmod.CurrentHealth = hpmod.MaxHealth;
                   }
-
+        
                   if (!_screamed) {
                     Game.PlaySound("CartoonScream", ply.GetWorldPosition(), 0.7f);
                     _screamed = true;
                   }
-
+        
                   foundPlayer = true;
-
+        
                   break;
                 }
               }
-
-              if (!foundPlayer)
-                _screamed = false;
+        
+              if (!foundPlayer) _screamed = false;
             }
             Player.SetModifiers(hpmod);
           }
-
+        
           public override void OnEnabled(bool enabled) {
-            if (enabled)
-              return;
-
+            if (enabled) return;
+        
             _cradleSlot -= 1;
-
+            if (!transformed) {
+              delay1.Stop();
+              return;
+            }
+        
             if (Player != null) {
               Player.SetWorldPosition(_body.GetWorldPosition());
               Player.SetLinearVelocity(_body.GetLinearVelocity());
@@ -5807,111 +5843,121 @@ namespace PowerupsDeluxe {
               Player.SetStatusBarsVisible(true);
               Player.SetCameraSecondaryFocusMode(CameraFocusMode.Focus);
               Player.SetInputEnabled(true);
-
-              Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero,
-                Player.UniqueID, EffectName.Blood, 2.5f);
+        
+              Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero, Player.UniqueID,
+                              EffectName.Blood, 2.5f);
             }
-
+        
             foreach (IObject obj in _allItems) {
               obj.Destroy();
             }
-
+        
             for (int i = tendrils.Count - 1; i >= 0; i--) {
-              tendrils[i].Destroy();
+              tendrils [i]
+                  .Destroy();
               tendrils.RemoveAt(i);
             }
-
+        
             _playerKeyInputEvent.Stop();
             _playerKeyInputEvent.Stop();
             _ObjectTerminatedEvent.Stop();
           }
-
+        
           private class Tendril {
             private const int DURATION = 1000;
             private float _expiration;
             private bool _grabbing = false;
-
+        
             private readonly IObject _grabber;
-
+        
             private readonly IObjectTargetObjectJoint _toGrabber;
             private readonly IObject _forceSolid;
             private readonly IObjectPullJoint _force;
             private readonly IObjectPullJoint _arm;
             private readonly IObjectWeldJoint _weld;
-
+        
             public bool Removed {
-              get; private set;
+              get;
+              private set;
             }
-
+        
             public Tendril(Vector2 velocity, IObject body) {
               _expiration = Game.TotalElapsedGameTime + DURATION;
-
-              _grabber = Game.CreateObject("Giblet03",
-              body.GetWorldPosition() + (Vector2.Normalize(velocity) * 8f), //position
-              0f, //angle
-              velocity + body.GetLinearVelocity(), //linearvelocity
-              0f, //angularvelocity
-              velocity.X > 0 ? 1 : -1 //direction
+        
+              _grabber = Game.CreateObject(
+                  "Giblet03",
+                  body.GetWorldPosition() +
+                      (Vector2.Normalize(velocity) * 8f),  // position
+                  0f,                                      // angle
+                  velocity + body.GetLinearVelocity(),     // linearvelocity
+                  0f,                                      // angularvelocity
+                  velocity.X > 0 ? 1 : -1                  // direction
               );
               _grabber.TrackAsMissile(true);
               _grabber.SetHealth(10f);
               _grabber.CustomID = "__tendril__";
-
-              _toGrabber = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", _grabber.GetWorldPosition());
+        
+              _toGrabber = (IObjectTargetObjectJoint) Game.CreateObject(
+                  "TargetObjectJoint", _grabber.GetWorldPosition());
               _toGrabber.SetTargetObject(_grabber);
-
-              Vector2 forcePos = body.GetWorldPosition() + velocity * 5f + new Vector2(0, 20f);
-
+        
+              Vector2 forcePos =
+                  body.GetWorldPosition() + velocity * 5f + new Vector2(0, 20f);
+        
               _forceSolid = Game.CreateObject("InvisibleBlockNoCollision", forcePos);
-
+        
               _force = (IObjectPullJoint) Game.CreateObject("PullJoint", forcePos);
               _force.SetTargetObject(_forceSolid);
               _force.SetTargetObjectJoint(_toGrabber);
               _force.SetForcePerDistance(0.02f);
               _force.SetForce(0f);
-
+        
               //_force.SetLineVisual(LineVisual.DJRope); //TEMPORARY
-
-              _arm = (IObjectPullJoint) Game.CreateObject("PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
+        
+              _arm = (IObjectPullJoint) Game.CreateObject(
+                  "PullJoint", body.GetWorldPosition() + new Vector2(0, 5f));
               _arm.SetLineVisual(LineVisual.DJRope);
               _arm.SetTargetObject(body);
               _arm.SetTargetObjectJoint(_toGrabber);
               _arm.SetForce(0f);
               _arm.SetForcePerDistance(0f);
-
+        
               _weld = (IObjectWeldJoint) Game.CreateObject("WeldJoint");
               _weld.AddTargetObject(_grabber);
-
             }
-
-            public bool MatchTendril(IObject obj) {
-              return MatchTendril(obj.UniqueID);
-            }
-
-            public bool MatchTendril(int id) {
-              return _grabber.UniqueID == id;
-            }
-
+        
+            public bool MatchTendril(IObject obj) { return MatchTendril(obj.UniqueID); }
+        
+            public bool MatchTendril(int id) { return _grabber.UniqueID == id; }
+        
             private void CheckGrab() {
-              if (Math.Floor(_grabber.GetAngularVelocity() * 1000) != 0f || Math.Floor(_grabber.GetAngle() * 1000) != 0f || _grabber.GetHealth() < 10f) {
-
-                //Game.RunCommand("/msg angle " + _grabber.GetAngle());
-                //Game.RunCommand("/msg AngularVelocity " + _grabber.GetAngularVelocity());
-
-                RayCastInput input = new RayCastInput(true) {
-                  ClosestHitOnly = true,
-                  ProjectileHit = RayCastFilterMode.True,
-                  IncludeOverlap = false
-                };
-
+              if (Math.Floor(_grabber.GetAngularVelocity() * 1000) != 0f ||
+                  Math.Floor(_grabber.GetAngle() * 1000) != 0f ||
+                  _grabber.GetHealth() < 10f) {
+                // Game.RunCommand("/msg angle " + _grabber.GetAngle());
+                // Game.RunCommand("/msg AngularVelocity " +
+                // _grabber.GetAngularVelocity());
+        
+                RayCastInput input = new RayCastInput(true){
+                    ClosestHitOnly = true, ProjectileHit = RayCastFilterMode.True,
+                    IncludeOverlap = false};
+        
                 Vector2 pos = _grabber.GetWorldPosition();
-                RayCastResult result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero, Vector2.Zero);
+                RayCastResult result = new RayCastResult(false, 0, null, false, 0,
+                                                         Vector2.Zero, Vector2.Zero);
                 for (int i = 0; i < 4; i++) {
-                  result = Game.RayCast(pos, pos + Vector2Helper.Rotated(new Vector2(5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0), (float) Math.PI / 2 * i), input)[0];
-
+                  result = Game.RayCast(
+                      pos,
+                      pos + Vector2Helper.Rotated(
+                                new Vector2(
+                                    5f * (_grabber.GetFaceDirection() < 0 ? -1 : 1), 0),
+                                (float) Math.PI / 2 * i),
+                      input)[0];
+        
                   if (result.Hit) {
                     if (result.HitObject.Name.Substring(0, 3) == "Gib") {
-                      result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero, Vector2.Zero);
+                      result = new RayCastResult(false, 0, null, false, 0, Vector2.Zero,
+                                                 Vector2.Zero);
                       continue;
                     }
                     break;
@@ -5921,35 +5967,34 @@ namespace PowerupsDeluxe {
                   Grab(result.HitObject);
                 } else
                   Destroy();
-
               }
             }
-
+        
             public void Grab(IObject obj) {
               _expiration += 1000f;
               _grabbing = true;
               _weld.AddTargetObject(obj);
               _arm.SetForcePerDistance(0.05f);
               _arm.SetForce(0.1f);
-              //Game.RunCommand("/msg grabbed " + obj.Name);
+              // Game.RunCommand("/msg grabbed " + obj.Name);
               obj.DealDamage(DMG);
               if (obj is IPlayer) {
-                _arm.SetForcePerDistance(0.2f); //also knock them down?
+                _arm.SetForcePerDistance(0.2f);  // also knock them down?
                 _expiration += 1000f;
-                //Time += 300f;
+                // Time += 300f;
               }
             }
-
+        
             public void Update() {
               if (_grabber == null || Removed) {
                 Destroy();
                 return;
               }
-
+        
               if (!_grabbing) {
                 CheckGrab();
               }
-
+        
               if (Game.TotalElapsedGameTime > _expiration) {
                 Destroy();
               }
@@ -5957,10 +6002,9 @@ namespace PowerupsDeluxe {
             public void Destroy() {
               if (!Removed) {
                 Removed = true;
-
-                if (_grabber != null)
-                  _grabber.Destroy();
-
+        
+                if (_grabber != null) _grabber.Destroy();
+        
                 _toGrabber.Remove();
                 _forceSolid.Remove();
                 _force.Remove();

@@ -4,7 +4,7 @@ namespace PowerupsDeluxe {
   public partial class GameScript : GameScriptInterface {
     // DRONE - dsafxP
     public class Drone : Powerup {
-      private const float SPEED = 6;
+      private const float SPEED = 3;
 
       private Events.ObjectDamageCallback _objDmgCallback;
 
