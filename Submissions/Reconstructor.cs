@@ -100,12 +100,12 @@ namespace PowerupsDeluxe {
         foreach (IObject deb in EatDebris) {
           float heal = deb.GetHealth() * HEAL_MULT;
           float healed = Player.GetHealth() + heal;
-          
+
           if (healed > Player.GetMaxHealth()) {
             PlayerModifiers mod = Player.GetModifiers();
 
             mod.CurrentHealth += heal;
-            mod.MaxHealth += (int)heal;
+            mod.MaxHealth += (int) heal;
 
             Player.SetModifiers(mod);
           } else {

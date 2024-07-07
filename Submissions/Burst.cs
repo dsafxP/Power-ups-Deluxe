@@ -44,7 +44,7 @@ namespace PowerupsDeluxe {
       }
 
       public void OnPlayerKeyInput(IPlayer player, VirtualKeyInfo[] keyEvents) {
-        if (player.UserIdentifier == Player.UserIdentifier && keyEvents[0].Key == VirtualKey.ATTACK && 
+        if (player.UserIdentifier == Player.UserIdentifier && keyEvents[0].Key == VirtualKey.ATTACK &&
           (player.IsMeleeAttacking || player.IsKicking) && CanBurst) {
           PlayerModifiers mods = player.GetModifiers();
           PlayerModifiers original = player.GetModifiers();
@@ -55,12 +55,12 @@ namespace PowerupsDeluxe {
           mods.MeleeStunImmunity = 1;
           mods.MeleeForceModifier *= 1 + damageMult * 3f;
 
-          Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int)(damageMult * 100) / 100f));
+          Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int) (damageMult * 100) / 100f));
 
           Area effectArea = new Area(14, -12, -10, 12);
           effectArea.Move(Player.GetWorldPosition());
 
-          for (int i = 0; i < 5 + _rng.Next(5) * (int)damageMult; i++)
+          for (int i = 0; i < 5 + _rng.Next(5) * (int) damageMult; i++)
             PointShape.Random(v => Game.PlayEffect("S_P", v), effectArea, _rng);
 
           Game.PlayEffect("CAM_S", Player.GetWorldPosition(), 2f, 500f, false);
@@ -78,7 +78,7 @@ namespace PowerupsDeluxe {
             if (attacker.UniqueID == Player.UniqueID) {
               foreach (PlayerMeleeHitArg arg in args) {
                 if (arg.HitObject is IPlayer) {
-                  IPlayer vic = (IPlayer)arg.HitObject;
+                  IPlayer vic = (IPlayer) arg.HitObject;
                   vic.SetWorldPosition(vic.GetWorldPosition() + Vector2Helper.Up);
                   vic.SetLinearVelocity(vic.GetLinearVelocity() + new Vector2(5 * Player.FacingDirection * damageMult, 6));
                   if (arg.HitDamage <= 0) {
@@ -118,10 +118,10 @@ namespace PowerupsDeluxe {
 
         if (_nextParticleTime <= 0) { //replace with while
           _followingParticles.Add(BParticle.GetBParticle(Player, Player.GetWorldPosition() +
-            Vector2Helper.Rotated(Vector2Helper.Right, (float)(_rng.NextDouble() * 2 * Math.PI)) *
-            ((float)(_rng.NextDouble() * 30f) + 10f), ((float)_rng.NextDouble() * 4f + 2)));
+            Vector2Helper.Rotated(Vector2Helper.Right, (float) (_rng.NextDouble() * 2 * Math.PI)) *
+            ((float) (_rng.NextDouble() * 30f) + 10f), ((float) _rng.NextDouble() * 4f + 2)));
 
-          _nextParticleTime += _rng.Next((int)(5 / (powerMult))) * 50 - 50;
+          _nextParticleTime += _rng.Next((int) (5 / (powerMult))) * 50 - 50;
         }
 
         //updating particles
@@ -200,17 +200,17 @@ namespace PowerupsDeluxe {
         }
         private BParticle() {
           //the text particle
-          graphic = (IObjectText)Game.CreateObject("Text");
+          graphic = (IObjectText) Game.CreateObject("Text");
 
           //the rails
-          path2 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+          path2 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
 
-          path1 = (IObjectElevatorPathJoint)Game.CreateObject("ElevatorPathJoint");
+          path1 = (IObjectElevatorPathJoint) Game.CreateObject("ElevatorPathJoint");
           path1.SetNextPathJoint(path2);
           //path1.SetLineVisual(LineVisual.DJRope);
 
           //the rail attachment
-          elevatorAttachment = (IObjectElevatorAttachmentJoint)Game.CreateObject("ElevatorAttachmentJoint");
+          elevatorAttachment = (IObjectElevatorAttachmentJoint) Game.CreateObject("ElevatorAttachmentJoint");
           elevatorAttachment.SetTargetObject(graphic);
           elevatorAttachment.SetElevatorPathJoint(path1);
           elevatorAttachment.SetMaxMotorTorque(200);
@@ -220,7 +220,8 @@ namespace PowerupsDeluxe {
         }
 
         public void Update() {
-          if (!GetActive()) return;
+          if (!GetActive())
+            return;
           //UpdatePath2();
 
           float distanceToTarget = Vector2.Distance(path1.GetWorldPosition(), path2.GetWorldPosition()) - 3f;
@@ -263,7 +264,8 @@ namespace PowerupsDeluxe {
 
             for (int i = 0; i < particleCount; i++) {
               int length = particles.Length;
-              if (length == 0) length = 1;
+              if (length == 0)
+                length = 1;
 
               //iterating backwards
               int index = (particleCount + particleIndex - i) % particleCount;
@@ -281,7 +283,8 @@ namespace PowerupsDeluxe {
             }
             particles = newParticlesList;
 
-          } else return;
+          } else
+            return;
         }
       }
     }

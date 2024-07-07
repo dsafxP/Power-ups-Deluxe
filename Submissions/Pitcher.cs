@@ -74,11 +74,11 @@ namespace PowerupsDeluxe {
         if (Time % AMMO_REGEN_COOLDOWN == 0 && HasRangedWeapon) {
           RifleWeaponItem rifleWeaponItem = Player.CurrentPrimaryWeapon;
 
-          Player.SetCurrentPrimaryWeaponAmmo((int)(rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+          Player.SetCurrentPrimaryWeaponAmmo((int) (rifleWeaponItem.TotalAmmo + (rifleWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
           HandgunWeaponItem handgunWeaponItem = Player.CurrentSecondaryWeapon;
 
-          Player.SetCurrentSecondaryWeaponAmmo((int)(handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
+          Player.SetCurrentSecondaryWeaponAmmo((int) (handgunWeaponItem.TotalAmmo + (handgunWeaponItem.MaxTotalAmmo * AMMO_REGEN)));
 
           Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(), "+AMMO");
 

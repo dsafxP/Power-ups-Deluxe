@@ -47,7 +47,7 @@ namespace PowerupsDeluxe {
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
           Game.PlayEffect(EffectName.CustomFloatText, Player.GetWorldPosition(),
-            string.Format(TXT_EFFECT, (int)(Time / 1000)));
+            string.Format(TXT_EFFECT, (int) (Time / 1000)));
 
           Game.PlaySound("TimerTick", Vector2.Zero);
         }

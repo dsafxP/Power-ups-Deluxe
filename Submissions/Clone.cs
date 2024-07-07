@@ -26,9 +26,6 @@ namespace PowerupsDeluxe {
         _healthPerMilSec = player.GetHealth() / Time;
       }
 
-      /// <summary>
-      /// Virtual method for actions upon activating the power-up.
-      /// </summary>
       protected override void Activate() {
         // Copy attributes
         _clonePlayer = Game.CreatePlayer(Player.GetWorldPosition());

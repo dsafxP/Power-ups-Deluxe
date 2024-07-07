@@ -71,7 +71,8 @@ namespace PowerupsDeluxe {
           Game.PlayEffect(EffectName.ImpactDefault, Player.GetWorldPosition());
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         // Play effects indicating expiration of powerup

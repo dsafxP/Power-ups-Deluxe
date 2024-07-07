@@ -34,7 +34,8 @@ namespace PowerupsDeluxe {
         Time = 40000; // 40 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % REGEN_COOLDOWN == 0) {

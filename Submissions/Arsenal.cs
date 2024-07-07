@@ -125,7 +125,7 @@ namespace PowerupsDeluxe {
         if (ground != Vector2.Zero) {
           Game.PlayEffect(EffectName.Dig, ground);
 
-          _stash = (IObjectAmmoStashTrigger)Game.CreateObject("AmmoStash00", ground);
+          _stash = (IObjectAmmoStashTrigger) Game.CreateObject("AmmoStash00", ground);
         }
       }
 

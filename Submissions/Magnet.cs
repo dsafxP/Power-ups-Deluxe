@@ -76,7 +76,8 @@ namespace PowerupsDeluxe {
         Time = 31000; // 31 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         bool effect = Time % EFFECT_COOLDOWN == 0;

@@ -58,7 +58,8 @@ namespace PowerupsDeluxe {
         Time = 25000; // 25 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         Game.PlaySound("DestroyMetal", Vector2.Zero, 1);

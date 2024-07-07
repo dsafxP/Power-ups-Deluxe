@@ -41,7 +41,8 @@ namespace PowerupsDeluxe {
         Time = 21000; // 21 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0)
@@ -84,9 +85,9 @@ namespace PowerupsDeluxe {
 
           Player.SetHealth(Player.GetHealth() + dmg * HEAL_MULT);
 
-          IPlayer hit = (IPlayer)arg.HitObject;
+          IPlayer hit = (IPlayer) arg.HitObject;
 
-          if(hit.IsDead) {
+          if (hit.IsDead) {
             hit.SetHealth(hit.GetHealth() + dmg); // Null dmg so it isn't dealt twice
 
             hit.DealDamage(dmg * CORPSE_DMG_MULT);

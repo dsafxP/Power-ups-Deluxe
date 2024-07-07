@@ -77,7 +77,7 @@ namespace PowerupsDeluxe {
       }
 
       protected override void Activate() {
-        Streetsweeper = (IObjectStreetsweeper)Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
+        Streetsweeper = (IObjectStreetsweeper) Game.CreateObject("Streetsweeper", Player.GetWorldPosition());
 
         Streetsweeper.SetOwnerPlayer(Player);
         Streetsweeper.SetMovementType(StreetsweeperMovementType.Stationary);

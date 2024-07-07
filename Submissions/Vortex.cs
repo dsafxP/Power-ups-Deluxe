@@ -94,7 +94,8 @@ namespace PowerupsDeluxe {
         }
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void TimeOut() {
         // Play sound effect indicating expiration of powerup
@@ -106,7 +107,7 @@ namespace PowerupsDeluxe {
         PointShape.Swirl(
           (v => Game.PlayEffect(EffectName.ItemGleam,
             Vector2Helper.Rotated(v - pos,
-              (float)(Time % 1500 * (MathHelper.TwoPI / 1500))) +
+              (float) (Time % 1500 * (MathHelper.TwoPI / 1500))) +
             pos)),
           pos, // Center Position
           5, // Initial Radius

@@ -149,7 +149,8 @@ namespace PowerupsDeluxe {
         Time = 27000; // 27 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (_sticky != null) {

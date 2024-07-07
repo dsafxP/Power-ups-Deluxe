@@ -102,7 +102,7 @@ namespace PowerupsDeluxe {
 
         IEnumerable<IPlayer> stunned = args
           .Where(a => a.IsPlayer)
-          .Select(p => (IPlayer)p.HitObject)
+          .Select(p => (IPlayer) p.HitObject)
           .Where(p => (p.IsFalling || p.IsStaggering) && !p.IsDead);
 
         if (stunned.Any())

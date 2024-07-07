@@ -63,7 +63,7 @@ namespace PowerupsDeluxe {
           RayCastResult result = RayCast;
 
           if (result.IsPlayer) {
-            IPlayer hit = (IPlayer)result.HitObject;
+            IPlayer hit = (IPlayer) result.HitObject;
 
             return (hit.GetTeam() == PlayerTeam.Independent || hit.GetTeam() != Player.GetTeam()) &&
               !hit.IsDead;
@@ -89,7 +89,8 @@ namespace PowerupsDeluxe {
         Time = 25000; // 25 s
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Player.IsBurning) // Fire resistance
@@ -123,8 +124,8 @@ namespace PowerupsDeluxe {
       }
 
       private Vector2 GetRandomFireVelocity(Random random) {
-        float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float)(RANDOM_SPEED_EXP * random.NextDouble());
-        float y = _rayCastEndOffset.Y * (float)(RANDOM_SPEED_EXP * random.NextDouble());
+        float x = (_rayCastEndOffset.X * Player.FacingDirection) * (float) (RANDOM_SPEED_EXP * random.NextDouble());
+        float y = _rayCastEndOffset.Y * (float) (RANDOM_SPEED_EXP * random.NextDouble());
 
         return new Vector2(x, y);
       }

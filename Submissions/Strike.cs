@@ -43,7 +43,8 @@ namespace PowerupsDeluxe {
         Time = 17000;
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         if (Time % EFFECT_COOLDOWN == 0) {
@@ -73,7 +74,7 @@ namespace PowerupsDeluxe {
           if (!arg.IsPlayer)
             continue;
 
-          IPlayer hit = (IPlayer)arg.HitObject;
+          IPlayer hit = (IPlayer) arg.HitObject;
 
           hit.SetInputEnabled(false);
           hit.AddCommand(_playerCommand);

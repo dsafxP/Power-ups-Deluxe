@@ -59,21 +59,21 @@ namespace PowerupsDeluxe {
 
         Player.SetModifiers(modify);
 
-        IObjectWeldJoint weld1 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Direct attachment to player by center1
-        IObjectWeldJoint weld2 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Rotating attachments around center1, by center2
-        IObjectWeldJoint weld3 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //attached to player by proxy through center1
+        IObjectWeldJoint weld1 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Direct attachment to player by center1
+        IObjectWeldJoint weld2 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //Rotating attachments around center1, by center2
+        IObjectWeldJoint weld3 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", Player.GetWorldPosition() + offset); //attached to player by proxy through center1
 
         allItems.Add(weld1);
         allItems.Add(weld2);
         allItems.Add(weld3);
 
-        IObject center1 = (IObject)Game.CreateObject(centerobj, Player.GetWorldPosition() + offset); //HINGE FOR ROTATING PART TO ATTACH TO, WELDED ONTO PLAYER
+        IObject center1 = (IObject) Game.CreateObject(centerobj, Player.GetWorldPosition() + offset); //HINGE FOR ROTATING PART TO ATTACH TO, WELDED ONTO PLAYER
         center1.SetBodyType(BodyType.Dynamic);
         center1.SetMass(0.0001f);
         weld1.AddTargetObject(center1);
         allItems.Add(center1);
 
-        IObjectPullJoint force = (IObjectPullJoint)Game.CreateObject("PullJoint", center1.GetWorldPosition() + new Vector2(0, 200));
+        IObjectPullJoint force = (IObjectPullJoint) Game.CreateObject("PullJoint", center1.GetWorldPosition() + new Vector2(0, 200));
         //force.SetLineVisual(LineVisual.DJRope);
         force.SetForcePerDistance(0.01f);
         allItems.Add(force);
@@ -82,19 +82,19 @@ namespace PowerupsDeluxe {
         force.SetTargetObject(bird);
         allItems.Add(bird);
 
-        IObjectTargetObjectJoint target = (IObjectTargetObjectJoint)Game.CreateObject("TargetObjectJoint", center1.GetWorldPosition());
+        IObjectTargetObjectJoint target = (IObjectTargetObjectJoint) Game.CreateObject("TargetObjectJoint", center1.GetWorldPosition());
         target.SetTargetObject(center1);
         force.SetTargetObjectJoint(target);
         allItems.Add(target);
 
-        IObject center2 = (IObject)Game.CreateObject(centerobj, Player.GetWorldPosition() + offset);
+        IObject center2 = (IObject) Game.CreateObject(centerobj, Player.GetWorldPosition() + offset);
         center2.SetBodyType(BodyType.Dynamic);
         center2.SetMass(0.001f);
         weld2.AddTargetObject(center2);
         weld2.AddTargetObject(Player);
         allItems.Add(center2);
 
-        IObjectRevoluteJoint revolute = (IObjectRevoluteJoint)Game.CreateObject("RevoluteJoint", Player.GetWorldPosition() + offset);
+        IObjectRevoluteJoint revolute = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", Player.GetWorldPosition() + offset);
         revolute.SetTargetObjectA(center2);
         revolute.SetTargetObjectB(center1);
         revolute.SetMotorEnabled(true);
@@ -105,7 +105,7 @@ namespace PowerupsDeluxe {
         //revolute.SetMass(0.0001f);
 
         for (int i = 0; i < 4; i++) {
-          IObjectText obj = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
+          IObjectText obj = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
           obj.SetTextColor(new Color(COLOR_R, COLOR_G, COLOR_B));
           obj.SetTextScale(4);
           obj.SetText("(");
@@ -119,7 +119,7 @@ namespace PowerupsDeluxe {
         }
 
         for (int i = 0; i < 4; i++) {
-          IObjectText obj = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
+          IObjectText obj = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + Vector2Helper.Rotated(new Vector2(-22, 2), MathHelper.PIOver2 * i));
           obj.SetTextColor(Color.White);
           obj.SetTextScale(4);
           obj.SetText("{");
@@ -149,7 +149,7 @@ namespace PowerupsDeluxe {
         weld2.AddTargetObject(deflector);
         allItems.Add(deflector);
 
-        IObjectText shine = (IObjectText)Game.CreateObject("Text", new Vector2(-5, -1) + center1.GetWorldPosition());
+        IObjectText shine = (IObjectText) Game.CreateObject("Text", new Vector2(-5, -1) + center1.GetWorldPosition());
         shine.SetTextColor(Color.White);
         shine.SetTextScale(3);
         shine.SetText(",");
@@ -159,7 +159,7 @@ namespace PowerupsDeluxe {
         weld2.AddTargetObject(shine);
         allItems.Add(shine);
 
-        IObjectText crack1 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(-8.6f, 14.5f));
+        IObjectText crack1 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(-8.6f, 14.5f));
         crack1.SetTextColor(Color.White);
         crack1.SetTextScale(3);
         crack1.SetText("");
@@ -169,7 +169,7 @@ namespace PowerupsDeluxe {
         weld2.AddTargetObject(crack1);
         allItems.Add(crack1);
 
-        IObjectText crack2 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(12.8f, 6.9f));
+        IObjectText crack2 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(12.8f, 6.9f));
         crack2.SetTextColor(Color.White);
         crack2.SetTextScale(3);
         crack2.SetText("");
@@ -179,7 +179,7 @@ namespace PowerupsDeluxe {
         weld2.AddTargetObject(crack2);
         allItems.Add(crack2);
 
-        IObjectText crack3 = (IObjectText)Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(6f, -5.3f));
+        IObjectText crack3 = (IObjectText) Game.CreateObject("Text", center1.GetWorldPosition() + new Vector2(6f, -5.3f));
         crack3.SetTextColor(Color.White);
         crack3.SetTextScale(3);
         crack3.SetText("");
@@ -213,7 +213,7 @@ namespace PowerupsDeluxe {
               projectile.Velocity = Vector2Helper.Bounce(projectile.Velocity, normal);
               projectile.Position += normal * 2;
 
-              health -= (projectile.GetProperties().ObjectDamage * (float)(angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
+              health -= (projectile.GetProperties().ObjectDamage * (float) (angleDifference / MathHelper.PI)) + (projectile.GetProperties().ObjectDamage) / 3;
 
               if (health > 50 && health < 75) {
                 crack1.SetText("X");
@@ -241,7 +241,8 @@ namespace PowerupsDeluxe {
         onDamage = Events.PlayerDamageCallback.Start((IPlayer hitPlayer, PlayerDamageArgs args) => {
           if (args.DamageType == PlayerDamageEventType.Fire) {
             preservedHealth = Player.GetModifiers().CurrentHealth;
-            if (preservedHealth > 0) return;
+            if (preservedHealth > 0)
+              return;
           }
 
           if (hitPlayer.UniqueID == Player.UniqueID) {
@@ -336,8 +337,8 @@ namespace PowerupsDeluxe {
             IObject debris = Game.CreateObject("GlassShard00A", Player.GetWorldPosition() + new Vector2(X_OFFSET, Y_OFFSET) + dir);
             debris.SetHealth(1);
             debris.SetLinearVelocity(dir * 0.3f + new Vector2(0, 4));
-            debris.SetAngle((float)(_rng.NextDouble() * MathHelper.TwoPI));
-            debris.SetAngularVelocity(((float)_rng.NextDouble() - 0.5f) * 20);
+            debris.SetAngle((float) (_rng.NextDouble() * MathHelper.TwoPI));
+            debris.SetAngularVelocity(((float) _rng.NextDouble() - 0.5f) * 20);
             toFade.Add(debris);
           } else {
             Game.PlayEffect(EffectName.DestroyGlass, dir + Player.GetWorldPosition());
@@ -358,9 +359,9 @@ namespace PowerupsDeluxe {
       }
 
       private Vector2 RandomPoint(float radius) {
-        float distance = (float)Math.Pow(_rng.NextDouble(), 0.25) * radius;
+        float distance = (float) Math.Pow(_rng.NextDouble(), 0.25) * radius;
 
-        return Vector2Helper.Rotated(new Vector2(distance, 0), (float)(_rng.NextDouble() * MathHelper.TwoPI));
+        return Vector2Helper.Rotated(new Vector2(distance, 0), (float) (_rng.NextDouble() * MathHelper.TwoPI));
       }
     }
   }

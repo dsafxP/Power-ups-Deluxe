@@ -37,7 +37,8 @@ namespace PowerupsDeluxe {
         Dashing = false;
       }
 
-      protected override void Activate() { }
+      protected override void Activate() {
+      }
 
       public override void Update(float dlt, float dltSecs) {
         EmptyUppercutCheck(0);

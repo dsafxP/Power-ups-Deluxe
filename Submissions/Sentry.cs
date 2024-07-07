@@ -68,7 +68,7 @@ namespace PowerupsDeluxe {
         Game.PlayEffect(EffectName.PlayerLandFull, spawnOffset);
 
         _sentryObjs = SpawnTurret(spawnOffset);
-        _revoluteJoint = (IObjectRevoluteJoint)_sentryObjs
+        _revoluteJoint = (IObjectRevoluteJoint) _sentryObjs
           .First(o => o.Name == "RevoluteJoint");
 
         _revoluteJoint.SetMotorEnabled(true);
@@ -96,7 +96,7 @@ namespace PowerupsDeluxe {
           RayCastResult rayCastResult = Game.RayCast(revoluteJointPos, end, _raycastInput)[0];
 
           if (rayCastResult.IsPlayer) {
-            IPlayer hit = (IPlayer)rayCastResult.HitObject;
+            IPlayer hit = (IPlayer) rayCastResult.HitObject;
 
             if ((hit.GetTeam() != Player.GetTeam() ||
               hit.GetTeam() == PlayerTeam.Independent) && !hit.IsDead && hit != Player) {
@@ -164,11 +164,11 @@ namespace PowerupsDeluxe {
       private static IObject[] SpawnTurret(Vector2 pos) {
         const float MASS_MULT = 0.02f;
 
-        IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        IObjectAlterCollisionTile alt1 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
         alt1.SetDisableCollisionTargetObjects(true);
 
-        IObjectWeldJoint weld1 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weld1 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
         IObject metal = Game.CreateObject("Metal02E", pos);
 
@@ -198,11 +198,11 @@ namespace PowerupsDeluxe {
 
         alt1.AddTargetObject(pulley);
 
-        IObjectWeldJoint weld2 = (IObjectWeldJoint)Game.CreateObject("WeldJoint", pos);
+        IObjectWeldJoint weld2 = (IObjectWeldJoint) Game.CreateObject("WeldJoint", pos);
 
-        IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint)Game.CreateObject("RevoluteJoint", pos);
+        IObjectRevoluteJoint revoluteJoint = (IObjectRevoluteJoint) Game.CreateObject("RevoluteJoint", pos);
 
-        IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile)Game.CreateObject("AlterCollisionTile");
+        IObjectAlterCollisionTile alt2 = (IObjectAlterCollisionTile) Game.CreateObject("AlterCollisionTile");
 
         alt2.SetDisablePlayerMelee(true);
         alt2.SetDisableProjectileHit(true);
