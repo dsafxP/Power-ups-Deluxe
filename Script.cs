@@ -2445,6 +2445,364 @@ namespace PowerupsDeluxe {
             Game.PlayEffect(EffectName.ItemGleam, v);
           }
         }
+
+        // BLITZKRIEG - dsafxP
+        public class Blitzkrieg : Powerup {
+          private const float ATTACK_COOLDOWN = 250;
+          private const float THROW_ANGULAR_VELOCITY = 50;
+          private const float THROW_SPEED = 10;
+        
+          private static readonly Vector2 _offset = new Vector2(0, 24);
+          private static readonly PlayerModifiers _setMod = new PlayerModifiers(){
+              ExplosionDamageTakenModifier = 0, ImpactDamageTakenModifier = 0.25f};
+          private static readonly string[] _throwableIDs = {"WpnGrenadesThrown",
+                                                            "WpnMolotovsThrown",
+                                                            //"WpnC4Thrown",
+                                                            "WpnMineThrown"};
+        
+          private readonly List<IObject> _explosives = new List<IObject>();
+          private PlayerModifiers _modifiers;
+        
+          private static string RandomThrowableID {
+            get { return _throwableIDs[_rng.Next(_throwableIDs.Length)]; }
+          }
+        
+          private IPlayer ClosestEnemy {
+            get {
+              List<IPlayer> enemies =
+                  Game.GetPlayers()
+                      .Where(p =>(p.GetTeam() != Player.GetTeam() ||
+                                  p.GetTeam() == PlayerTeam.Independent) &&
+                                 !p.IsDead && p != Player)
+                      .ToList();
+        
+              Vector2 playerPos = Player.GetWorldPosition();
+        
+              enemies.Sort((p1, p2) =>
+                               Vector2.Distance(p1.GetWorldPosition(), playerPos)
+                                   .CompareTo(Vector2.Distance(p2.GetWorldPosition(),
+                                                               playerPos)));
+        
+              return enemies.FirstOrDefault();
+            }
+          }
+        
+          public override string Name {
+            get { return "BLITZKRIEG"; }
+          }
+        
+          public override string Author {
+            get { return "dsafxP"; }
+          }
+        
+          public IObject[] Explosives {
+            get {
+              _explosives.RemoveAll(item => item == null || item.IsRemoved);
+        
+              return _explosives.ToArray();
+            }
+          }
+        
+          public Blitzkrieg(IPlayer player) : base(player) {
+            Time = 19000;  // 19 s
+          }
+        
+          protected override void Activate() {
+            _modifiers = Player.GetModifiers();  // Store original player modifiers
+        
+            _modifiers.CurrentHealth = -1;
+            _modifiers.CurrentEnergy = -1;
+        
+            Player.SetModifiers(_setMod);
+          }
+        
+          public override void Update(float dlt, float dltSecs) {
+            if (Player.IsBurning) Player.ClearFire();
+        
+            if (Time % ATTACK_COOLDOWN == 0) {
+              Throw(true);
+            }
+          }
+        
+          public override void TimeOut() { Game.PlaySound("C4Detonate", Vector2.Zero); }
+        
+          public override void OnEnabled(bool enabled) {
+            if (!enabled) {
+              Player.SetModifiers(_modifiers);
+        
+              foreach (IObject exp in Explosives) {
+                Game.PlayEffect(EffectName.DestroyDefault, exp.GetWorldPosition());
+                Game.PlaySound("DestroyDefault", Vector2.Zero);
+        
+                exp.Remove();
+              }
+            }
+          }
+        
+          private IObject Throw(bool missile = false) {
+            IPlayer closestEnemy = ClosestEnemy;
+        
+            if (closestEnemy == null) return null;
+        
+            Vector2 playerPos = Player.GetWorldPosition() + _offset;
+            Vector2 throwVel =
+                Vector2Helper.DirectionTo(playerPos, closestEnemy.GetWorldPosition()) *
+                THROW_SPEED;
+        
+            IObject thrown =
+                Game.CreateObject(RandomThrowableID, playerPos, 0, throwVel,
+                                  THROW_ANGULAR_VELOCITY, Player.FacingDirection);
+        
+            thrown.TrackAsMissile(missile);
+        
+            Game.PlayEffect(EffectName.TraceSpawner, Vector2.Zero, thrown.UniqueID,
+                            EffectName.ItemGleam, 2f);
+        
+            _explosives.Add(thrown);
+        
+            return thrown;
+          }
+        }
+        
+        // STARRED - Tomo
+        public class Star : Powerup {
+          private const float EFFECT_COOLDOWN = 50;
+          private const float THROW_COOLDOWN = 100;
+          private const float PUSH_FORCE = 7;
+          private const float PUSH_DMG = 16;
+        
+          private static readonly PlayerCommand _playerCommand =
+              new PlayerCommand(PlayerCommandType.Fall);
+          private static readonly PlayerModifiers _starMod =
+              new PlayerModifiers(){EnergyConsumptionModifier = 0,
+                                    ProjectileCritChanceTakenModifier = 0,
+                                    ExplosionDamageTakenModifier = 0,
+                                    ProjectileDamageTakenModifier = 0,
+                                    MeleeDamageTakenModifier = 0,
+                                    ImpactDamageTakenModifier = 0,
+                                    MeleeStunImmunity = 1,
+                                    CanBurn = 0,
+                                    RunSpeedModifier = 2,
+                                    SprintSpeedModifier = 2};
+        
+          private static readonly string[] _colors = {
+              "ClothingRed",   "ClothingOrange", "ClothingYellow",
+              "ClothingGreen", "ClothingBlue",   "ClothingPurple"};
+        
+          private static readonly string[] _lightColors = {
+              "ClothingLightRed",   "ClothingLightOrange", "ClothingLightYellow",
+              "ClothingLightGreen", "ClothingLightBlue",   "ClothingLightPurple"};
+        
+          private int _rainbowIndex = 0;
+        
+          private IProfile _profile;
+          private PlayerModifiers _modifiers;
+        
+          private int RainbowIndex {
+            get {
+              _rainbowIndex = (_rainbowIndex + 1) % _colors.Length;
+        
+              return _rainbowIndex;
+            }
+          }
+        
+          private IPlayer[] PlayersToPush {
+            get {
+              return Game.GetObjectsByArea<IPlayer>(Player.GetAABB())
+                  .Where(p => !p.IsDead && p != Player &&
+                              (p.GetTeam() != Player.GetTeam() ||
+                               p.GetTeam() == PlayerTeam.Independent))
+                  .ToArray();
+            }
+          }
+        
+          public override string Name {
+            get { return "STARRED"; }
+          }
+        
+          public override string Author {
+            get { return "Tomo"; }
+          }
+        
+          public Star(IPlayer player) : base(player) {
+            Time = 9000;  // 9 s
+          }
+        
+          protected override void Activate() {
+            _profile = Player.GetProfile();  // Store profile
+        
+            _modifiers = Player.GetModifiers();  // Store original player modifiers
+        
+            _modifiers.CurrentHealth = -1;
+            _modifiers.CurrentEnergy = -1;
+        
+            Player.SetModifiers(_starMod);
+          }
+        
+          public override void Update(float dlt, float dltSecs) {
+            if (Time % EFFECT_COOLDOWN == 0) {
+              PointShape.Random(Draw, Player.GetAABB(), _rng);
+        
+              Player.SetProfile(ColorProfile(Player.GetProfile(), _colors[RainbowIndex],
+                                             _lightColors[_rainbowIndex]));
+            }
+        
+            if (Time % THROW_COOLDOWN == 0)
+              foreach (IPlayer toPush in PlayersToPush) {
+                toPush.SetInputEnabled(false);
+                toPush.AddCommand(_playerCommand);
+        
+                Events.UpdateCallback.Start(
+                    (float _dlt) => { toPush.SetInputEnabled(true); }, 1, 1);
+        
+                Vector2 toPushPos = toPush.GetWorldPosition();
+        
+                toPush.SetWorldPosition(toPushPos +
+                                        (Vector2Helper.Up * 2));  // Sticky feet
+        
+                toPush.SetLinearVelocity(
+                    new Vector2(-toPush.FacingDirection * PUSH_FORCE, PUSH_FORCE));
+        
+                toPush.DealDamage(PUSH_DMG, Player.UniqueID);
+        
+                Game.PlaySound("PlayerDiveCatch", Vector2.Zero);
+                Game.PlayEffect(EffectName.Smack, toPushPos);
+              }
+          }
+        
+          public override void TimeOut() {
+            // Play effects indicating expiration of powerup
+            Game.PlaySound("StrengthBoostStop", Vector2.Zero);
+            Game.PlayEffect(EffectName.PlayerLandFull, Player.GetWorldPosition());
+          }
+        
+          public override void OnEnabled(bool enabled) {
+            if (!enabled) {  // Restore player
+              Player.SetModifiers(_modifiers);
+              Player.SetProfile(_profile);
+            }
+          }
+        
+          private static void Draw(Vector2 v) {
+            Game.PlayEffect(EffectName.ItemGleam, v);
+          }
+        
+          private static IProfile ColorProfile(IProfile pr, string col, string colI) {
+            if (pr.Accesory != null)
+              pr.Accesory = new IProfileClothingItem(pr.Accessory.Name, col, colI);
+        
+            if (pr.ChestOver != null)
+              pr.ChestOver = new IProfileClothingItem(pr.ChestOver.Name, col, colI);
+        
+            if (pr.ChestUnder != null)
+              pr.ChestUnder = new IProfileClothingItem(pr.ChestUnder.Name, col, colI);
+        
+            if (pr.Feet != null)
+              pr.Feet = new IProfileClothingItem(pr.Feet.Name, col, colI);
+        
+            if (pr.Hands != null)
+              pr.Hands = new IProfileClothingItem(pr.Hands.Name, col, colI);
+        
+            if (pr.Head != null)
+              pr.Head = new IProfileClothingItem(pr.Head.Name, col, colI);
+        
+            if (pr.Legs != null)
+              pr.Legs = new IProfileClothingItem(pr.Legs.Name, col, colI);
+        
+            if (pr.Waist != null)
+              pr.Waist = new IProfileClothingItem(pr.Waist.Name, col, colI);
+        
+            return pr;
+          }
+        }
+        
+        // OVERHEAL - Danila015
+        public class Overheal : Powerup {
+          private const float REGEN_COOLDOWN = 100;
+          private const float REGEN = 5;
+          private const float CANCEL_DMG = 15;
+        
+          private const int OVERHEAL = 1;
+        
+          private static readonly PlayerDamageEventType[] _allowedTypes = {
+              PlayerDamageEventType.Melee, PlayerDamageEventType.Projectile,
+              PlayerDamageEventType.Missile};
+        
+          private Events.PlayerDamageCallback _damageCallback = null;
+        
+          public override string Name {
+            get { return "OVERHEAL"; }
+          }
+        
+          public override string Author {
+            get { return "Danila015"; }
+          }
+        
+          public Overheal(IPlayer player) : base(player) {
+            Time = 40000;  // 40 s
+          }
+        
+          protected override void Activate() {}
+        
+          public override void Update(float dlt, float dltSecs) {
+            if (Time % REGEN_COOLDOWN == 0) {
+              float health = Player.GetHealth();
+        
+              if (health < Player.GetMaxHealth()) {
+                PointShape.Random(Draw, Player.GetAABB(), _rng);
+        
+                Game.PlaySound("GetHealthSmall", Vector2.Zero, 0.15f);
+        
+                Player.SetHealth(health + REGEN);
+              } else {
+                // Apply overheal
+                PlayerModifiers mod = Player.GetModifiers();
+        
+                mod.MaxHealth += OVERHEAL;
+                mod.CurrentHealth += OVERHEAL;
+        
+                Player.SetModifiers(mod);
+        
+                // Effect
+                Game.PlaySound("Syringe", Vector2.Zero, 0.25f);
+                PointShape.Random(DrawOverheal, Player.GetAABB(), _rng);
+              }
+            }
+          }
+        
+          public override void TimeOut() {
+            Game.PlaySound("PlayerLeave", Player.GetWorldPosition());
+          }
+        
+          public override void OnEnabled(bool enabled) {
+            if (enabled) {
+              _damageCallback = Events.PlayerDamageCallback.Start(OnPlayerDamage);
+            } else {
+              _damageCallback.Stop();
+              _damageCallback = null;
+            }
+          }
+        
+          private void OnPlayerDamage(IPlayer player, PlayerDamageArgs args) {
+            if (player != Player) return;
+        
+            if (_allowedTypes.Any(at => args.DamageType == at)) {
+              Player.DealDamage(CANCEL_DMG);
+        
+              Time = 0;  // Player has been damaged by an opponent, stop
+            }
+          }
+        
+          private static void Draw(Vector2 v) {
+            Game.PlayEffect(EffectName.BloodTrail, v);
+            Game.PlayEffect(EffectName.Smack, v);
+          }
+        
+          private static void DrawOverheal(Vector2 v) {
+            Game.PlayEffect(EffectName.Blood, v);
+          }
+        }
+        
         // BERSERK - Danila015
         public class Berserk : Powerup {
           private const float EFFECT_COOLDOWN = 100;
