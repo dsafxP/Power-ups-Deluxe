@@ -53,7 +53,7 @@ namespace PowerupsDeluxe {
 
           mods.MeleeDamageDealtModifier *= damageMult;
           mods.MeleeStunImmunity = 1;
-          mods.MeleeForceModifier *= 1 + damageMult;
+          mods.MeleeForceModifier *= 1 + damageMult * 3f;
 
           Game.PlayEffect("CFTXT", Player.GetWorldPosition() + new Vector2(0, 5), "x" + ((int)(damageMult * 100) / 100f));
 
