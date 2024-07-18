@@ -6,7 +6,7 @@ namespace PowerupsDeluxe {
     public class Hungry : Powerup {
       private const float FORCE_DISTANCE = 62;
       private const float JOINT_MASS = 0.0001f;
-      private const float DMG = 22;
+      private const float DMG = 11;
       private const string SOLID = "InvisibleBlock";
       private const string NON_SOLID = "InvisibleBlockNoCollision";
       private const int JUMP_COOLDOWN = 1200;
