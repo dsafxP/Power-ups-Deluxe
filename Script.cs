@@ -176,15 +176,13 @@ namespace PowerupsDeluxe {
       (arg.All(char.IsDigit) ? u.GameSlotIndex == int.Parse(arg) : false));
     }
 
-    public static Type GetPowerup(string arg) {
+    public Type GetPowerup(string arg) {
       string nest = "SFDScript.GameScript+Powerups+AvailablePowerups+" + arg;
-      System.Reflection.Assembly assembly =
-          System.Reflection.Assembly.GetExecutingAssembly();
+      System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-      return assembly.GetTypes().FirstOrDefault(
-          t => t.FullName.Equals(nest, StringComparison.OrdinalIgnoreCase));
+      return assembly.GetTypes()
+      .FirstOrDefault(t => t.FullName.Equals(nest, StringComparison.OrdinalIgnoreCase));
     }
-
 
     private static void PlayPowerupEffect(Vector2 pos) {
       Game.PlaySound("LogoSlam", pos, 1);
@@ -203,93 +201,71 @@ namespace PowerupsDeluxe {
 
       if (sender == null) {  // Get
         sender = Game.GetObjectsByArea<IPlayer>(caller.GetAABB())
-                     .FirstOrDefault(p => !p.IsDead && p.IsInputEnabled && p.IsBot);
+        .FirstOrDefault(p => !p.IsDead && p.IsInputEnabled && p.IsBot);
       }
 
-      Vector2 offset = new Vector2(0, 20);
-      /*
+      Vector2 offset = new Vector2(0, 26);
+
       if (sender.CurrentPowerupItem.WeaponItem == POWERUP_WEAPONITEM) {
-          Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() +
-      offset, "CAN'T PICKUP");
-    
-          return;
-      }*/
+        Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, "CAN'T PICKUP");
+
+        return;
+      }
 
       // Remove syringe
       if (caller != null) {
-        caller.GetHighlightObject().Remove();
+        caller.GetHighlightObject()
+        .Remove();
       }
 
       sender.GiveWeaponItem(POWERUP_WEAPONITEM);
 
-      Type powerUpType = Powerups.GetRandomPowerupType(_rng);
-
-      // ADDITION: powerup type is retained through dropped syringe customID
-      string inputCode = caller.GetHighlightObject().CustomID;
-      if (inputCode.Contains("powerup:"))
-        powerUpType = GetPowerup(inputCode.Substring(8 + 48));
-
-      // ADDITION: powerup details are displayed before use
-
-      Powerup powerUp = (Powerup) Activator.CreateInstance(
-          powerUpType, sender);  // Activate random powerup
-
-      powerUp.Enabled = false;
-
-      Game.PlayEffect(EffectName.CustomFloatText,
-                      sender.GetWorldPosition() + offset, powerUp.Name);
-
-      Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author),
-                           Color.Yellow, sender.UserIdentifier);
-
-      float initiatedTime = Game.TotalElapsedRealTime;
+      Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, "POWER-UP BOOST");
 
       Events.PlayerWeaponRemovedActionCallback weaponRemovedActionCallback = null;
 
       weaponRemovedActionCallback = Events.PlayerWeaponRemovedActionCallback.Start(
-          (IPlayer player, PlayerWeaponRemovedArg arg) => {
-            if (player == sender && arg.WeaponItem == POWERUP_WEAPONITEM) {
-              IObject item = Game.GetObject(arg.TargetObjectID);
+        (IPlayer player, PlayerWeaponRemovedArg arg) => {
+          if (player == sender && arg.WeaponItem == POWERUP_WEAPONITEM) {
+            IObject item = Game.GetObject(arg.TargetObjectID);
 
-              if (item != null) {  // Powerup item dropped
+            if (item != null) { // Powerup item dropped
+              IObject syringe = Powerups.CreatePowerupSyringe(sender.GetWorldPosition());
 
-                if (initiatedTime + 100 > Game.TotalElapsedRealTime) {
-                  return;
-                }
+              //Game.WriteToConsole("Created syringe", syringe.UniqueID);
 
-                IObject syringe =
-                    Powerups.CreatePowerupSyringe(sender.GetWorldPosition());
+              // Set syringe
+              syringe.SetAngle(item.GetAngle());
+              syringe.SetLinearVelocity(item.GetLinearVelocity());
+              syringe.SetAngularVelocity(item.GetAngularVelocity());
 
-                // Game.WriteToConsole("Created syringe", syringe.UniqueID);
+              item.Remove(); // Remove original item
 
-                // Set syringe
-                syringe.SetAngle(item.GetAngle());
-                syringe.SetLinearVelocity(item.GetLinearVelocity());
-                syringe.SetAngularVelocity(item.GetAngularVelocity());
-                // ADDITION:
-                syringe.CustomID = "powerup:" + powerUpType.FullName;
+              weaponRemovedActionCallback.Stop();
 
-                item.Remove();  // Remove original item
+              weaponRemovedActionCallback = null;
+            } else { // Powerup item used
+              sender.SetStrengthBoostTime(0);
+              sender.SetSpeedBoostTime(0);
 
-                weaponRemovedActionCallback.Stop();
+              Type powerUpType = Powerups.GetRandomPowerupType(_rng);
 
-                weaponRemovedActionCallback = null;
-              } else {  // Powerup item used
-                sender.SetStrengthBoostTime(0);
-                sender.SetSpeedBoostTime(0);
+              Powerup powerUp = (Powerup) Activator.CreateInstance(powerUpType, sender); // Activate random powerup
 
-                PlayPowerupEffect(sender.GetWorldPosition());
+              Game.ShowChatMessage(string.Format("{0} - {1}", powerUp.Name, powerUp.Author), Color.Yellow, sender.UserIdentifier);
 
-                // CHANGE: activate stored powerup, removed identifying information
-                powerUp.Enabled = true;
+              PlayPowerupEffect(sender.GetWorldPosition());
 
-                weaponRemovedActionCallback.Stop();
+              Game.PlayEffect(EffectName.CustomFloatText, sender.GetWorldPosition() + offset, powerUp.Name);
 
-                weaponRemovedActionCallback = null;
-              }
+              weaponRemovedActionCallback.Stop();
+
+              weaponRemovedActionCallback = null;
             }
-          });
+          }
+        });
     }
+
     public static class Powerups {
       private static readonly ObjectAITargetData _boxTargetData = new ObjectAITargetData(500, ObjectAITargetMode.MeleeOnly);
 
@@ -5381,8 +5357,10 @@ namespace PowerupsDeluxe {
           private const int MAX_CELLS = 14;
           private const int TIME = 19000;
 
-          private static readonly VirtualKey[] _inputKeys = {VirtualKey.AIM_RUN_LEFT,
-                                                             VirtualKey.AIM_RUN_RIGHT};
+          private static readonly VirtualKey[] _inputKeys = {
+            VirtualKey.AIM_RUN_LEFT,                                       
+            VirtualKey.AIM_RUN_RIGHT
+          };
 
           private static int _cradleSlot = 0;
 
@@ -5391,13 +5369,15 @@ namespace PowerupsDeluxe {
 
           private readonly IObject[] _walls = new IObject[4];
           private readonly IObject[] _cells = new IObject[MAX_CELLS];
-          private readonly float[] _cradlePos = { -200, 260 };
+          private readonly float[] _cradlePos = {
+        -200,
+        260
+      };
 
           private int _cellCount = 2;
           private int _jumpCooldown = 0;
           private float slowUpdateTime = 0;
           private bool _screamed = false;
-          private bool transformed = false;
 
           private IObject _forcePoint;
           private IObject _body;
@@ -5427,7 +5407,6 @@ namespace PowerupsDeluxe {
             _cradleSlot += 1;
           }
 
-          Events.UpdateCallback delay1 = null;
           protected override void Activate() {
             Player.SetInputMode(PlayerInputMode.ReadOnly);
 
