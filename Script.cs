@@ -3795,7 +3795,7 @@ namespace PowerupsDeluxe {
 
         // DRONE - dsafxP
         public class Drone : Powerup {
-          private const float SPEED = 3;
+          private const float SPEED = 4;
 
           private Events.ObjectDamageCallback _objDmgCallback;
 
