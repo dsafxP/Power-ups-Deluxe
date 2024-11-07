@@ -156,7 +156,27 @@ namespace PowerupsDeluxe {
         Enabled = true;
       }
 
-      private void Update(float dlt) {
+      /// <summary>
+      /// Initializes a new instance of the CustomProjectile class copying another.
+      /// </summary>
+      /// <param name="pos">Initial position of the projectile.</param>
+      /// <param name="direction">Initial direction of the projectile.</param>
+      /// <param name="proj">Projectile to copy.</param>
+      public CustomProjectile(Vector2 pos, Vector2 direction, CustomProjectile proj) {
+        Position = pos;
+        Direction = direction;
+        Piercing = proj.Piercing;
+        IgnoreRolling = proj.IgnoreRolling;
+        Speed = proj.Speed;
+        MaxDistanceTravelled = proj.MaxDistanceTravelled;
+        Effect = proj.Effect;
+        RayCastCollision = proj.RayCastCollision;
+        OnPlayerHit = proj.OnPlayerHit;
+        OnObjectHit = proj.OnObjectHit;
+        Enabled = true;
+      }
+
+      protected virtual void Update(float dlt) {
         Vector2 vel = Velocity;
 
         DistanceTravelled += vel.Length();
@@ -171,7 +191,7 @@ namespace PowerupsDeluxe {
 
         if (checkedResult.Hit) {
           if (checkedResult.IsPlayer && OnPlayerHit != null) {
-            IPlayer hitPlayer = (IPlayer)checkedResult.HitObject;
+            IPlayer hitPlayer = (IPlayer) checkedResult.HitObject;
 
             dodged = !IgnoreRolling && (hitPlayer.IsRolling || hitPlayer.IsDiving);
 
@@ -199,10 +219,10 @@ namespace PowerupsDeluxe {
       }
 
       private static void Trail(Action<Vector2> func, Vector2 start, Vector2 end, float pointDistance = 0.1f) {
-        int count = (int)Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
+        int count = (int) Math.Ceiling(Vector2.Distance(start, end) / pointDistance);
 
         for (int i = 0; i < count; i++) {
-          Vector2 pos = Vector2.Lerp(start, end, (float)i / (count - 1));
+          Vector2 pos = Vector2.Lerp(start, end, (float) i / (count - 1));
           func(pos);
         }
       }
